@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Puff 'n Stuff — Station QR Codes</title>
+<style>
+  :root{--ink:#171512;--paper:#f7f5ef;--frame:#171512;--muted:#8a857c;--sans:Arial,Helvetica,sans-serif;--serif:Georgia,'Times New Roman',serif;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);padding:24px;}
+  h1{font-family:var(--serif);font-size:26px;font-weight:800;margin:0 0 4px;}
+  .sub{font-size:13px;color:var(--muted);margin-bottom:18px;}
+  .controls{border:2px solid var(--frame);background:#fff;padding:14px 16px;margin-bottom:22px;max-width:760px;}
+  .controls label{display:block;font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+  .controls input{width:100%;padding:9px 11px;border:1.5px solid #cbc7bd;font-size:14px;font-family:var(--sans);}
+  .btnrow{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
+  .btn{border:2px solid var(--frame);background:var(--ink);color:#fff;padding:9px 18px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;}
+  .btn.alt{background:#fff;color:var(--ink);}
+  .note{font-size:12px;color:#555;line-height:1.5;margin-top:11px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;max-width:1100px;}
+  .card{border:2px solid var(--frame);background:#fff;padding:14px 12px 12px;text-align:center;break-inside:avoid;}
+  .card .qr{width:150px;height:150px;margin:0 auto 8px;}
+  .card .qr svg,.card .qr img{width:150px;height:150px;display:block;}
+  .card .em{font-size:26px;line-height:1;margin:2px 0 3px;}
+  .card .nm{font-family:var(--serif);font-weight:800;font-size:15px;line-height:1.2;margin-bottom:3px;}
+  .card .cat{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);}
+  .card .lk{font-size:9px;color:#a8a29a;word-break:break-all;margin-top:6px;}
+  .dl{margin-top:9px;}
+  .dl button{border:1.5px solid var(--frame);background:#fff;color:var(--ink);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:6px 12px;cursor:pointer;}
+  @media print{
+    body{padding:0;background:#fff;}
+    .controls,.sub,.dl{display:none !important;}
+    h1{margin:8px 12px;}
+    .grid{grid-template-columns:repeat(3,1fr);gap:10px;padding:0 10px;max-width:none;}
+    .card{border:1.5px solid #000;}
+  }
+</style>
+</head>
+<body>
+<h1>Station QR Codes</h1>
+<div class="sub">Passion to Perfection · Digital Stations</div>
+
+<div class="controls">
+  <label for="base">Site address (the live Passion to Perfection page)</label>
+  <input id="base" type="text" value="https://training.puffnstuff.com/">
+  <div class="btnrow">
+    <button class="btn" onclick="build()">Regenerate codes</button>
+    <button class="btn alt" onclick="dlAll()">Download all (JPEG)</button>
+    <button class="btn alt" onclick="window.print()">Print / Save as PDF</button>
+  </div>
+  <div class="note"><b>To use a code:</b> click <b>JPEG</b> under any station to download that one code as a 500&times;500 image (drop it into a sign, tent card, BEO, or doc), or use <b>Print / Save as PDF</b> for the whole set on one sheet. When the site moves to its final address, paste the new address above, click <b>Regenerate codes</b>, and download again. Nothing else changes.</div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+/* [id, name, category, badge-emoji] — MUST match the STATIONS + STATION_BADGE lists in index.html.
+   Adding a station in the app? Add the same row here (same id + emoji) so it gets a QR code. */
+var STATIONS=[
+  ["coffee-station","Coffee Station","Coffee","☕"],
+  ["carved-turkey","Chef Carved Turkey Breast","Chef Action","🦃"],
+  ["carved-ham","Chef Carved Ham","Chef Action","🍖"],
+  ["carved-flank","Chef Carved Flank Steak","Chef Action","🥩"],
+  ["carved-chicken","Chef Carved Brick Chicken","Chef Action","🍗"],
+  ["hot-dog-bar","Hot Dog Bar","Displayed","🌭"],
+  ["omelet","Omelet Station","Chef Action","🍳"],
+  ["eggs-benedict","Eggs Benedict","Chef Action","🥚"],
+  ["sundae-bar","Sundae Bar","Chef Action","🍨"],
+  ["walking-cannoli","Walking Cannoli","Chef Action","🧁"],
+  ["byo-bowl","Build Your Own Bowl","Displayed","🥣"],
+  ["pasta-bowl","Pasta Bowl","Displayed","🍝"],
+  ["rice-krispy","Rice Krispy Bar","Displayed","🍡"],
+  ["sweet-savory","Sweet & Savory","Displayed","🍫"],
+  ["hot-mess-bar","Hot Mess Bar","Displayed","🫕"],
+  ["blazing-donuts-latin","Blazing Donuts – Latin Inspired","Chef Action","🍩"],
+  ["blazing-donuts-coffee","Blazing Donuts – Coffee","Chef Action","🔥"],
+  ["blazing-donuts-berries","Blazing Donuts – Berries & Cream","Chef Action","🍓"],
+  ["place-setting","Standard Place Setting","Place Settings","🍽️"]
+];
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function baseUrl(){return document.getElementById('base').value.trim().replace(/#.*$/,'');}
+function stationUrl(id){return baseUrl()+'#station/'+id;}
+function findStation(id){for(var i=0;i<STATIONS.length;i++){if(STATIONS[i][0]===id)return STATIONS[i];}return null;}
+var IMG_SIZE=500;      /* downloaded image is exactly 500 x 500 */
+var IMG_TYPE='image/jpeg', IMG_EXT='jpg', IMG_QUALITY=0.92;
+function qrImgCanvas(url,label,emoji){
+  var S=IMG_SIZE, topPad=16, botPad=16, gap=8;
+  var emSize=40, fontSize=24, lineH=Math.round(fontSize*1.2);
+  var c=document.createElement('canvas'); c.width=S; c.height=S;
+  var ctx=c.getContext('2d');
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,S,S);
+  // wrap the station name
+  ctx.font='bold '+fontSize+'px Georgia, serif';
+  var words=String(label).split(' '), lines=[], line='', maxW=S-topPad*2;
+  words.forEach(function(w){ var t=line?line+' '+w:w; if(ctx.measureText(t).width>maxW && line){ lines.push(line); line=w; } else { line=t; } });
+  if(line)lines.push(line);
+  var emH=emoji?(emSize+6):0;
+  var labelBlock=emH + lines.length*lineH;
+  var labelTop=S - botPad - labelBlock;
+  // QR fills the space above the label, centered
+  var qr=qrcode(0,'M'); qr.addData(url); qr.make();
+  var n=qr.getModuleCount(), margin=2, total=n+margin*2;
+  var regionH=labelTop - gap - topPad, regionW=S - topPad*2;
+  var cell=Math.max(2,Math.floor(Math.min(regionH,regionW)/total)), qrDim=cell*total;
+  var qx=Math.round((S-qrDim)/2), qy=topPad+Math.round((regionH-qrDim)/2);
+  ctx.fillStyle='#171512';
+  for(var r=0;r<n;r++)for(var col=0;col<n;col++){ if(qr.isDark(r,col)) ctx.fillRect(qx+(col+margin)*cell, qy+(r+margin)*cell, cell, cell); }
+  // emoji + name below
+  ctx.textAlign='center'; ctx.textBaseline='top';
+  var y=labelTop;
+  if(emoji){ ctx.font=emSize+'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; ctx.fillText(emoji,S/2,y); y+=emH; }
+  ctx.fillStyle='#171512'; ctx.font='bold '+fontSize+'px Georgia, serif';
+  lines.forEach(function(ln){ ctx.fillText(ln,S/2,y); y+=lineH; });
+  return c;
+}
+function dlPng(id){
+  var s=findStation(id); if(!s)return;
+  var c=qrImgCanvas(stationUrl(id),s[1],s[3]||'');
+  var fname=s[1].replace(/[^A-Za-z0-9]+/g,'-').replace(/^-+|-+$/g,'')+'-QR.'+IMG_EXT;
+  var a=document.createElement('a'); a.href=c.toDataURL(IMG_TYPE,IMG_QUALITY); a.download=fname;
+  document.body.appendChild(a); a.click(); a.remove();
+}
+function dlAll(){
+  STATIONS.forEach(function(s,i){ setTimeout(function(){ dlPng(s[0]); }, i*350); });
+}
+function build(){
+  var grid=document.getElementById('grid');
+  grid.innerHTML='';
+  STATIONS.forEach(function(s){
+    var url=stationUrl(s[0]);
+    var qr=qrcode(0,'M'); qr.addData(url); qr.make();
+    var svg=qr.createSvgTag({cellSize:4,margin:2});
+    var card=document.createElement('div');
+    card.className='card';
+    card.innerHTML='<div class="qr">'+svg+'</div><div class="em">'+(s[3]||'')+'</div><div class="nm">'+esc(s[1])+'</div><div class="cat">'+esc(s[2])+'</div><div class="lk">'+esc(url)+'</div><div class="dl"><button onclick="dlPng(\''+s[0]+'\')">JPEG</button></div>';
+    grid.appendChild(card);
+  });
+}
+build();
+</script>
+</body>
+</html>
