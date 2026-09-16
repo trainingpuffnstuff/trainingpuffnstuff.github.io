@@ -1865,7 +1865,7 @@ function renderHome(){
     <div class="daily" id="dailyptr">${dailyPointerHTML(null)}</div>
     ${(()=>{if(!GLOSSARY.length)return '';const G=GLOSSARY[Math.floor(Math.random()*GLOSSARY.length)];
       return `<div class="daily"><div class="dk">Puff lingo</div><div class="dn">${G[0]}</div><div class="dv dvhide" id="ghide">${G[1]}</div><div style="margin-top:8px;display:flex;gap:7px"><button class="relchip" onclick="document.getElementById('ghide').classList.add('show');this.style.display='none'">See what it means</button><button class="relchip" onclick="go('glossary')">Glossary ›</button></div></div>`;})()}
-    <div style="text-align:center;margin-top:18px"><span onclick="openAdmin();return false;" title="Leadership" style="cursor:pointer;font-size:13px;color:var(--hair);opacity:.5;padding:6px 10px;display:inline-block;user-select:none">⚙</span></div>
+    <div style="text-align:center;margin-top:18px"><span onclick="openAdmin();return false;" title="Leadership access" style="cursor:pointer;font-size:15px;color:var(--muted);opacity:.75;padding:6px 12px;display:inline-block;user-select:none">⚙ Leadership</span></div>
     <div class="logoblock"><img class="pflogo" alt="Puff 'n Stuff. Events | Catering" src="img/df30ebd195.png"></div>
   `;
 }
