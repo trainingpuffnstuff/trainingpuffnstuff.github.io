@@ -158,7 +158,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/p
 
 // ---- config ----
 const CAPS = { passed:6, salad:3, entree:4, station:5, dessert:4 };
-const CSV_HEADERS = ["event_title","event_date_time","sales_contact","planner_contact","menu_section_1_title","menu_1_item_1","menu_1_item_2","menu_1_item_3","menu_section_2_title","menu_2_label_1","menu_2_item_1","menu_2_label_2","menu_2_item_2","menu_2_label_3","menu_2_item_3","bar_type","wine_list","beer_list","spirits_list","bar_alternative","timeline_time_1","timeline_time_2","timeline_time_3","timeline_time_4","timeline_time_5","timeline_time_6","timeline_milestone_1","timeline_milestone_2","timeline_milestone_3","timeline_milestone_4","timeline_milestone_5","timeline_milestone_6","supervisor_qty","lead_event_chef_qty","floor_chef_qty","event_chef_qty","server_qty","bartender_qty","investment_summary","grand_total"];
+const CSV_HEADERS = ["event_title","event_date_time","sales_contact","planner_contact","menu_section_1_title","menu_1_item_1","menu_1_item_2","menu_1_item_3","menu_section_2_title","menu_2_label_1","menu_2_item_1","menu_2_label_2","menu_2_item_2","menu_2_label_3","menu_2_item_3","menu_section_3_title","menu_3_item_1","menu_3_item_2","menu_3_item_3","menu_3_item_4","menu_section_4_title","menu_4_item_1","menu_4_item_2","menu_4_item_3","menu_4_item_4","menu_section_5_title","menu_5_item_1","menu_5_item_2","menu_5_item_3","menu_5_item_4","bar_type","wine_list","beer_list","spirits_list","bar_alternative","timeline_time_1","timeline_time_2","timeline_time_3","timeline_time_4","timeline_time_5","timeline_time_6","timeline_milestone_1","timeline_milestone_2","timeline_milestone_3","timeline_milestone_4","timeline_milestone_5","timeline_milestone_6","supervisor_qty","lead_event_chef_qty","floor_chef_qty","event_chef_qty","server_qty","bartender_qty","investment_summary","grand_total"];
 
 // section header phrases -> bucket (order matters; specific before general)
 const SECTION_MAP = [
@@ -313,6 +313,7 @@ function parse(lines){
   for(let i=0;i<lines.length;i++){
     let l=lines[i];
     if(/SERVICE PERSONNEL|Terms & Conditions|Terms And Conditions/i.test(l)) break;
+    if(/Menu\s*&\s*Inclusions\s*:/i.test(l)) break;   // stop at first menu subtotal -> first menu only (scaffold; prevents multi-floor bleed)
     if(BEV_BOUNDARY.test(l)){ bucket="__bev__"; continue; }
     if(isHeader(l)){ const b=bucketFor(l); if(b){bucket=b; curHeadRaw=l;} continue; }
     if(bucket==="__bev__") continue;
@@ -353,12 +354,18 @@ function parse(lines){
     out.meta.wine = (parts[2]||"").trim();
   }
 
+  // multi-menu (extreme) detection: one menu prints one "Menu & Inclusions :" subtotal
+  const menuBlocks=(joined.match(/Menu\s*&\s*Inclusions\s*:/gi)||[]).length;
+  out.meta.menu_count=menuBlocks;
+  out.meta.extreme=menuBlocks>1;
+
   // warnings
   for(const [b,cap] of Object.entries(CAPS)){
     if(out.sections[b].length>cap) out.warnings.push(`${b}: ${out.sections[b].length} items found, template holds ${cap}. Extra items are marked and won't export.`);
   }
   if(!out.meta.rep) out.warnings.push("No sales rep name found on the header.");
   if(out.meta.guests && parseInt(out.meta.guests,10)>=500) out.warnings.push(`Large event (${out.meta.guests} guests). These are usually too complex for the Canva proposal \u2014 review carefully.`);
+  if(out.meta.extreme) out.warnings.unshift(`This SEO has ${menuBlocks} separate menus (multiple floors or spaces). The export is a best-effort scaffold of the FIRST menu only \u2014 build the full proposal by hand.`);
   return out;
 }
 
@@ -410,6 +417,9 @@ function render(p){
     <div><div class="k">SEO #</div><div class="v">${esc(p.meta.event_no||"\u2014")}</div></div>
   </div>`;
 
+  if(p.meta.extreme){
+    html+=`<div class="banner warn" style="border-left:6px solid #b23830;background:#fbeceb"><strong>Extreme event — scaffold only.</strong> This SEO has ${p.meta.menu_count} separate menus (multiple floors or spaces). The download captures the <strong>first menu</strong> as a starting point — build the full proposal by hand.</div>`;
+  }
   if(p.warnings.length){
     html+=`<div class="banner warn"><strong>Check before exporting</strong><ul>`+
       p.warnings.map(w=>`<li>${esc(w)}</li>`).join("")+`</ul></div>`;
@@ -571,6 +581,19 @@ function buildRow(p){
   } else if(kept(p,"entree").length){
     row.menu_section_2_title=T.entree||"Entr\u00e9es";
     kept(p,"entree").slice(0,3).forEach((it,i)=>{ row["menu_2_item_"+(i+1)]=fmt(it); });
+  }
+  // flex overflow -> sections 3-5 (page 2): items dropped from 1/2 plus any unshown category, so nothing is lost
+  const s2b = kept(p,"station").length?"station":(kept(p,"entree").length?"entree":null);
+  const used=new Set([s1b]); if(s2b) used.add(s2b);
+  const FLEXT={passed:"Hors d'Oeuvres",salad:"Salads / Starters",entree:"Entr\u00e9es / Mains",station:"Stations",dessert:"Desserts"};
+  let fx=3;
+  for(const b of ["passed","salad","entree","station","dessert"]){
+    if(fx>5) break;
+    const items = used.has(b) ? kept(p,b).slice(3) : kept(p,b);   // used bucket: only the overflow past the 3 already shown
+    if(!items.length) continue;
+    row["menu_section_"+fx+"_title"]=T[b]||FLEXT[b];
+    items.slice(0,4).forEach((it,i)=>{ row["menu_"+fx+"_item_"+(i+1)]=fmt(it); });
+    fx++;
   }
   // bar
   row.bar_type=p.meta.bar_type;
