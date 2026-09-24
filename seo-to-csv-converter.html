@@ -177,7 +177,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/p
 // What the current Canva proposal template holds. The review screen measures everything
 // against this, so it is the one place to change when the template changes.
 const TEMPLATE = { sections:2, itemsPerSection:3 };
-const CSV_HEADERS = ["event_title","event_date_time","sales_contact","planner_contact","menu_title","menu_section_1_title","menu_section_1_note","menu_1_item_1","menu_1_item_2","menu_1_item_3","menu_section_2_title","menu_section_2_note","menu_2_label_1","menu_2_item_1","menu_2_label_2","menu_2_item_2","menu_2_label_3","menu_2_item_3","bar_type","wine_list","beer_list","spirits_list","bar_alternative","timeline_time_1","timeline_time_2","timeline_time_3","timeline_time_4","timeline_time_5","timeline_time_6","timeline_milestone_1","timeline_milestone_2","timeline_milestone_3","timeline_milestone_4","timeline_milestone_5","timeline_milestone_6","supervisor_qty","lead_event_chef_qty","floor_chef_qty","event_chef_qty","server_qty","bartender_qty","investment_summary","grand_total","deposit_terms"];
+// Columns in the order of the Canva Bulk Create test file; the last three have no template field yet
+const CSV_HEADERS = ["event_title","event_date_time","sales_contact","planner_contact","menu_section_1_title","menu_1_item_1","menu_1_item_2","menu_1_item_3","menu_section_2_title","menu_2_label_1","menu_2_item_1","menu_2_label_2","menu_2_item_2","menu_2_label_3","menu_2_item_3","bar_type","wine_list","beer_list","spirits_list","bar_alternative","timeline_time_1","timeline_time_2","timeline_time_3","timeline_time_4","timeline_time_5","timeline_time_6","timeline_milestone_1","timeline_milestone_2","timeline_milestone_3","timeline_milestone_4","timeline_milestone_5","timeline_milestone_6","supervisor_qty","lead_event_chef_qty","floor_chef_qty","event_chef_qty","server_qty","bartender_qty","investment_summary","grand_total","deposit_terms","menu_title","menu_section_1_note","menu_section_2_note"];
 
 // Menu lines are read by how Caterease formats them, not by what they say:
 //   large centered script font         -> menu title ("50th Reunion Menu"), later ones are area titles
@@ -330,21 +331,33 @@ function parse(rich){
   parseMenu(rich,out);
 
   // --- bar ---
-  const barIdx=lines.findIndex(l=>/Premium Full Bar|Full Bar Inclusions|Soft Drink Bar|Beverages/i.test(l));
   out.meta.bar_type = /Premium Full Bar/i.test(joined) ? "Full Bar" : (/Soft Drink Bar|Iced Tea/i.test(joined) ? "Non-Alcoholic" : "");
-  const brand=lines.find(l=>/Grey Goose|Tito's|Bombay|Woodford/i.test(l));
-  if(brand){
-    // split "vodka, rum, gin, bourbon ...; beers; wines"
+  // brand list = the description under the first "... Full Bar" item, up to "Listed brands ...":
+  // "spirits, ...; beers, ...; wines, ..." and it can wrap over several lines
+  let brand="";
+  const bIdx=lines.findIndex(l=>/^\(\d+\).*Full Bar/i.test(l) && !/Inclusions/i.test(l));
+  if(bIdx>=0) for(let k=bIdx+1;k<Math.min(bIdx+8,lines.length);k++){
+    if(/^Listed brands|^\(\d+\)|^Beverages\s*:/i.test(lines[k])) break;
+    brand+=" "+lines[k];
+  }
+  if(!brand.trim()) brand=lines.find(l=>/Grey Goose|Tito's|Bombay|Woodford/i.test(l))||"";
+  out.meta.barHeld=[];
+  const barList=part=>(part||"").split(",").map(s=>s.replace(/\.\s*$/,"").replace(/\s+/g," ").trim()).filter(s=>{
+    if(!s) return false;
+    if(isAllCaps(s)){ out.meta.barHeld.push(s); return false; }   // typed notes like "NO TEQUILA"
+    return true;
+  });
+  if(brand.trim()){
     const parts=brand.split(";");
-    out.meta.spirits = (parts[0]||"").trim();
-    out.meta.beer = (parts[1]||"").trim();
-    out.meta.wine = (parts[2]||"").trim();
+    out.meta.spirits=barList(parts[0]); out.meta.beer=barList(parts[1]); out.meta.wine=barList(parts.slice(2).join(","));
   }
 
   // warnings
   if(!rich.some(l=>l.segs.some(s=>s.f))) out.warnings.push("The PDF's text formatting couldn't be read, so headings, items and notes may be sorted incorrectly. Check the menu carefully.");
   if(!out.sections.length) out.warnings.push("No menu items were found on this SEO.");
   if(!out.meta.rep) out.warnings.push("No sales planner name found on the header.");
+  if(out.meta.times.length<5) out.warnings.push("The timeline (departure, arrival, start, end, breakdown) wasn't found on the SEO, so the timeline will be blank.");
+  if(out.meta.barHeld.length) out.warnings.push(`Left off the bar list as likely notes: ${out.meta.barHeld.join(", ")}.`);
   const held=countHeld(out);
   if(held) out.warnings.push(`${held} line${held===1?" was":"s were"} held back as likely internal (marked ⚑). Tick one to put it on the proposal.`);
   if(out.meta.guests && parseInt(out.meta.guests,10)>=500) out.warnings.push(`Large event (${out.meta.guests} guests). These are usually too complex for the Canva proposal — review carefully.`);
@@ -683,27 +696,38 @@ function buildRow(p){
   const row={};
   CSV_HEADERS.forEach(h=>row[h]="");
   row.event_title=p.meta.party;
-  // date + event start/end if present
-  if(p.meta.times.length>=2) row.event_date_time=`${p.meta.date}\n${p.meta.times[2]||p.meta.times[0]} - ${p.meta.times[3]||p.meta.times[p.meta.times.length-1]}`;
-  else row.event_date_time=p.meta.date;
-  row.sales_contact=p.meta.rep;           // planner_contact left blank -> needs lookup
+  // SEO timeline columns: Departure / Arrival on Site / Event Start / Event Concludes / Breakdown Completes
+  const T=(p.meta.times||[]).map(upTime);
+  // "October 23rd, 2026" + event start - end
+  row.event_date_time=longDate(p.meta.date)+(T.length>=4?`\n${T[2]} - ${T[3]}`:"");
+  // "Name / Phone: xxx-xxx-xxxx" until planner profiles supply title and email
+  const rm=(p.meta.rep||"").match(/^(.*?)\s*\((\d{3})\)\s*(\d{3}-\d{4})/);
+  row.sales_contact=rm?`${rm[1]}\nPhone: ${rm[2]}-${rm[3]}`:p.meta.rep;
   row.menu_title=p.menuTitle&&p.menuTitle.on?p.menuTitle.text:"";
   // menu: sections in SEO order (as reordered by the planner), as many as the template holds
   exportPlan(p).forEach((x,si)=>{
     const n=si+1;
     row[`menu_section_${n}_title`]=x.sec.title;
     row[`menu_section_${n}_note`]=noteOf(x.sec);
-    x.items.forEach((it,i)=>{ row[`menu_${n}_item_${i+1}`]=fmt(it); });
+    const stations=/station/i.test(x.sec.title);
+    x.items.forEach((it,i)=>{
+      row[`menu_${n}_item_${i+1}`]=fmt(it);
+      if(stations && `menu_${n}_label_${i+1}` in row) row[`menu_${n}_label_${i+1}`]="Station "+["One","Two","Three"][i];
+    });
   });
-  // bar
+  // bar: heading line, then one brand per line
   row.bar_type=p.meta.bar_type;
-  if(p.meta.wine) row.wine_list=p.meta.wine;
-  if(p.meta.beer) row.beer_list=p.meta.beer;
-  if(p.meta.spirits) row.spirits_list=p.meta.spirits;
-  // timeline: SEO columns are Departure / Arrival on Site / Event Start / Event Concludes / Breakdown Completes
-  (p.meta.times||[]).slice(0,6).forEach((t,i)=>{ row["timeline_time_"+(i+1)]=t; });
-  const ms=["Team Departs HQ","Arrival & Setup","Event Begins","Event Concludes","Breakdown & Departure","—"];
-  ms.forEach((m,i)=>{ if(row["timeline_time_"+(i+1)]) row["timeline_milestone_"+(i+1)]=m; });
+  const bar=(h,l)=>l&&l.length?h+"\n"+l.join("\n"):"";
+  row.wine_list=bar("WINE",p.meta.wine);
+  row.beer_list=bar("BEER",p.meta.beer);
+  row.spirits_list=bar("SPIRITS",p.meta.spirits);
+  // timeline: six proposal steps built from the five SEO times
+  if(T.length>=5){
+    const [dep,arr,start,end,brk]=T;
+    [[dep,"Puff 'n Stuff Team Departs HQ"],[arr,"Arrival & Load-In at Venue"],[`${arr} - ${start}`,"Setup, Staging, & Final Prep"],
+     [start,"Service Begins"],[end,"Event Concludes"],[`${end} - ${brk}`,"Breakdown, Clean-Up, and Puff 'n Stuff Departure"]]
+      .forEach(([t,m],i)=>{ row["timeline_time_"+(i+1)]=t; row["timeline_milestone_"+(i+1)]=m; });
+  }
   // staff
   row.supervisor_qty=p.staff.supervisor||"";
   row.lead_event_chef_qty=p.staff.lead_event_chef||"";
@@ -717,7 +741,17 @@ function buildRow(p){
   // deposit_terms left blank -> fixed sales text
   return row;
 }
-function fmt(it){ return [it.name, descOf(it), it.tags.join(", ")].filter(Boolean).join("\n"); }
+// proposal item: NAME IN CAPITALS / description / dietary codes
+function fmt(it){ return [it.name.toUpperCase(), descOf(it), it.tags.join(", ")].filter(Boolean).join("\n"); }
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+// "9/19/2026 - Saturday" -> "September 19th, 2026"
+function longDate(d){
+  const m=(d||"").match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(!m) return d||"";
+  const day=+m[2], sfx=(day%100>=11&&day%100<=13)?"th":(["th","st","nd","rd"][day%10]||"th");
+  return `${MONTHS[+m[1]-1]} ${day}${sfx}, ${m[3]}`;
+}
+const upTime=t=>t.replace(/\s*([ap])m$/i,(_,a)=>" "+a.toUpperCase()+"M");
 
 function download(p){
   const row=buildRow(p);
