@@ -30,6 +30,7 @@
   .sub{color:var(--ink-soft); font-size:.95rem; margin:0}
   main{max-width:820px; margin:0 auto; padding:20px}
   .drop{
+    display:block;
     border:1.5px dashed var(--line); border-radius:var(--radius);
     background:var(--panel); padding:34px 20px; text-align:center; cursor:pointer;
     transition:border-color .15s, background .15s;
@@ -122,6 +123,21 @@
   .move select{font:inherit; font-size:.78rem; padding:2px 4px; border:1px solid var(--line); border-radius:4px;
     background:var(--panel); color:var(--ink)}
   .seczone{border-radius:var(--radius)}
+  .row.drop-before{box-shadow:0 -3px 0 var(--wine)}
+  .nline{display:flex; gap:6px; align-items:flex-start; font-size:.82rem; color:var(--ink-soft); margin-top:3px; cursor:pointer}
+  .nline input{margin-top:2px; width:14px; height:14px; flex:none; accent-color:var(--wine)}
+  .nline.held{opacity:.85}
+  .nline .fl{color:var(--warn); font-weight:700}
+  .nline .why{color:var(--warn); font-size:.72rem; text-decoration:none; display:inline-block}
+  .hnotes{padding:0 12px 4px}
+  .secflag{padding:0 12px 4px}
+  .mtitle{display:flex; gap:10px; align-items:baseline; flex-wrap:wrap; margin:18px 0 4px}
+  .mtitle .k{color:var(--ink-soft); font-size:.72rem; text-transform:uppercase; letter-spacing:.05em}
+  .intl{margin-top:28px; border-top:1px solid var(--line); padding-top:4px}
+  .intl summary{cursor:pointer; list-style-position:outside; margin-left:14px}
+  .intl summary .sec{display:inline-flex; margin:12px 0 8px}
+  .sec-title.static{cursor:default}
+  .sec-title.static:hover{border-color:transparent}
 </style>
 </head>
 <body>
@@ -136,9 +152,11 @@
     <h2>How to use it</h2>
     <ol>
       <li><strong>Add the SEO.</strong> Drop a Special Event Order PDF below, or click to choose one.</li>
-      <li><strong>Check the menu.</strong> Items are sorted into sections. Uncheck anything that shouldn't reach the client; internal notes are flagged for you. Items past a section's limit are greyed out and won't export.</li>
-      <li><strong>Fix the sorting.</strong> If an item is in the wrong section, drag it by the &#9776; handle into the right one, or use its "Move to" menu. Both do the same thing.</li>
-      <li><strong>Rename a section.</strong> Click a section title to edit it (e.g. "Passed Hors d'Oeuvres" &rarr; "Cocktail Hour"). The new name is what shows on the proposal.</li>
+      <li><strong>Check the menu.</strong> Sections and items stay as they appear on the SEO. Uncheck any item that shouldn't reach the client.</li>
+      <li><strong>Review the &#9873; lines.</strong> Notes that look internal are held back: italic notes, lines typed in capitals, setup instructions and anything printed with the dietary tags. Each has its own small box. Tick it to put that line on the proposal. Notes under a section title (such as "Cocktail Hour") are ticked by default, so untick any you don't want.</li>
+      <li><strong>Move or reorder items.</strong> Drag an item by the &#9776; handle into another section, or drop it on another item to place it above that item. The "Move to" menu does the same thing. Inclusions and staff lines sit under "Package &amp; internal lines" at the bottom; move one into a section if it belongs on the proposal.</li>
+      <li><strong>Rename a section or the menu title.</strong> Click a title to edit it (e.g. "Passed Hors d'Oeuvres" &rarr; "Cocktail Hour"). The new name is what shows on the proposal.</li>
+      <li><strong>Watch the template limit.</strong> The Canva template currently holds 2 sections of 3 items. Checked items beyond that are marked "won't export". Unchecking an item frees its place.</li>
       <li><strong>Download the CSV</strong> and upload it into the Canva proposal template's Bulk Create.</li>
     </ol>
   </div>
@@ -156,28 +174,29 @@
 pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 // ---- config ----
-const CAPS = { passed:6, salad:3, entree:4, station:5, dessert:4 };
-const CSV_HEADERS = ["event_title","event_date_time","sales_contact","planner_contact","menu_section_1_title","menu_1_item_1","menu_1_item_2","menu_1_item_3","menu_section_2_title","menu_2_label_1","menu_2_item_1","menu_2_label_2","menu_2_item_2","menu_2_label_3","menu_2_item_3","bar_type","wine_list","beer_list","spirits_list","bar_alternative","timeline_time_1","timeline_time_2","timeline_time_3","timeline_time_4","timeline_time_5","timeline_time_6","timeline_milestone_1","timeline_milestone_2","timeline_milestone_3","timeline_milestone_4","timeline_milestone_5","timeline_milestone_6","supervisor_qty","lead_event_chef_qty","floor_chef_qty","event_chef_qty","server_qty","bartender_qty","investment_summary","grand_total","deposit_terms"];
+// What the current Canva proposal template holds. The review screen measures everything
+// against this, so it is the one place to change when the template changes.
+const TEMPLATE = { sections:2, itemsPerSection:3 };
+const CSV_HEADERS = ["event_title","event_date_time","sales_contact","planner_contact","menu_title","menu_section_1_title","menu_section_1_note","menu_1_item_1","menu_1_item_2","menu_1_item_3","menu_section_2_title","menu_section_2_note","menu_2_label_1","menu_2_item_1","menu_2_label_2","menu_2_item_2","menu_2_label_3","menu_2_item_3","bar_type","wine_list","beer_list","spirits_list","bar_alternative","timeline_time_1","timeline_time_2","timeline_time_3","timeline_time_4","timeline_time_5","timeline_time_6","timeline_milestone_1","timeline_milestone_2","timeline_milestone_3","timeline_milestone_4","timeline_milestone_5","timeline_milestone_6","supervisor_qty","lead_event_chef_qty","floor_chef_qty","event_chef_qty","server_qty","bartender_qty","investment_summary","grand_total","deposit_terms"];
 
-// section header phrases -> bucket (order matters; specific before general)
-const SECTION_MAP = [
-  [/passed hors|butler passed|passed hor|displayed hors|hors d'?oeuvre/i,"passed"],
-  [/grazing|antipasti|grazing boards|display grazing/i,"station"],
-  [/display station|dinner stations|chef attended|double.*station|carving|byo station|action station/i,"station"],
-  [/course i starters|^salad|starter/i,"salad"],
-  [/dessert station|plated dessert|dessert display/i,"dessert"],
-  [/entree|course ii|plated dinner|dinner buffet|brunch buffet|buffet/i,"entree"],
-];
-// items whose name marks them as dessert even with no dessert header
-const DESSERT_NAME = /dessert shooter|macaron|fruit tart|cheesecake|molten cake|brownie|bread pudding|french toast/i;
-// items whose name marks them as a salad/starter even under a buffet header
-const SALAD_NAME = /\bsalad\b|caprese|crudite/i;
-// lines that are never client menu items (inclusions, staff, beverages, etc.)
-const DROP_LINE = /^(passed inclusions|displayed inclusions|buffet inclusions|dessert inclusions|plated inclusions|full bar inclusions|passionately perfecting|pns staff meals|preset water|welcome bubbles|chocolate discs|cheese wheel|\d+ cheese wheel|presented on white china|menu & inclusions|two pastas|grilled artisan bread|soft drink bar|iced tea|displayed spa water|full bar|assorted bitters|welcome champagne|espresso martini|orange mojito|gaspar|premium full bar|delivered buffet|individual juices|upgrade to tossware|fruit garnish|delivery up)/i;
-const DIET = /^(?:(?:NF|VEG|VE|V|GF|DF|VG)(?:\s*[-,]\s*[\w ]*)?)(?:,\s*(?:NF|VEG|VE|V|GF|DF|VG))*\b/;
-const BEV_BOUNDARY = /^QTY?\s*BEVERAGES|^BEVERAGES|Beverages :|Mimosa Bar/i;
-// all-caps rep note (free-typed, flag for review)
-const REP_NOTE = /^[A-Z0-9 '&\/\-\?\.\,\(\)]{6,}$/;
+// Menu lines are read by how Caterease formats them, not by what they say:
+//   large centered script font         -> menu title ("50th Reunion Menu"), later ones are area titles
+//   centered bold (Cormorant / Lato)   -> section heading; centered lines right after it are heading notes
+//   (qty) + Lato Bold in left column   -> menu item; regular lines under it are its description
+//   small bold under an item           -> dietary codes (anything else on that line is a note)
+//   italic                             -> internal note
+// Wording rules below only decide what is held back for review; nothing is thrown away.
+const DIET_CODE = /^(NF|VEG|VE|V|GF|DF|VG)\b\s*(?:-\s*(.*))?$/;
+// package lines and internal-only lines: listed in their own panel, never exported
+const PACKAGE_NAME = /inclusions\s*$/i;
+const INTERNAL_NAME = /^(pns staff meals|passionately perfecting)/i;
+// staff/setup instructions that sometimes appear as plain text
+const SETUP_NOTE = /^(send hot|heat on site|heat lamp|assembled|plattered|black chafer|display under|deconstructed|set up on|set on|set by|set in|served on|serve |carafes|two way|alternating|flipped from|chef to)/i;
+const MENU_START = /^QTY\s+MENU\s*&\s*INCLUSIONS/i;
+// Caterease's own banners, matched exactly (a wrapped description line can read "Equipment.")
+const MENU_END = /^(QTY\s+BEVERAGES|SERVICE PERSONNEL|EQUIPMENT|INVESTMENT BREAKDOWN)$/;
+const PAGE_TOP = 705, PAGE_BOTTOM = 32;   // Caterease page header / footer bands (PDF points)
+const MENU_MID = 336, CENTER_TOL = 4;      // Caterease centers headings exactly on the menu column (x≈336)
 
 const $=s=>document.querySelector(s);
 let PARSED=null;
@@ -207,39 +226,40 @@ async function run(file){
       $("#status").textContent=`Reading page ${i} of ${pdf.numPages}…`;
       const pg=await pdf.getPage(i);
       const tc=await pg.getTextContent();
-      lines=lines.concat(groupLines(tc.items));
+      // real font names (e.g. "Lato,BoldItalic") are only available once the page's fonts load
+      let fontOf=null;
+      try{ await pg.getOperatorList(); fontOf=id=>{ try{ return pg.commonObjs.get(id).name||""; }catch(_){ return ""; } }; }catch(_){}
+      lines=lines.concat(groupLines(tc.items,fontOf));
     }
     $("#status").textContent="Sorting the menu…";
     PARSED=parse(lines);
     render(PARSED);
     $("#status").textContent="";
   }catch(err){
-    $("#status").innerHTML='<span style="color:var(--wine)">Could not read that PDF. If it is a scan rather than a Caterease print, the text can\u2019t be extracted. ('+(err&&err.message||err)+')</span>';
+    $("#status").innerHTML='<span style="color:var(--wine)">Could not read that PDF. If it is a scan rather than a Caterease print, the text can’t be extracted. ('+esc(err&&err.message||err)+')</span>';
   }
 }
 
-// group pdf.js text items into visual lines by y-position
-function groupLines(items){
+// group pdf.js text items into visual lines by y-position; each line keeps its pieces
+// (text, position, size, font) so the menu can be read by formatting
+function groupLines(items,fontOf){
   const rows={};
   items.forEach(it=>{
     const t=it.str; if(!t.trim())return;
     const y=Math.round(it.transform[5]);
     let key=Object.keys(rows).find(k=>Math.abs(k-y)<=3);
     if(key===undefined)key=y;
-    (rows[key]=rows[key]||[]).push({x:it.transform[4],s:t});
+    (rows[key]=rows[key]||[]).push({x:it.transform[4],w:it.width||0,h:it.height||0,s:t,f:fontOf?fontOf(it.fontName):""});
   });
-  return Object.keys(rows).sort((a,b)=>b-a).map(y=>
-    rows[y].sort((a,b)=>a.x-b.x).map(o=>o.s).join(" ").replace(/\s+/g," ").trim()
-  ).filter(Boolean);
+  return Object.keys(rows).sort((a,b)=>b-a).map(y=>{
+    const segs=rows[y].sort((a,b)=>a.x-b.x);
+    return {y:+y, segs, text:segs.map(o=>o.s).join(" ").replace(/\s+/g," ").trim()};
+  }).filter(l=>l.text);
 }
 
-function bucketFor(head){
-  for(const [re,b] of SECTION_MAP) if(re.test(head)) return b;
-  return null;
-}
-
-function parse(lines){
-  const out={ meta:{}, sections:{passed:[],salad:[],entree:[],station:[],dessert:[]}, order:[], staff:{}, warnings:[], raw:lines };
+function parse(rich){
+  const lines=rich.map(l=>l.text);
+  const out={ meta:{}, menuTitle:null, sections:[], internal:{title:"Package & internal lines",items:[]}, staff:{}, warnings:[], raw:lines };
   const joined=lines.join("\n");
 
   // --- meta ---
@@ -255,7 +275,8 @@ function parse(lines){
     if(dm) out.meta.date=(dm.match(/(\d{1,2}\/\d{1,2}\/\d{4}\s*-\s*[A-Za-z]+day)/)||[,""])[1];
   }
   out.meta.guests = grab(/Guests:\s*(\d+)/);
-  // sales rep = the name line in the page header, directly under SPECIAL EVENT ORDER.
+  // sales planner = the name line in the page header, directly under SPECIAL EVENT ORDER.
+  // (The name below it is the coordinator, which the proposal doesn't use.)
   // Never a line with an email or the client's On Site Contact block.
   const badRep=l=>/@|Contact|Revised|Event ?#|SPECIAL EVENT|Puff|Catering/i.test(l);
   let rep="";
@@ -306,39 +327,7 @@ function parse(lines){
   });
 
   // --- menu items ---
-  // walk lines; track current section bucket; a (qty) line starts an item, next non-tag line = description
-  let bucket=null, curHeadRaw="";
-  const isHeader=(l)=> !/^\(\d+\)/.test(l) && bucketFor(l)!==null && !DROP_LINE.test(l) && l.length<70;
-  for(let i=0;i<lines.length;i++){
-    let l=lines[i];
-    if(/SERVICE PERSONNEL|Terms & Conditions|Terms And Conditions/i.test(l)) break;
-    if(BEV_BOUNDARY.test(l)){ bucket="__bev__"; continue; }
-    if(isHeader(l)){ const b=bucketFor(l); if(b){bucket=b; curHeadRaw=l;} continue; }
-    if(bucket==="__bev__") continue;
-    const qm=l.match(/^\((\d+)\)\s*(.+)$/);
-    if(qm){
-      let name=qm[2].trim();
-      if(DROP_LINE.test(name)) continue;
-      if(!bucket) bucket=bucketFor(curHeadRaw)||"passed";
-      // name-based overrides, per item, without changing the running section
-      let dest=bucket;
-      if(DESSERT_NAME.test(name) && (dest==="passed"||dest==="entree")) dest="dessert";
-      else if(SALAD_NAME.test(name) && dest==="entree") dest="salad";
-      // gather description lines until the next item, header, footer, or boundary
-      let desc=[], tags="", flags=[];
-      const FOOTER=/Puff\s?['\u2019]?n Stuff Catering|Page \d+ of \d+|SPECIAL EVENT ORDER|puffnstuff\.com|Rio Drive|Columbus Drive/i;
-      const PREP_NOTE=/^(send hot|heat on site|heat lamp|assembled|plattered|black chafer|display under|deconstructed|set up on|carafes|two way|carved)/i;
-      for(let j=i+1;j<lines.length;j++){
-        const nx=lines[j];
-        if(/^\(\d+\)/.test(nx)||isHeader(nx)||BEV_BOUNDARY.test(nx)||FOOTER.test(nx)||/SERVICE PERSONNEL|Menu & Inclusions/i.test(nx)) break;
-        if(DIET.test(nx) && nx.length<40){ tags=nx; continue; }
-        if(PREP_NOTE.test(nx)){ continue; }   // kitchen/setup note, not client copy
-        if(REP_NOTE.test(nx) && nx===nx.toUpperCase() && nx.length<80){ flags.push(nx); continue; }
-        desc.push(nx);
-      }
-      out.sections[dest].push({ name, desc:desc.join(" "), tags, flags, keep:true });
-    }
-  }
+  parseMenu(rich,out);
 
   // --- bar ---
   const barIdx=lines.findIndex(l=>/Premium Full Bar|Full Bar Inclusions|Soft Drink Bar|Beverages/i.test(l));
@@ -353,23 +342,177 @@ function parse(lines){
   }
 
   // warnings
-  for(const [b,cap] of Object.entries(CAPS)){
-    if(out.sections[b].length>cap) out.warnings.push(`${b}: ${out.sections[b].length} items found, template holds ${cap}. Extra items are marked and won't export.`);
-  }
-  if(!out.meta.rep) out.warnings.push("No sales rep name found on the header.");
-  if(out.meta.guests && parseInt(out.meta.guests,10)>=500) out.warnings.push(`Large event (${out.meta.guests} guests). These are usually too complex for the Canva proposal \u2014 review carefully.`);
+  if(!rich.some(l=>l.segs.some(s=>s.f))) out.warnings.push("The PDF's text formatting couldn't be read, so headings, items and notes may be sorted incorrectly. Check the menu carefully.");
+  if(!out.sections.length) out.warnings.push("No menu items were found on this SEO.");
+  if(!out.meta.rep) out.warnings.push("No sales planner name found on the header.");
+  const held=countHeld(out);
+  if(held) out.warnings.push(`${held} line${held===1?" was":"s were"} held back as likely internal (marked ⚑). Tick one to put it on the proposal.`);
+  if(out.meta.guests && parseInt(out.meta.guests,10)>=500) out.warnings.push(`Large event (${out.meta.guests} guests). These are usually too complex for the Canva proposal — review carefully.`);
   return out;
+}
+
+// typed in capitals; times like "5:00PM" don't count, so "5:00PM-5:45PM" isn't mistaken for a note
+const isAllCaps=t=>{ t=t.replace(/\d{1,2}(:\d{2})?\s*[AP]\.?M\.?/gi,""); return /[A-Z]{3}/.test(t) && !/[a-z]/.test(t); };
+// flavor/variety label printed ahead of its description: "KEY LIME - Classic Pie Crust", "CAFÈ CON LECHE -", "SEASONAL RAVIOLI:"
+const FLAVOR_LABEL=/^[^a-z]+(\s-(\s|$)|:\s*$)/;
+const noteLine=(text,why)=>({text,on:false,why});
+
+function parseMenu(rich,out){
+  const fontOf=s=>s.f||"";
+  const italic=s=>/italic|oblique/i.test(fontOf(s));
+  const bold=s=>/bold|black|heavy|semibold/i.test(fontOf(s));
+  const arial=s=>/arial|helvetica/i.test(fontOf(s));
+  const cormorant=s=>/cormorant|garamond/i.test(fontOf(s));
+  const small=s=>s.h>0 && s.h<=9;
+  const isQty=s=>s.x<80 && /^\(\d+\)$/.test(s.s.trim());
+  const txt=segs=>segs.map(s=>s.s).join(" ").replace(/\s+/g," ").trim();
+
+  let inMenu=false, sec=null, item=null, inHeading=false, pendingArea=null;
+  const newSection=(title,why)=>{
+    sec={ title, orig:title, notes:[], items:[], flags:why?[why]:[] };
+    if(pendingArea){ sec.notes.push(noteLine(pendingArea,"Area title on the SEO")); pendingArea=null; }
+    out.sections.push(sec);
+    return sec;
+  };
+  const ensureSection=()=>sec||newSection("Menu","This section had no heading on the SEO.");
+
+  for(const ln of rich){
+    const t=ln.text;
+    if(MENU_START.test(t)){ inMenu=true; continue; }
+    if(MENU_END.test(t)){ inMenu=false; continue; }
+    if(!inMenu) continue;
+    if(ln.y>PAGE_TOP || ln.y<PAGE_BOTTOM) continue;                   // repeated page header / footer
+    if(/^Menu & Inclusions\s*:/i.test(t)) continue;                    // subtotal line
+
+    const qtySeg=ln.segs.find(isQty);
+    const content=ln.segs.filter(s=>s!==qtySeg);
+    if(!content.length) continue;
+    const lead=content[0];
+    // Arial outside the left menu column is Caterease's own chrome (service line, dates, totals)
+    if(arial(lead) && !qtySeg && (lead.x<85 || lead.x>160)) continue;
+
+    if(qtySeg){
+      // ---- a menu item (or a package / internal line) ----
+      const main=content.filter(s=>!small(s)), tagSegs=content.filter(small);
+      let name=txt(main.length?main:content);
+      item={ name, qty:parseInt(qtySeg.s.replace(/\D/g,""),10), tags:[], lines:[], flags:[], keep:true };
+      if(tagSegs.length) addTagLine(item,txt(tagSegs));
+      if(PACKAGE_NAME.test(name)||INTERNAL_NAME.test(name)||cormorant(lead)){
+        item.keep=false;
+        item.flags.push(PACKAGE_NAME.test(name)?"Package / inclusions line.":"Internal line.");
+        out.internal.items.push(item);
+        inHeading=false;
+        continue;
+      }
+      // typed suffixes on the name, e.g. "Pan Roasted Chicken - CHICKEN BREAST - NOT BONE IN", "(2PER)"
+      let m; const suffix=[];
+      while((m=name.match(/^(.*\S)\s+-\s+([^a-z]*[A-Z]{2}[^a-z]*)$/)) && /[a-z]/.test(m[1])){ suffix.unshift(m[2]); name=m[1]; }
+      while((m=name.match(/^(.*\S)\s*\(([^a-z()]*[A-Z0-9]{2}[^a-z()]*)\)$/)) && /[a-z]/.test(m[1])){ suffix.unshift("("+m[2]+")"); name=m[1]; }
+      suffix.forEach(x=>item.lines.push(noteLine(x,"Typed after the item name — usually a kitchen note.")));
+      item.name=name;
+      if(arial(lead)){ item.keep=false; item.flags.push("Custom line typed into the SEO — check before including."); }
+      else if(isAllCaps(name)){ item.keep=false; item.flags.push("Typed in capitals — often a custom or internal line. Check it if it belongs on the proposal."); }
+      ensureSection().items.push(item);
+      inHeading=false;
+      continue;
+    }
+
+    // ---- no quantity: a heading, a heading note, or a line belonging to the item above ----
+    const minX=content[0].x, maxX=Math.max(...content.map(s=>s.x+s.w));
+    const centered=Math.abs((minX+maxX)/2-MENU_MID)<=CENTER_TOL && minX>100;
+    if(centered){
+      const clean=t.replace(/\s*-\s*$/,"");
+      if(lead.h>=20){                                  // script-font title
+        if(!out.menuTitle) out.menuTitle={text:clean,orig:clean,on:true};
+        else pendingArea=clean;
+        item=null; inHeading=false;
+        continue;
+      }
+      if(bold(lead) && !italic(lead) && !inHeading){
+        newSection(clean); item=null; inHeading=true;
+        continue;
+      }
+      // heading note: shown under the section title, planner can untick
+      const s=ensureSection();
+      if(italic(lead)) s.notes.push(noteLine(clean,"Italic on the SEO — usually a setup note."));
+      else if(isAllCaps(clean)) s.notes.push(noteLine(clean,"Typed in capitals — usually a setup note."));
+      else if(SETUP_NOTE.test(clean)) s.notes.push(noteLine(clean,"Looks like a setup instruction."));
+      else s.notes.push({text:clean,on:true,why:""});
+      if(!item) inHeading=true;
+      continue;
+    }
+
+    inHeading=false;
+    if(!item){                                         // stray left-column line with no item above it
+      ensureSection().notes.push(noteLine(t,"Line with no menu item above it."));
+      continue;
+    }
+    const main=content.filter(s=>!small(s)), tagSegs=content.filter(small);
+    if(main.length){
+      const mt=txt(main);
+      if(main.some(italic)) item.lines.push(noteLine(mt,"Italic on the SEO — usually an internal note."));
+      else if(/^\*/.test(mt)) item.lines.push(noteLine(mt,"Starred note — usually an internal note."));
+      else if(isAllCaps(mt) && !FLAVOR_LABEL.test(mt)) item.lines.push(noteLine(mt,"Typed in capitals — often an internal note."));
+      else if(SETUP_NOTE.test(mt)) item.lines.push(noteLine(mt,"Looks like a setup instruction."));
+      else item.lines.push({text:mt,on:true,why:""});
+    }
+    if(tagSegs.length) addTagLine(item,txt(tagSegs));
+  }
+
+  // light sanity flags
+  for(const s of out.sections){
+    s.items.forEach(it=>{
+      const d=descOf(it);
+      if(/-\s*$/.test(d)) it.flags.push("Description looks cut off on the SEO.");
+    });
+  }
+}
+
+// "V, GF, NF" -> tags; "NF - skewered" -> tag NF + note; "Contains: Wheat", "Serves up to 15" -> note
+function addTagLine(item,t){
+  const rest=[];
+  t.split(/\s*,\s*/).forEach(p=>{
+    const m=p.match(DIET_CODE);
+    if(m){ if(!item.tags.includes(m[1])) item.tags.push(m[1]); if(m[2]) rest.push(m[2]); }
+    else if(p) rest.push(p);
+  });
+  if(rest.length) item.lines.push(noteLine(rest.join(", "),"Printed with the dietary tags — treated as internal."));
+}
+
+function countHeld(p){
+  let n=0;
+  p.sections.forEach(s=>{
+    s.notes.forEach(x=>{ if(x.why) n++; });
+    s.items.forEach(it=>{ it.lines.forEach(x=>{ if(x.why) n++; }); if(!it.keep && it.flags.length) n++; });
+  });
+  return n;
+}
+
+const descOf=it=>it.lines.filter(l=>l.on).map(l=>l.text).join(" ").replace(/\s+/g," ").trim();
+const noteOf=s=>s.notes.filter(n=>n.on).map(n=>n.text).join(" · ");
+
+// which sections/items the current Canva template will actually receive
+function exportPlan(p){
+  const secs=[];
+  for(const s of p.sections){
+    const items=s.items.filter(it=>it.keep);
+    if(!items.length) continue;
+    if(secs.length>=TEMPLATE.sections) break;
+    secs.push({sec:s, items:items.slice(0,TEMPLATE.itemsPerSection)});
+  }
+  return secs;
 }
 
 function render(p){
   // meta panel
   let html=`<div class="meta">
-    <div><div class="k">Event</div><div class="v">${esc(p.meta.party||"\u2014")}</div></div>
-    <div><div class="k">Client</div><div class="v">${esc(p.meta.client||"\u2014")}</div></div>
-    <div><div class="k">Date</div><div class="v">${esc(p.meta.date||"\u2014")}</div></div>
-    <div><div class="k">Guests</div><div class="v">${esc(p.meta.guests||"\u2014")}</div></div>
-    <div><div class="k">Type</div><div class="v">${esc(p.meta.type||"\u2014")}</div></div>
-    <div><div class="k">SEO #</div><div class="v">${esc(p.meta.event_no||"\u2014")}</div></div>
+    <div><div class="k">Event</div><div class="v">${esc(p.meta.party||"—")}</div></div>
+    <div><div class="k">Client</div><div class="v">${esc(p.meta.client||"—")}</div></div>
+    <div><div class="k">Date</div><div class="v">${esc(p.meta.date||"—")}</div></div>
+    <div><div class="k">Guests</div><div class="v">${esc(p.meta.guests||"—")}</div></div>
+    <div><div class="k">Type</div><div class="v">${esc(p.meta.type||"—")}</div></div>
+    <div><div class="k">SEO #</div><div class="v">${esc(p.meta.event_no||"—")}</div></div>
+    <div><div class="k">Sales planner</div><div class="v">${esc(p.meta.rep||"—")}</div></div>
   </div>`;
 
   if(p.warnings.length){
@@ -379,138 +522,179 @@ function render(p){
     html+=`<div class="banner ok">Parsed cleanly. Review the menu below, then download.</div>`;
   }
   $("#report").innerHTML=html;
-
-  // review sections
-  const SECT=["passed","salad","entree","station","dessert"];
-  const labels={passed:"Passed Hors d'Oeuvres",salad:"Salads / Starters",entree:"Entr\u00e9es / Mains",station:"Stations",dessert:"Desserts"};
-  if(!p.titles) p.titles=Object.assign({},labels);
   renderReview(p);
 }
 
+const secKey=(p,s)=>s===p.internal?"int":String(p.sections.indexOf(s));
+const secAt=(p,k)=>k==="int"?p.internal:p.sections[+k];
+
+function lineHtml(l,attrs){
+  // held-back or tickable line: small checkbox, text, and why it was held back
+  return `<label class="nline ${l.on?'':'held'}"><input type="checkbox" ${l.on?'checked':''} ${attrs}>`+
+    `<span>${l.why?'<b class="fl">⚑</b> ':''}${esc(l.text)}${l.why?` <span class="why">${esc(l.why)}</span>`:''}</span></label>`;
+}
+
 function renderReview(p){
-  const SECT=["passed","salad","entree","station","dessert"];
-  const labels={passed:"Passed Hors d'Oeuvres",salad:"Salads / Starters",entree:"Entr\u00e9es / Mains",station:"Stations",dessert:"Desserts"};
+  const plan=exportPlan(p);
+  const exported=new Set(), exportedSecs=new Set();
+  plan.forEach(x=>{ exportedSecs.add(x.sec); x.items.forEach(it=>exported.add(it)); });
+  const all=[...p.sections,p.internal];
+  const opts=cur=>p.sections.map((s,i)=>`<option value="${i}"${s===cur?' selected':''}>${esc(s.title)}</option>`).join("")+
+    `<option value="int"${cur===p.internal?' selected':''}>Not on proposal (internal)</option>`;
   let r="";
-  for(const b of SECT){
-    const items=p.sections[b];
-    const cap=CAPS[b];
-    // always render the zone (even if empty) so items can be dropped into it
+  if(p.menuTitle){
+    r+=`<div class="mtitle"><label class="nline"><input type="checkbox" data-mt="1" ${p.menuTitle.on?'checked':''}><span class="k">Menu title</span></label>
+      <span class="sec-title mt-text" contenteditable="true" spellcheck="false">${esc(p.menuTitle.text)}</span></div>`;
+  }
+  all.forEach(s=>{
+    const k=secKey(p,s), isInt=s===p.internal;
+    const kept=s.items.filter(it=>it.keep).length;
+    let cap;
+    if(isInt) cap=`${s.items.length} line${s.items.length===1?'':'s'} · never exported`;
+    else if(!exportedSecs.has(s)&&kept) cap=`<span class="over">${kept} checked · won’t export — the template holds ${TEMPLATE.sections} sections</span>`;
+    else cap=`<span class="${kept>TEMPLATE.itemsPerSection?'over':''}">${kept} checked · template holds ${TEMPLATE.itemsPerSection}</span>`;
+    if(isInt) r+=`<details class="intl"${s.items.some(it=>it.keep)?' open':''}><summary>`;
     r+=`<div class="sec">
-        <span class="sec-title" contenteditable="true" data-bucket="${b}" spellcheck="false">${esc(p.titles[b])}</span>
-        <span class="cap ${items.length>cap?'over':''}">${items.length} item${items.length===1?'':'s'} \u00b7 template holds ${cap}</span>
-      </div>
-      <div class="seczone" data-zone="${b}">`;
-    if(!items.length){
-      r+=`<div class="hint" style="padding:6px 12px">Empty. Drag an item here or use its Move menu.</div>`;
+        ${isInt?`<span class="sec-title static">${esc(s.title)}</span>`:`<span class="sec-title" contenteditable="true" data-s="${k}" spellcheck="false">${esc(s.title)}</span>`}
+        <span class="cap">${cap}</span>
+      </div>`;
+    if(isInt) r+=`</summary><div class="hint" style="padding:0 12px 6px">Inclusions, staff meals and similar lines from the SEO. Move one into a section if it belongs on the proposal.</div>`;
+    if(s.flags&&s.flags.length) r+=`<div class="flag secflag">${esc(s.flags.join(" "))}</div>`;
+    if(!isInt && s.notes.length){
+      r+=`<div class="hnotes">`+s.notes.map((n,ni)=>lineHtml(n,`data-hn="${k}:${ni}"`)).join("")+`</div>`;
     }
-    items.forEach((it,idx)=>{
-      const over=idx>=cap;
-      const flagged=it.flags.length;
-      const opts=SECT.map(s=>`<option value="${s}"${s===b?' selected':''}>${labels[s]}</option>`).join("");
-      r+=`<div class="row ${it.keep?'':'off'} ${over?'cut':''}" draggable="true" data-b="${b}" data-i="${idx}">
-        <span class="grip" title="Drag to move">\u2630</span>
-        <input type="checkbox" ${it.keep&&!over?'checked':''} ${over?'disabled':''} title="Include in proposal">
+    r+=`<div class="seczone" data-zone="${k}">`;
+    if(!s.items.length) r+=`<div class="hint" style="padding:6px 12px">Empty. Drag an item here or use its Move menu.</div>`;
+    s.items.forEach((it,idx)=>{
+      const out=!isInt && it.keep && !exported.has(it);
+      r+=`<div class="row ${it.keep||isInt?'':'off'} ${out?'cut':''}" draggable="true" data-s="${k}" data-i="${idx}">
+        <span class="grip" title="Drag to move or reorder">☰</span>
+        ${isInt?'':`<input type="checkbox" class="keep" ${it.keep?'checked':''} title="Include in proposal">`}
         <div class="body">
           <div class="nm">${esc(it.name)}</div>
-          ${it.desc?`<div class="ds">${esc(it.desc)}</div>`:''}
-          ${it.tags?`<div class="tag">${esc(it.tags)}</div>`:''}
-          ${flagged?`<div class="flag">Typed note, likely internal: ${esc(it.flags.join(" | "))}</div>`:''}
-          ${over?`<div class="flag">Beyond the ${cap}-slot limit \u2014 won\u2019t export.</div>`:''}
-          <div class="move">Move to: <select data-b="${b}" data-i="${idx}">${opts}</select></div>
+          ${it.lines.map((l,li)=>l.why?lineHtml(l,`data-ln="${li}"`):(l.on?`<div class="ds">${esc(l.text)}</div>`:lineHtml(l,`data-ln="${li}"`))).join("")}
+          ${it.tags.length?`<div class="tag">${esc(it.tags.join(", "))}</div>`:''}
+          ${it.flags.length?`<div class="flag">⚑ ${esc(it.flags.join(" "))}</div>`:''}
+          ${out?`<div class="flag">Won’t export — ${exportedSecs.has(s)?`the template holds ${TEMPLATE.itemsPerSection} items per section. Uncheck another item or drag this one higher.`:`the template holds ${TEMPLATE.sections} sections.`}</div>`:''}
+          <div class="move">Move to: <select data-s="${k}" data-i="${idx}">${opts(s)}</select></div>
         </div>
       </div>`;
     });
     r+=`</div>`;
-  }
+    if(isInt) r+=`</details>`;
+  });
   r+=`<div class="actions">
     <button id="dl">Download CSV</button>
     <button class="ghost" id="reset">Clear</button>
-    <span class="hint">Drag items between sections, rename a section by clicking its title, and uncheck anything that shouldn\u2019t reach the client.</span>
+    <span class="hint">Uncheck anything that shouldn’t reach the client, tick a ⚑ line to put it back, and drag items to move or reorder them.</span>
   </div>`;
   $("#review").innerHTML=r;
   wireReview(p);
 }
 
-function moveItem(p,fromB,fromI,toB){
-  if(fromB===toB) return;
-  const it=p.sections[fromB].splice(fromI,1)[0];
-  if(it) p.sections[toB].push(it);
+function moveItem(p,fromK,fromI,toK,toI){
+  const from=secAt(p,fromK), to=secAt(p,toK);
+  if(!from||!to) return;
+  const it=from.items.splice(fromI,1)[0];
+  if(!it) return;
+  if(from===p.internal && to!==p.internal) it.keep=true;   // pulled onto the proposal on purpose
+  if(toI==null||toI>to.items.length) to.items.push(it);
+  else to.items.splice(from===to&&fromI<toI?toI-1:toI,0,it);
 }
 
 function wireReview(p){
-  // checkboxes
-  $("#review").querySelectorAll(".row input[type=checkbox]:not([disabled])").forEach(cb=>{
+  const R=$("#review");
+  // item checkboxes
+  R.querySelectorAll(".row input.keep").forEach(cb=>{
     cb.addEventListener("change",e=>{
       const row=e.target.closest(".row");
-      p.sections[row.dataset.b][+row.dataset.i].keep=e.target.checked;
-      row.classList.toggle("off",!e.target.checked);
+      secAt(p,row.dataset.s).items[+row.dataset.i].keep=e.target.checked;
+      renderReview(p);
     });
   });
+  // description / note lines inside an item
+  R.querySelectorAll(".row input[data-ln]").forEach(cb=>{
+    cb.addEventListener("change",e=>{
+      const row=e.target.closest(".row");
+      secAt(p,row.dataset.s).items[+row.dataset.i].lines[+e.target.dataset.ln].on=e.target.checked;
+      renderReview(p);
+    });
+  });
+  // heading notes
+  R.querySelectorAll("input[data-hn]").forEach(cb=>{
+    cb.addEventListener("change",e=>{
+      const [k,ni]=e.target.dataset.hn.split(":");
+      secAt(p,k).notes[+ni].on=e.target.checked;
+      renderReview(p);
+    });
+  });
+  // menu title
+  const mtc=R.querySelector("input[data-mt]");
+  if(mtc) mtc.addEventListener("change",e=>{ p.menuTitle.on=e.target.checked; });
+  const mtt=R.querySelector(".mt-text");
+  if(mtt){
+    mtt.addEventListener("blur",()=>{ p.menuTitle.text=mtt.textContent.trim()||p.menuTitle.orig; });
+    mtt.addEventListener("keydown",ev=>{ if(ev.key==="Enter"){ ev.preventDefault(); mtt.blur(); }});
+  }
   // rename section titles
-  $("#review").querySelectorAll(".sec-title").forEach(el=>{
-    const commit=()=>{ p.titles[el.dataset.bucket]=el.textContent.trim()||labelFor(el.dataset.bucket); };
+  R.querySelectorAll(".sec-title[data-s]").forEach(el=>{
+    const commit=()=>{ const s=secAt(p,el.dataset.s); s.title=el.textContent.trim()||s.orig; };
     el.addEventListener("blur",commit);
     el.addEventListener("keydown",ev=>{ if(ev.key==="Enter"){ ev.preventDefault(); el.blur(); }});
   });
   // move dropdown (touch-friendly path)
-  $("#review").querySelectorAll(".move select").forEach(sel=>{
+  R.querySelectorAll(".move select").forEach(sel=>{
     sel.addEventListener("change",e=>{
-      moveItem(p,e.target.dataset.b,+e.target.dataset.i,e.target.value);
+      moveItem(p,e.target.dataset.s,+e.target.dataset.i,e.target.value,null);
       renderReview(p);
     });
     sel.addEventListener("click",e=>e.stopPropagation());
   });
-  // drag and drop (desktop)
+  // drag and drop (desktop): drop on a section to add at the end, on an item to place before it
   let dragFrom=null, dragIdx=null;
-  $("#review").querySelectorAll(".row").forEach(row=>{
+  R.querySelectorAll(".row").forEach(row=>{
     row.addEventListener("dragstart",e=>{
-      dragFrom=row.dataset.b; dragIdx=+row.dataset.i;
+      dragFrom=row.dataset.s; dragIdx=+row.dataset.i;
       row.classList.add("dragging");
       e.dataTransfer.effectAllowed="move";
       try{e.dataTransfer.setData("text/plain",dragFrom+":"+dragIdx);}catch(_){}
     });
     row.addEventListener("dragend",()=>{ row.classList.remove("dragging"); clearHot(); });
   });
-  const zones=$("#review").querySelectorAll(".seczone");
-  function clearHot(){ zones.forEach(z=>z.classList.remove("drop-hot")); }
+  const zones=R.querySelectorAll(".seczone");
+  function clearHot(){ zones.forEach(z=>z.classList.remove("drop-hot")); R.querySelectorAll(".row.drop-before").forEach(x=>x.classList.remove("drop-before")); }
   zones.forEach(z=>{
-    z.addEventListener("dragover",e=>{ e.preventDefault(); e.dataTransfer.dropEffect="move"; z.classList.add("drop-hot"); });
-    z.addEventListener("dragleave",()=>z.classList.remove("drop-hot"));
+    z.addEventListener("dragover",e=>{
+      e.preventDefault(); e.dataTransfer.dropEffect="move"; clearHot(); z.classList.add("drop-hot");
+      const tr=e.target.closest(".row"); if(tr) tr.classList.add("drop-before");
+    });
+    z.addEventListener("dragleave",e=>{ if(!z.contains(e.relatedTarget)) clearHot(); });
     z.addEventListener("drop",e=>{
       e.preventDefault(); clearHot();
-      const toB=z.dataset.zone;
-      if(dragFrom!==null){ moveItem(p,dragFrom,dragIdx,toB); dragFrom=null; renderReview(p); }
+      const tr=e.target.closest(".row");
+      if(dragFrom!==null){ moveItem(p,dragFrom,dragIdx,z.dataset.zone,tr?+tr.dataset.i:null); dragFrom=null; renderReview(p); }
     });
   });
   $("#dl").addEventListener("click",()=>download(p));
   $("#reset").addEventListener("click",()=>{location.reload()});
 }
-function labelFor(b){return {passed:"Passed Hors d'Oeuvres",salad:"Salads / Starters",entree:"Entr\u00e9es / Mains",station:"Stations",dessert:"Desserts"}[b];}
-
-function kept(p,b){return p.sections[b].filter((it,i)=>it.keep && i<CAPS[b]);}
 
 function buildRow(p){
   const row={};
   CSV_HEADERS.forEach(h=>row[h]="");
   row.event_title=p.meta.party;
-  row.event_date_time=[p.meta.date, p.meta.times.length?"":""].join("").trim();
-  // date + first/last time if present
+  // date + event start/end if present
   if(p.meta.times.length>=2) row.event_date_time=`${p.meta.date}\n${p.meta.times[2]||p.meta.times[0]} - ${p.meta.times[3]||p.meta.times[p.meta.times.length-1]}`;
   else row.event_date_time=p.meta.date;
   row.sales_contact=p.meta.rep;           // planner_contact left blank -> needs lookup
-  const T=p.titles||{};
-  // menu section 1 = passed (fall back to first non-empty), using the (possibly renamed) title
-  const s1b = kept(p,"passed").length?"passed":(kept(p,"salad").length?"salad":"entree");
-  row.menu_section_1_title=T[s1b]||"Menu";
-  kept(p,s1b).slice(0,3).forEach((it,i)=>{ row["menu_1_item_"+(i+1)]=fmt(it); });
-  // menu section 2 = stations (labelled) else entrees
-  if(kept(p,"station").length){
-    row.menu_section_2_title=T.station||"Stations";
-    kept(p,"station").slice(0,3).forEach((it,i)=>{ row["menu_2_label_"+(i+1)]="Station "+["One","Two","Three"][i]; row["menu_2_item_"+(i+1)]=fmt(it); });
-  } else if(kept(p,"entree").length){
-    row.menu_section_2_title=T.entree||"Entr\u00e9es";
-    kept(p,"entree").slice(0,3).forEach((it,i)=>{ row["menu_2_item_"+(i+1)]=fmt(it); });
-  }
+  row.menu_title=p.menuTitle&&p.menuTitle.on?p.menuTitle.text:"";
+  // menu: sections in SEO order (as reordered by the planner), as many as the template holds
+  exportPlan(p).forEach((x,si)=>{
+    const n=si+1;
+    row[`menu_section_${n}_title`]=x.sec.title;
+    row[`menu_section_${n}_note`]=noteOf(x.sec);
+    x.items.forEach((it,i)=>{ row[`menu_${n}_item_${i+1}`]=fmt(it); });
+  });
   // bar
   row.bar_type=p.meta.bar_type;
   if(p.meta.wine) row.wine_list=p.meta.wine;
@@ -518,7 +702,7 @@ function buildRow(p){
   if(p.meta.spirits) row.spirits_list=p.meta.spirits;
   // timeline: SEO columns are Departure / Arrival on Site / Event Start / Event Concludes / Breakdown Completes
   (p.meta.times||[]).slice(0,6).forEach((t,i)=>{ row["timeline_time_"+(i+1)]=t; });
-  const ms=["Team Departs HQ","Arrival & Setup","Event Begins","Event Concludes","Breakdown & Departure","\u2014"];
+  const ms=["Team Departs HQ","Arrival & Setup","Event Begins","Event Concludes","Breakdown & Departure","—"];
   ms.forEach((m,i)=>{ if(row["timeline_time_"+(i+1)]) row["timeline_milestone_"+(i+1)]=m; });
   // staff
   row.supervisor_qty=p.staff.supervisor||"";
@@ -533,19 +717,19 @@ function buildRow(p){
   // deposit_terms left blank -> fixed sales text
   return row;
 }
-function fmt(it){ return [it.name, it.desc, it.tags].filter(Boolean).join("\n"); }
+function fmt(it){ return [it.name, descOf(it), it.tags.join(", ")].filter(Boolean).join("\n"); }
 
 function download(p){
   const row=buildRow(p);
   const q=v=>{ v=(v==null?"":String(v)); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
   const csv=CSV_HEADERS.join(",")+"\r\n"+CSV_HEADERS.map(h=>q(row[h])).join(",")+"\r\n";
-  const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+  const blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"});
   const a=document.createElement("a");
   a.href=URL.createObjectURL(blob);
   a.download=(p.meta.event_no||"proposal")+"_canva.csv";
   a.click(); URL.revokeObjectURL(a.href);
 }
-function esc(s){return String(s==null?"":s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 </script>
 </body>
 </html>
