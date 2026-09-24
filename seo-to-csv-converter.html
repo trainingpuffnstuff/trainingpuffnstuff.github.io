@@ -249,6 +249,15 @@ function bucketFor(head){
   return null;
 }
 
+// pull only the standardized dietary indicators from a raw tag line, in order, de-duped
+// e.g. "NF - skewered" -> "NF", "V, GF, NF" -> "V, GF, NF"
+function cleanDiet(s){
+  const m=String(s).toUpperCase().match(/\b(?:NF|VEG|VG|VE|V|GF|DF)\b/g);
+  if(!m) return "";
+  const seen=[]; m.forEach(c=>{ if(!seen.includes(c)) seen.push(c); });
+  return seen.join(", ");
+}
+
 // clean a raw SEO section header into a client-facing title
 // (strips floor/table/time logistics, leading counts, and title-cases ALL-CAPS)
 function cleanTitle(h){
@@ -358,7 +367,7 @@ function parse(lines){
       for(let j=i+1;j<lines.length;j++){
         const nx=lines[j];
         if(/^\(\d+\)/.test(nx)||isHeader(nx)||BEV_BOUNDARY.test(nx)||FOOTER.test(nx)||/SERVICE PERSONNEL|Menu & Inclusions/i.test(nx)) break;
-        if(DIET.test(nx) && nx.length<40){ tags=nx; continue; }
+        if(DIET.test(nx) && nx.length<40){ tags=cleanDiet(nx)||tags; continue; }
         if(PREP_NOTE.test(nx)){ continue; }   // kitchen/setup note, not client copy
         if(REP_NOTE.test(nx) && nx===nx.toUpperCase() && nx.length<80){ flags.push(nx); continue; }
         desc.push(nx);
