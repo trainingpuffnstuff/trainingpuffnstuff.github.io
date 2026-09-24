@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SEO to Canva CSV</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <style>
   :root{
     box-sizing:border-box;
@@ -363,23 +364,23 @@ function parse(lines){
 
 // ---- planner roster (pulled from puffnstuff.com/about/meet-the-team) ----
 const PLANNERS = [
-  {name:"Heidi Brice", role:"Director of Sales", email:"Heidi@puffnstuff.com", phone:"407.398.6301", photo:"https://puffnstuff.com/_astro/Heidi-Brice.yZC6vVSZ.jpg"},
-  {name:"Lauren Balden", role:"Director of Sales, Tampa", email:"lauren@puffnstuff.com", phone:"813.712.7833", photo:"https://puffnstuff.com/_astro/Lauren-Balden.DSYEuC6Y.jpg"},
-  {name:"Ashley Joiner", role:"Special Event Planner", email:"ashleyj@puffnstuff.com", phone:"407.398.6681", photo:"https://puffnstuff.com/_astro/Ashley-Joiner.DGR-bSj6.jpg"},
-  {name:"Brittany Davis", role:"Special Event Planner", email:"BrittanyD@puffnstuff.com", phone:"407.790.0151", photo:"https://puffnstuff.com/_astro/Brittany-Davis.CEqP0utF.jpg"},
-  {name:"Emily Justice", role:"Special Event Planner", email:"emilyj@puffnstuff.com", phone:"407.478.5820", photo:"https://puffnstuff.com/_astro/Emily-Justice.DkEowThk.jpg"},
-  {name:"Laurel Ehnot", role:"Special Event Planner", email:"Laurell@puffnstuff.com", phone:"407.478.5820", photo:"https://puffnstuff.com/_astro/Laurel-Ehnot.ChEEBW8i.jpg"},
-  {name:"Domenic Crisafulli", role:"Special Event Planner", email:"domenic@puffnstuff.com", phone:"813.580.8368", photo:"https://puffnstuff.com/_astro/Domenic-Crisafulli-V2.C1aZDmbp.jpg"},
-  {name:"Sandy Rule", role:"Special Event Planner", email:"sandyr@puffnstuff.com", phone:"813.299.1653", photo:"https://puffnstuff.com/_astro/Sandy-Rule-V2.CvzqAgUx.jpg"},
-  {name:"Courtney Flynn", role:"Sales Event Planner - Business Development", email:"courtneyf@puffnstuff.com", phone:"813.575.3071", photo:"https://puffnstuff.com/_astro/Courtney-Flynn-2.CNZOAn9q.jpg"},
-  {name:"Alexa Hastings", role:"Special Event Planner", email:"Alexa@puffnstuff.com", phone:"813.580.8369", photo:"https://puffnstuff.com/_astro/Alexa-Hastings.2Wc2YJuY.jpg"},
-  {name:"Amy Kensinger", role:"Special Event Planner", email:"amyk@puffnstuff.com", phone:"813.476.3781", photo:"https://puffnstuff.com/_astro/Amy-kensinger.BZwc8O_V.jpg"},
-  {name:"Jessica Wedinger", role:"Special Event Coordinator, Orlando", email:"jessicaw@puffnstuff.com", phone:"904.387.1955", photo:"https://puffnstuff.com/_astro/Jessica-Wedinger.DU71Vv0c.jpg"},
-  {name:"Sydney Richardson", role:"Special Event Coordinator", email:"sydney@puffnstuff.com", phone:"407.629.4342", photo:"https://puffnstuff.com/_astro/Sydney-Richardson.Dg36O5w4.jpg"},
-  {name:"Trinity Torres", role:"Special Event Coordinator", email:"trinity@puffnstuff.com", phone:"", photo:"https://puffnstuff.com/_astro/trinity.yLefTDl0.jpg"},
-  {name:"Savannah Torres", role:"Special Event Coordinator", email:"savannaht@puffnstuff.com", phone:"", photo:"https://puffnstuff.com/_astro/savannah.CevaVEWn.jpg"},
-  {name:"Heather Gustafson", role:"Special Event Coordinator", email:"heatherg@puffnstuff.com", phone:"", photo:"https://puffnstuff.com/_astro/heather.Dsa40uem.jpg"},
-  {name:"Paloma Roca-Rey", role:"Special Event Coordinator", email:"paloma@puffnstuff.com", phone:"813.575.3072", photo:"https://puffnstuff.com/_astro/paloma-image.X4MEqJpI.webp"}
+  {name:"Heidi Brice", role:"Director of Sales", email:"Heidi@puffnstuff.com", phone:"407.398.6301", photo:"img/planners/heidi-brice.jpg"},
+  {name:"Lauren Balden", role:"Director of Sales, Tampa", email:"lauren@puffnstuff.com", phone:"813.712.7833", photo:"img/planners/lauren-balden.jpg"},
+  {name:"Ashley Joiner", role:"Special Event Planner", email:"ashleyj@puffnstuff.com", phone:"407.398.6681", photo:"img/planners/ashley-joiner.jpg"},
+  {name:"Brittany Davis", role:"Special Event Planner", email:"BrittanyD@puffnstuff.com", phone:"407.790.0151", photo:"img/planners/brittany-davis.jpg"},
+  {name:"Emily Justice", role:"Special Event Planner", email:"emilyj@puffnstuff.com", phone:"407.478.5820", photo:"img/planners/emily-justice.jpg"},
+  {name:"Laurel Ehnot", role:"Special Event Planner", email:"Laurell@puffnstuff.com", phone:"407.478.5820", photo:"img/planners/laurel-ehnot.jpg"},
+  {name:"Domenic Crisafulli", role:"Special Event Planner", email:"domenic@puffnstuff.com", phone:"813.580.8368", photo:"img/planners/domenic-crisafulli.jpg"},
+  {name:"Sandy Rule", role:"Special Event Planner", email:"sandyr@puffnstuff.com", phone:"813.299.1653", photo:"img/planners/sandy-rule.jpg"},
+  {name:"Courtney Flynn", role:"Sales Event Planner - Business Development", email:"courtneyf@puffnstuff.com", phone:"813.575.3071", photo:"img/planners/courtney-flynn.jpg"},
+  {name:"Alexa Hastings", role:"Special Event Planner", email:"Alexa@puffnstuff.com", phone:"813.580.8369", photo:"img/planners/alexa-hastings.jpg"},
+  {name:"Amy Kensinger", role:"Special Event Planner", email:"amyk@puffnstuff.com", phone:"813.476.3781", photo:"img/planners/amy-kensinger.jpg"},
+  {name:"Jessica Wedinger", role:"Special Event Coordinator, Orlando", email:"jessicaw@puffnstuff.com", phone:"904.387.1955", photo:""},
+  {name:"Sydney Richardson", role:"Special Event Coordinator", email:"sydney@puffnstuff.com", phone:"407.629.4342", photo:""},
+  {name:"Trinity Torres", role:"Special Event Coordinator", email:"trinity@puffnstuff.com", phone:"", photo:""},
+  {name:"Savannah Torres", role:"Special Event Coordinator", email:"savannaht@puffnstuff.com", phone:"", photo:""},
+  {name:"Heather Gustafson", role:"Special Event Coordinator", email:"heatherg@puffnstuff.com", phone:"", photo:"img/planners/heather-gustafson.jpg"},
+  {name:"Paloma Roca-Rey", role:"Special Event Coordinator", email:"paloma@puffnstuff.com", phone:"813.575.3072", photo:""}
 ];
 
 function plannerOptions(sel){
@@ -389,7 +390,8 @@ function plannerOptions(sel){
 function plannerPreview(i){
   if(i==null||i==="") return "";
   const pl=PLANNERS[i]; if(!pl) return "";
-  return `<img src="${pl.photo}" alt="" style="width:56px;height:56px;border-radius:50%;object-fit:cover;background:#eee" onerror="this.style.visibility='hidden'">`+
+  const img = pl.photo?`<img src="${pl.photo}" alt="" style="width:56px;height:56px;border-radius:50%;object-fit:cover;background:#eee" onerror="this.style.visibility='hidden'">`:`<div style="width:56px;height:56px;border-radius:50%;background:#e7e4de;display:flex;align-items:center;justify-content:center;color:#a99;font-size:11px;text-align:center">no photo</div>`;
+  return img+
     `<div style="font-size:13px;line-height:1.35">`+
       `<div style="font-weight:600">${esc(pl.name)}</div>`+
       `<div style="color:#666">${esc(pl.role||"")}</div>`+
@@ -466,7 +468,8 @@ function renderReview(p){
     </div>
   </div>`;
   r+=`<div class="actions">
-    <button id="dl">Download CSV</button>
+    <button id="dlx">Download for Canva (XLSX, with photo)</button>
+    <button class="ghost" id="dl">Download CSV (text only)</button>
     <button class="ghost" id="reset">Clear</button>
     <span class="hint">Drag items between sections, rename a section by clicking its title, and uncheck anything that shouldn\u2019t reach the client.</span>
   </div>`;
@@ -535,6 +538,7 @@ function wireReview(p){
     plsel.addEventListener("click",e=>e.stopPropagation());
   }
   $("#dl").addEventListener("click",()=>download(p));
+  const dlx=$("#dlx"); if(dlx) dlx.addEventListener("click",()=>downloadXlsx(p,dlx));
   $("#reset").addEventListener("click",()=>{location.reload()});
 }
 function labelFor(b){return {passed:"Hors d'Oeuvres",salad:"Salads / Starters",entree:"Entr\u00e9es / Mains",station:"Stations",dessert:"Desserts"}[b];}
@@ -602,6 +606,44 @@ function download(p){
   a.href=URL.createObjectURL(blob);
   a.download=(p.meta.event_no||"proposal")+"_canva.csv";
   a.click(); URL.revokeObjectURL(a.href);
+}
+
+// XLSX export for Canva Bulk Create, with the planner headshot embedded in a cell.
+// (Canva ignores image URLs in CSV; it only renders images embedded inside XLSX cells.)
+async function downloadXlsx(p, btn){
+  const orig = btn ? btn.textContent : "";
+  try{
+    if(typeof ExcelJS==="undefined"){ alert("The spreadsheet engine is still loading — give it a second and try again."); return; }
+    if(btn){ btn.disabled=true; btn.textContent="Building…"; }
+    const row=buildRow(p);
+    const wb=new ExcelJS.Workbook();
+    const ws=wb.addWorksheet("Proposal");
+    const headers=CSV_HEADERS.concat(["planner_headshot"]);          // extra column holds the embedded image
+    ws.columns=headers.map(h=>({header:h,key:h,width:h==="planner_headshot"?26:22}));
+    ws.getRow(1).font={bold:true};
+    const data={}; CSV_HEADERS.forEach(h=>data[h]=row[h]||"");
+    data["planner_headshot_url"]="";                                  // image lives in the embedded column, not as text
+    ws.addRow(data);
+    ws.getRow(2).height=96;
+    // embed the selected planner's headshot (must be a same-origin repo file to read its bytes)
+    const pl=(p.planner!=null)?PLANNERS[p.planner]:null;
+    if(pl && pl.photo && !/^https?:/i.test(pl.photo)){
+      try{
+        const buf=await (await fetch(pl.photo)).arrayBuffer();
+        const ext=(pl.photo.split(".").pop()||"jpeg").toLowerCase();
+        const imgId=wb.addImage({buffer:buf, extension: ext==="png"?"png":(ext==="gif"?"gif":"jpeg")});
+        const col=headers.indexOf("planner_headshot");                // 0-based col of the image column
+        ws.addImage(imgId,{tl:{col:col,row:1}, br:{col:col+1,row:2}, editAs:"oneCell"});
+      }catch(e){ console.warn("headshot embed failed",e); }
+    }
+    const out=await wb.xlsx.writeBuffer();
+    const blob=new Blob([out],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download=(p.meta.event_no||"proposal")+"_canva.xlsx";
+    a.click(); URL.revokeObjectURL(a.href);
+  }catch(e){ alert("Could not build the XLSX: "+(e&&e.message||e)); }
+  finally{ if(btn){ btn.disabled=false; btn.textContent=orig; } }
 }
 function esc(s){return String(s==null?"":s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
 </script>
