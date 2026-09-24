@@ -158,7 +158,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/p
 
 // ---- config ----
 const CAPS = { passed:6, salad:3, entree:4, station:5, dessert:4 };
-const CSV_HEADERS = ["event_title","event_date_time","sales_contact","planner_contact","planner_headshot_url","menu_section_1_title","menu_1_item_1","menu_1_item_2","menu_1_item_3","menu_section_2_title","menu_2_label_1","menu_2_item_1","menu_2_label_2","menu_2_item_2","menu_2_label_3","menu_2_item_3","bar_type","wine_list","beer_list","spirits_list","bar_alternative","timeline_time_1","timeline_time_2","timeline_time_3","timeline_time_4","timeline_time_5","timeline_time_6","timeline_milestone_1","timeline_milestone_2","timeline_milestone_3","timeline_milestone_4","timeline_milestone_5","timeline_milestone_6","supervisor_qty","lead_event_chef_qty","floor_chef_qty","event_chef_qty","server_qty","bartender_qty","investment_summary","grand_total","deposit_terms"];
+const CSV_HEADERS = ["event_title","event_date_time","sales_contact","planner_contact","menu_section_1_title","menu_1_item_1","menu_1_item_2","menu_1_item_3","menu_section_2_title","menu_2_label_1","menu_2_item_1","menu_2_label_2","menu_2_item_2","menu_2_label_3","menu_2_item_3","bar_type","wine_list","beer_list","spirits_list","bar_alternative","timeline_time_1","timeline_time_2","timeline_time_3","timeline_time_4","timeline_time_5","timeline_time_6","timeline_milestone_1","timeline_milestone_2","timeline_milestone_3","timeline_milestone_4","timeline_milestone_5","timeline_milestone_6","supervisor_qty","lead_event_chef_qty","floor_chef_qty","event_chef_qty","server_qty","bartender_qty","investment_summary","grand_total"];
 
 // section header phrases -> bucket (order matters; specific before general)
 const SECTION_MAP = [
@@ -558,7 +558,6 @@ function buildRow(p){
   if(p.planner!=null && PLANNERS[p.planner]){
     const pl=PLANNERS[p.planner];
     row.planner_contact=[pl.name, pl.role, pl.email, pl.phone].filter(Boolean).join("\n");
-    row.planner_headshot_url=pl.photo||"";
   }
   const T=p.titles||{};
   // menu section 1 = passed (fall back to first non-empty), using the (possibly renamed) title
@@ -592,7 +591,6 @@ function buildRow(p){
   // investment
   row.investment_summary=`Grand Total Including Tax\nBased on ${p.meta.guests||""} Guests`.trim();
   row.grand_total=p.meta.grand_total?("$"+p.meta.grand_total):"";
-  // deposit_terms left blank -> fixed sales text
   return row;
 }
 function fmt(it){ return [it.name, it.desc, it.tags].filter(Boolean).join("\n"); }
@@ -622,7 +620,6 @@ async function downloadXlsx(p, btn){
     ws.columns=headers.map(h=>({header:h,key:h,width:h==="planner_headshot"?26:22}));
     ws.getRow(1).font={bold:true};
     const data={}; CSV_HEADERS.forEach(h=>data[h]=row[h]||"");
-    data["planner_headshot_url"]="";                                  // image lives in the embedded column, not as text
     ws.addRow(data);
     ws.getRow(2).height=96;
     // embed the selected planner's headshot (must be a same-origin repo file to read its bytes)
