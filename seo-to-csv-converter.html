@@ -70,6 +70,13 @@
   .row .nm[contenteditable],.row .ds[contenteditable]{border-radius:4px; padding:1px 4px; margin:0 -4px; cursor:text}
   .row .nm[contenteditable]:focus,.row .ds[contenteditable]:focus{outline:none; background:var(--panel); box-shadow:0 0 0 1px var(--wine)}
   .row .ds[contenteditable]:empty:before{content:attr(data-ph); color:var(--ink-soft); opacity:.55}
+  .row{position:relative}
+  .row .body{padding-right:68px}
+  .row .ord{display:inline-flex; flex-direction:column; gap:2px; vertical-align:top; margin:2px 4px 0 0}
+  .row .ord button{border:1px solid var(--line); background:#fff; cursor:pointer; line-height:1; font-size:9px; padding:1px 4px; border-radius:3px; color:var(--ink-soft)}
+  .row .ord button:hover{border-color:var(--wine); color:var(--wine)}
+  .row .pthumb{position:absolute; top:8px; right:8px; width:54px; height:54px; object-fit:cover; border-radius:6px; border:1px solid var(--line)}
+  .row .pthumb.none{display:flex; align-items:center; justify-content:center; font-size:9px; color:var(--ink-soft); background:#f1eee9; text-align:center; line-height:1.1}
   .row .tag{font-size:.72rem; color:var(--wine); letter-spacing:.03em; margin-top:2px}
   .row .flag{font-size:.72rem; color:var(--warn); margin-top:3px}
   .actions{position:sticky; bottom:0; background:var(--ground);
@@ -441,6 +448,84 @@ function plannerPreview(i){
     `</div>`;
 }
 
+// ---- menu photo catalog (curated pro shots, hosted at img/menu/) ----
+const MENU_PHOTOS = [
+  {slug:"petite-macarons",name:"Petite Macarons",aliases:["Petite Macarons","Macarons","Grown Up Macarons"]},
+  {slug:"seared-ahi-tuna",name:"Seared Ahi Tuna",aliases:["Seared Ahi Tuna","Cold Smoked Seared Ahi Tuna","Ahi Tuna"]},
+  {slug:"okey-dokey-artichokey",name:"Okey Dokey Artichokey",aliases:["Okey Dokey Artichokey","Spinach Artichoke Dip","Artichoke Dip"]},
+  {slug:"charcuterie",name:"Charcuterie",aliases:["Charcuterie","Charcuterie Board","Charcuterie Display","Grazing"]},
+  {slug:"cheese-display",name:"Cheese Display",aliases:["Cheese Display","Cheese Board","Artisanal Cheese"]},
+  {slug:"black-bleu-meatball",name:"Black & Bleu Meatball",aliases:["Black & Bleu Meatball","Black and Bleu Meatball","Meatball"]},
+  {slug:"mini-lobster-roll",name:"Mini Lobster Roll",aliases:["Mini Lobster Roll","Lobster Roll"]},
+  {slug:"mushroom-taleggio-arancini",name:"Mushroom & Taleggio Arancini",aliases:["Mushroom & Taleggio Arancini","Mushroom Arancini","Arancini"]},
+  {slug:"seasonal-bruschetta-fall-winter",name:"Seasonal Bruschetta (Fall/Winter)",aliases:["Seasonal Bruschetta","Bruschetta","Fall Winter Bruschetta"]},
+  {slug:"seasonal-bruschetta-spring-summer",name:"Seasonal Bruschetta (Spring/Summer)",aliases:["Seasonal Bruschetta","Bruschetta","Spring Summer Bruschetta"]},
+  {slug:"chips-dips-platter",name:"Chips & Dips Platter",aliases:["Chips & Dips","Chips and Dips"]},
+  {slug:"crudites",name:"Crudites",aliases:["Crudites","Crudite","Crudite Platter","Vegetable Crudite"]},
+  {slug:"deviled-eggs-trio",name:"Deviled Eggs Trio",aliases:["Deviled Eggs Trio","Deviled Egg Trio","Deviled Eggs"]},
+  {slug:"shrimp-cocktail",name:"Shrimp Cocktail",aliases:["Shrimp Cocktail","Shrimp Cocktail Shooter"]},
+  {slug:"smoked-salmon",name:"Smoked Salmon",aliases:["Smoked Salmon","Honey Smoked Salmon"]},
+  {slug:"tea-sandwiches-platter",name:"Tea Sandwiches Platter",aliases:["Tea Sandwiches","Tea Sandwich"]},
+  {slug:"traditional-cheese-display",name:"Traditional Cheese Display",aliases:["Traditional Cheese","Cheese Display","Cheese"]},
+  {slug:"morning-breads-danish-muffins",name:"Morning Breads, Danish & Muffins",aliases:["Assorted Pastries","Pastries & Croissants","Pastries","Danish","Muffins"]},
+  {slug:"french-toast-bread-pudding",name:"French Toast Bread Pudding",aliases:["French Toast Bread Pudding"]},
+  {slug:"fresh-house-blended-juices",name:"Fresh House Blended Juices",aliases:["Fresh House Blended Juices","Fresh Juice","Juice Blends","Juice"]},
+  {slug:"breakfast-sandwich",name:"Breakfast Sandwich",aliases:["Breakfast Sandwich","Croissant Breakfast Sandwich","Bagel Breakfast Sandwich"]},
+  {slug:"frittata",name:"Frittata",aliases:["Frittata"]},
+  {slug:"fresh-fruit-display",name:"Fresh Fruit Display",aliases:["Fresh Fruit Display","Fruit Display","Fresh Fruit Salad","Seasonal Fruit"]},
+  {slug:"mixed-berry-parfait",name:"Mixed Berry Parfait",aliases:["Parfait","Yogurt Parfait","Mixed Berry Parfait","Parfaits"]},
+  {slug:"applewood-smoked-bacon",name:"Applewood Smoked Bacon",aliases:["Applewood Smoked Bacon","Bacon"]},
+  {slug:"grilled-ham",name:"Grilled Ham",aliases:["Grilled Ham"]},
+  {slug:"avocado-toast",name:"Avocado Toast",aliases:["Avocado Toast","Avo Toast","Avocado Spread"]},
+  {slug:"biscuits-jam",name:"Biscuits & Jam",aliases:["Biscuits & Jam","Biscuits and Jam","Biscuits"]},
+  {slug:"individual-quiche",name:"Individual Quiche",aliases:["Individual Quiche","Quiche","Rustic Quiche"]},
+  {slug:"85c-short-rib",name:"85C Short Rib",aliases:["85 Degree Short Rib","Braised Short Rib","Short Rib Cube","Short Rib"]},
+  {slug:"gourmet-cookie-sandwiches",name:"Gourmet Cookie Sandwiches",aliases:["Gourmet Cookie Sandwiches","Cookie Sandwich"]},
+  {slug:"brownie",name:"Brownie",aliases:["Double Chocolate Brownie","Brownie"]},
+  {slug:"pie-in-a-jar",name:"Pie in a Jar",aliases:["Pie in a Jar","Apple Pie in a Jar","Banana Pudding Jar"]},
+  {slug:"potato-chips",name:"Potato Chips",aliases:["Potato Chips","Fresh Potato Chips","Chips"]},
+  {slug:"sides-display",name:"Sides Display",aliases:[],fallback:"entree"},
+  {slug:"chive-mashed-potatoes",name:"Chive Mashed Potatoes",aliases:["Chive Mashed","Mashed Potatoes","Whipped Potato"]},
+  {slug:"florida-inspired-caesar-salad",name:"Florida Inspired Caesar Salad",aliases:["Florida Inspired Caesar","Florida Caesar","Caesar Salad","Crisper Green"]},
+  {slug:"salad-buffet",name:"Salad Buffet",aliases:[],fallback:"salad"},
+  {slug:"chilled-watermelon",name:"Chilled Watermelon",aliases:["Chilled Watermelon","Tomato Watermelon","Watermelon Salad"]},
+  {slug:"winter-greens",name:"Winter Greens",aliases:["Winter Greens Salad","Winter Greens"]},
+  {slug:"smoked-ham-swiss-sandwich",name:"Smoked Ham & Swiss Sandwich",aliases:["Ham & Swiss","Smoked Ham","Ham Sandwich"]},
+  {slug:"slow-roast-beef-sandwich",name:"Slow Roast Beef Sandwich",aliases:["Slow Roast Beef","Roast Beef Sandwich","Roast Beef"]},
+  {slug:"sandwich-buffet",name:"Sandwich Buffet",aliases:[],fallback:"sandwich"},
+  {slug:"turkey-provolone-sandwich",name:"Turkey & Provolone Sandwich",aliases:["Turkey & Provolone","Turkey Provolone","Turkey Sandwich"]},
+  {slug:"berries-and-greens-salad",name:"Berries and Greens Salad",aliases:["Berries and Greens","Berries & Greens Salad"]}
+];
+const _menuFb = role => (MENU_PHOTOS.find(p=>p.fallback===role)||{}).slug || null;
+function menuNorm(s){ return " "+String(s||"").toLowerCase().replace(/[^a-z0-9]+/g," ").replace(/\s+/g," ").trim()+" "; }
+// best photo for a menu item: longest alias phrase that appears (whole-word) in the item, else a section fallback
+function photoForItem(name, sectionTitle){
+  const it=menuNorm(name); let best=null, bestLen=0;
+  for(const p of MENU_PHOTOS){
+    for(const a of p.aliases){
+      const an=menuNorm(a);
+      if(an.length>3 && it.indexOf(an)>=0 && an.length>bestLen){ best=p.slug; bestLen=an.length; }
+    }
+  }
+  if(best) return best;
+  const st=(sectionTitle||"").toLowerCase();
+  if(/salad/.test(st)) return _menuFb("salad");
+  if(/sandwich|handheld|light fare/.test(st)) return _menuFb("sandwich");
+  if(/entr|main|\bland\b|\bsea\b|\bgarden\b|station|dinner|carv|chef|buffet/.test(st)) return _menuFb("entree");
+  return null;
+}
+// up to 3 hero photos for a section = photos of the top kept items (deduped)
+function sectionHeroes(sec){
+  const out=[], seen=new Set();
+  for(const it of (sec.items||[])){
+    if(!it.keep) continue;
+    const slug=photoForItem(it.name, sec.title);
+    if(slug && !seen.has(slug)){ seen.add(slug); out.push(slug); }
+    if(out.length>=3) break;
+  }
+  return out;
+}
+
 function render(p){
   // meta panel
   let html=`<div class="meta">
@@ -483,8 +568,10 @@ function renderReview(p){
     sec.items.forEach((it,ii)=>{
       const over = it.keep && (shown++ >= SEC_MAX);
       const flagged=it.flags&&it.flags.length;
+      const ph = it.keep ? photoForItem(it.name, sec.title) : null;
       r+=`<div class="row ${it.keep?'':'off'} ${over?'cut':''}" data-si="${si}" data-ii="${ii}">
         <input type="checkbox" ${it.keep?'checked':''} title="Include in proposal">
+        <span class="ord"><button type="button" data-mv="up" title="Move up (top items become the section photos)">▲</button><button type="button" data-mv="dn" title="Move down">▼</button></span>
         <div class="body">
           <div class="nm" contenteditable="true" spellcheck="false" data-si="${si}" data-ii="${ii}" data-f="name">${esc(it.name)}</div>
           <div class="ds" contenteditable="true" spellcheck="false" data-si="${si}" data-ii="${ii}" data-f="desc" data-ph="Add a description…">${esc(it.desc||"")}</div>
@@ -492,6 +579,7 @@ function renderReview(p){
           ${flagged?`<div class="flag">Typed note, likely internal: ${esc(it.flags.join(" | "))}</div>`:''}
           ${over?`<div class="flag">Beyond the ${SEC_MAX}-item section \u2014 won\u2019t export.</div>`:''}
         </div>
+        ${ph?`<img class="pthumb" src="img/menu/${ph}.jpg" alt="" title="Photo match \u2014 top items become the section photos" onerror="this.style.display='none'">`:`<span class="pthumb none" title="No photo in the library for this item">no photo</span>`}
       </div>`;
     });
     r+=`</div>`;
@@ -536,6 +624,15 @@ function wireReview(p){
       if(el.dataset.f==="name") it.name=v; else it.desc=v;
     });
     el.addEventListener("keydown",ev=>{ if(ev.key==="Enter" && el.dataset.f==="name"){ ev.preventDefault(); el.blur(); }});
+  });
+  // reorder items within a section (top items become the section's proposal photos)
+  $("#review").querySelectorAll(".ord button").forEach(b=>{
+    b.addEventListener("click",e=>{
+      const row=e.target.closest(".row"); const si=+row.dataset.si, ii=+row.dataset.ii;
+      const arr=p.menuSections[si].items, dir=e.target.dataset.mv==="up"?-1:1, j=ii+dir;
+      if(j<0||j>=arr.length) return;
+      const t=arr[ii]; arr[ii]=arr[j]; arr[j]=t; renderReview(p);
+    });
   });
   // planner picker
   const plsel=$("#plsel");
@@ -611,8 +708,9 @@ async function downloadXlsx(p, btn){
     const row=buildRow(p);
     const wb=new ExcelJS.Workbook();
     const ws=wb.addWorksheet("Proposal");
-    const headers=CSV_HEADERS.concat(["planner_headshot"]);          // extra column holds the embedded image
-    ws.columns=headers.map(h=>({header:h,key:h,width:h==="planner_headshot"?26:22}));
+    const photoCols=[]; for(let s=1;s<=SEC_SLOTS;s++) for(let k=1;k<=3;k++) photoCols.push("section_"+s+"_photo_"+k);
+    const headers=CSV_HEADERS.concat(["planner_headshot"], photoCols);   // image columns (embedded photos)
+    ws.columns=headers.map(h=>({header:h,key:h,width:(h==="planner_headshot"||/_photo_/.test(h))?26:22}));
     ws.getRow(1).font={bold:true};
     const data={}; CSV_HEADERS.forEach(h=>data[h]=row[h]||"");
     ws.addRow(data);
@@ -627,6 +725,19 @@ async function downloadXlsx(p, btn){
         const col=headers.indexOf("planner_headshot");                // 0-based col of the image column
         ws.addImage(imgId,{tl:{col:col,row:1}, br:{col:col+1,row:2}, editAs:"oneCell"});
       }catch(e){ console.warn("headshot embed failed",e); }
+    }
+    // embed section hero photos: the top items of each section become that section's proposal photos
+    const psecs=(p.menuSections||[]).map(x=>({title:x.title, items:x.items.filter(i=>i.keep)})).filter(x=>x.items.length).slice(0,SEC_SLOTS);
+    for(let s=0;s<psecs.length;s++){
+      const heroes=sectionHeroes(psecs[s]);
+      for(let k=0;k<heroes.length;k++){
+        try{
+          const buf=await (await fetch("img/menu/"+heroes[k]+".jpg")).arrayBuffer();
+          const imgId=wb.addImage({buffer:buf, extension:"jpeg"});
+          const col=headers.indexOf("section_"+(s+1)+"_photo_"+(k+1));
+          if(col>=0) ws.addImage(imgId,{tl:{col:col,row:1}, br:{col:col+1,row:2}, editAs:"oneCell"});
+        }catch(e){ console.warn("menu photo embed failed", heroes[k], e); }
+      }
     }
     const out=await wb.xlsx.writeBuffer();
     const blob=new Blob([out],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});

@@ -1,0 +1,479 @@
+[
+ {
+  "slug": "petite-macarons",
+  "name": "Petite Macarons",
+  "section": "Dessert",
+  "aliases": [
+   "Petite Macarons",
+   "Macarons",
+   "Grown Up Macarons"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "seared-ahi-tuna",
+  "name": "Seared Ahi Tuna",
+  "section": "Hors - Sea",
+  "aliases": [
+   "Seared Ahi Tuna",
+   "Cold Smoked Seared Ahi Tuna",
+   "Ahi Tuna"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "okey-dokey-artichokey",
+  "name": "Okey Dokey Artichokey",
+  "section": "Dips",
+  "aliases": [
+   "Okey Dokey Artichokey",
+   "Spinach Artichoke Dip",
+   "Artichoke Dip"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "charcuterie",
+  "name": "Charcuterie",
+  "section": "Station/Board",
+  "aliases": [
+   "Charcuterie",
+   "Charcuterie Board",
+   "Charcuterie Display",
+   "Grazing"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "cheese-display",
+  "name": "Cheese Display",
+  "section": "Station/Board",
+  "aliases": [
+   "Cheese Display",
+   "Cheese Board",
+   "Artisanal Cheese"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "black-bleu-meatball",
+  "name": "Black & Bleu Meatball",
+  "section": "Holiday - Hors",
+  "aliases": [
+   "Black & Bleu Meatball",
+   "Black and Bleu Meatball",
+   "Meatball"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "mini-lobster-roll",
+  "name": "Mini Lobster Roll",
+  "section": "Hors - Sea",
+  "aliases": [
+   "Mini Lobster Roll",
+   "Lobster Roll"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "mushroom-taleggio-arancini",
+  "name": "Mushroom & Taleggio Arancini",
+  "section": "Hors - Garden",
+  "aliases": [
+   "Mushroom & Taleggio Arancini",
+   "Mushroom Arancini",
+   "Arancini"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "seasonal-bruschetta-fall-winter",
+  "name": "Seasonal Bruschetta (Fall/Winter)",
+  "section": "Hors - Garden",
+  "aliases": [
+   "Seasonal Bruschetta",
+   "Bruschetta",
+   "Fall Winter Bruschetta"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "seasonal-bruschetta-spring-summer",
+  "name": "Seasonal Bruschetta (Spring/Summer)",
+  "section": "Hors - Garden",
+  "aliases": [
+   "Seasonal Bruschetta",
+   "Bruschetta",
+   "Spring Summer Bruschetta"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "chips-dips-platter",
+  "name": "Chips & Dips Platter",
+  "section": "Platter",
+  "aliases": [
+   "Chips & Dips",
+   "Chips and Dips"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "crudites",
+  "name": "Crudites",
+  "section": "Station/Platter",
+  "aliases": [
+   "Crudites",
+   "Crudite",
+   "Crudite Platter",
+   "Vegetable Crudite"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "deviled-eggs-trio",
+  "name": "Deviled Eggs Trio",
+  "section": "Platter",
+  "aliases": [
+   "Deviled Eggs Trio",
+   "Deviled Egg Trio",
+   "Deviled Eggs"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "shrimp-cocktail",
+  "name": "Shrimp Cocktail",
+  "section": "Seafood",
+  "aliases": [
+   "Shrimp Cocktail",
+   "Shrimp Cocktail Shooter"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "smoked-salmon",
+  "name": "Smoked Salmon",
+  "section": "Hors - Sea",
+  "aliases": [
+   "Smoked Salmon",
+   "Honey Smoked Salmon"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "tea-sandwiches-platter",
+  "name": "Tea Sandwiches Platter",
+  "section": "Platter",
+  "aliases": [
+   "Tea Sandwiches",
+   "Tea Sandwich"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "traditional-cheese-display",
+  "name": "Traditional Cheese Display",
+  "section": "Platter",
+  "aliases": [
+   "Traditional Cheese",
+   "Cheese Display",
+   "Cheese"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "morning-breads-danish-muffins",
+  "name": "Morning Breads, Danish & Muffins",
+  "section": "Breakfast - Bakery",
+  "aliases": [
+   "Assorted Pastries",
+   "Pastries & Croissants",
+   "Pastries",
+   "Danish",
+   "Muffins"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "french-toast-bread-pudding",
+  "name": "French Toast Bread Pudding",
+  "section": "Breakfast - Sweets",
+  "aliases": [
+   "French Toast Bread Pudding"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "fresh-house-blended-juices",
+  "name": "Fresh House Blended Juices",
+  "section": "Beverage",
+  "aliases": [
+   "Fresh House Blended Juices",
+   "Fresh Juice",
+   "Juice Blends",
+   "Juice"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "breakfast-sandwich",
+  "name": "Breakfast Sandwich",
+  "section": "Breakfast - Eggs",
+  "aliases": [
+   "Breakfast Sandwich",
+   "Croissant Breakfast Sandwich",
+   "Bagel Breakfast Sandwich"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "frittata",
+  "name": "Frittata",
+  "section": "Breakfast - Eggs",
+  "aliases": [
+   "Frittata"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "fresh-fruit-display",
+  "name": "Fresh Fruit Display",
+  "section": "Breakfast - Fruit",
+  "aliases": [
+   "Fresh Fruit Display",
+   "Fruit Display",
+   "Fresh Fruit Salad",
+   "Seasonal Fruit"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "mixed-berry-parfait",
+  "name": "Mixed Berry Parfait",
+  "section": "Breakfast - Fruit & Yogurt",
+  "aliases": [
+   "Parfait",
+   "Yogurt Parfait",
+   "Mixed Berry Parfait",
+   "Parfaits"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "applewood-smoked-bacon",
+  "name": "Applewood Smoked Bacon",
+  "section": "Breakfast - Meat",
+  "aliases": [
+   "Applewood Smoked Bacon",
+   "Bacon"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "grilled-ham",
+  "name": "Grilled Ham",
+  "section": "Breakfast - Meat",
+  "aliases": [
+   "Grilled Ham",
+   "Ham"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "avocado-toast",
+  "name": "Avocado Toast",
+  "section": "Breakfast",
+  "aliases": [
+   "Avocado Toast",
+   "Avo Toast",
+   "Avocado Spread"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "biscuits-jam",
+  "name": "Biscuits & Jam",
+  "section": "Breakfast - Bakery",
+  "aliases": [
+   "Biscuits & Jam",
+   "Biscuits and Jam",
+   "Biscuits"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "individual-quiche",
+  "name": "Individual Quiche",
+  "section": "Breakfast - Eggs",
+  "aliases": [
+   "Individual Quiche",
+   "Quiche",
+   "Rustic Quiche"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "85c-short-rib",
+  "name": "85C Short Rib",
+  "section": "Entree - Land",
+  "aliases": [
+   "Short Rib",
+   "85 Degree Short Rib",
+   "Braised Short Rib",
+   "Short Rib Cube"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "gourmet-cookie-sandwiches",
+  "name": "Gourmet Cookie Sandwiches",
+  "section": "Dessert",
+  "aliases": [
+   "Gourmet Cookie Sandwiches",
+   "Cookie Sandwich"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "brownie",
+  "name": "Brownie",
+  "section": "Dessert",
+  "aliases": [
+   "Brownie",
+   "Double Chocolate Brownie"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "pie-in-a-jar",
+  "name": "Pie in a Jar",
+  "section": "Dessert",
+  "aliases": [
+   "Pie in a Jar",
+   "Apple Pie in a Jar",
+   "Banana Pudding Jar"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "potato-chips",
+  "name": "Potato Chips",
+  "section": "Side",
+  "aliases": [
+   "Chips",
+   "Potato Chips",
+   "Fresh Potato Chips"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "sides-display",
+  "name": "Sides Display",
+  "section": "Side",
+  "aliases": [],
+  "fallback": "entree"
+ },
+ {
+  "slug": "chive-mashed-potatoes",
+  "name": "Chive Mashed Potatoes",
+  "section": "Hot Side",
+  "aliases": [
+   "Chive Mashed",
+   "Mashed Potatoes",
+   "Whipped Potato"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "florida-inspired-caesar-salad",
+  "name": "Florida Inspired Caesar Salad",
+  "section": "Starter - Salad",
+  "aliases": [
+   "Florida Inspired Caesar",
+   "Florida Caesar",
+   "Caesar Salad",
+   "Crisper Green"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "salad-buffet",
+  "name": "Salad Buffet",
+  "section": "Starter - Salad",
+  "aliases": [],
+  "fallback": "salad"
+ },
+ {
+  "slug": "chilled-watermelon",
+  "name": "Chilled Watermelon",
+  "section": "Starter",
+  "aliases": [
+   "Chilled Watermelon",
+   "Tomato Watermelon",
+   "Watermelon Salad"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "winter-greens",
+  "name": "Winter Greens",
+  "section": "Starter - Salad",
+  "aliases": [
+   "Winter Greens",
+   "Winter Greens Salad"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "smoked-ham-swiss-sandwich",
+  "name": "Smoked Ham & Swiss Sandwich",
+  "section": "Sandwich",
+  "aliases": [
+   "Ham & Swiss",
+   "Smoked Ham",
+   "Ham Sandwich"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "slow-roast-beef-sandwich",
+  "name": "Slow Roast Beef Sandwich",
+  "section": "Sandwich",
+  "aliases": [
+   "Slow Roast Beef",
+   "Roast Beef",
+   "Roast Beef Sandwich"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "sandwich-buffet",
+  "name": "Sandwich Buffet",
+  "section": "Sandwich",
+  "aliases": [],
+  "fallback": "sandwich"
+ },
+ {
+  "slug": "turkey-provolone-sandwich",
+  "name": "Turkey & Provolone Sandwich",
+  "section": "Sandwich",
+  "aliases": [
+   "Turkey & Provolone",
+   "Turkey Provolone",
+   "Turkey Sandwich"
+  ],
+  "fallback": null
+ },
+ {
+  "slug": "berries-and-greens-salad",
+  "name": "Berries and Greens Salad",
+  "section": "Starter - Salad",
+  "aliases": [
+   "Berries and Greens",
+   "Berries & Greens Salad"
+  ],
+  "fallback": null
+ }
+]
