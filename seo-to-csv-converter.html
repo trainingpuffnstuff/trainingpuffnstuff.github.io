@@ -138,7 +138,7 @@
       <li><strong>Add the SEO.</strong> Drop a Special Event Order PDF below, or click to choose one.</li>
       <li><strong>Check the menu.</strong> Items are sorted into sections. Uncheck anything that shouldn't reach the client; internal notes are flagged for you. Items past a section's limit are greyed out and won't export.</li>
       <li><strong>Fix the sorting.</strong> If an item is in the wrong section, drag it by the &#9776; handle into the right one, or use its "Move to" menu. Both do the same thing.</li>
-      <li><strong>Rename a section.</strong> Click a section title to edit it (e.g. "Passed Hors d'Oeuvres" &rarr; "Cocktail Hour"). The new name is what shows on the proposal.</li>
+      <li><strong>Rename a section.</strong> Click a section title to edit it (e.g. "Hors d'Oeuvres" &rarr; "Cocktail Hour"). The new name is what shows on the proposal.</li>
       <li><strong>Download the CSV</strong> and upload it into the Canva proposal template's Bulk Create.</li>
     </ol>
   </div>
@@ -157,7 +157,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/p
 
 // ---- config ----
 const CAPS = { passed:6, salad:3, entree:4, station:5, dessert:4 };
-const CSV_HEADERS = ["event_title","event_date_time","sales_contact","planner_contact","menu_section_1_title","menu_1_item_1","menu_1_item_2","menu_1_item_3","menu_section_2_title","menu_2_label_1","menu_2_item_1","menu_2_label_2","menu_2_item_2","menu_2_label_3","menu_2_item_3","bar_type","wine_list","beer_list","spirits_list","bar_alternative","timeline_time_1","timeline_time_2","timeline_time_3","timeline_time_4","timeline_time_5","timeline_time_6","timeline_milestone_1","timeline_milestone_2","timeline_milestone_3","timeline_milestone_4","timeline_milestone_5","timeline_milestone_6","supervisor_qty","lead_event_chef_qty","floor_chef_qty","event_chef_qty","server_qty","bartender_qty","investment_summary","grand_total","deposit_terms"];
+const CSV_HEADERS = ["event_title","event_date_time","sales_contact","planner_contact","planner_headshot_url","menu_section_1_title","menu_1_item_1","menu_1_item_2","menu_1_item_3","menu_section_2_title","menu_2_label_1","menu_2_item_1","menu_2_label_2","menu_2_item_2","menu_2_label_3","menu_2_item_3","bar_type","wine_list","beer_list","spirits_list","bar_alternative","timeline_time_1","timeline_time_2","timeline_time_3","timeline_time_4","timeline_time_5","timeline_time_6","timeline_milestone_1","timeline_milestone_2","timeline_milestone_3","timeline_milestone_4","timeline_milestone_5","timeline_milestone_6","supervisor_qty","lead_event_chef_qty","floor_chef_qty","event_chef_qty","server_qty","bartender_qty","investment_summary","grand_total","deposit_terms"];
 
 // section header phrases -> bucket (order matters; specific before general)
 const SECTION_MAP = [
@@ -361,6 +361,42 @@ function parse(lines){
   return out;
 }
 
+// ---- planner roster (pulled from puffnstuff.com/about/meet-the-team) ----
+const PLANNERS = [
+  {name:"Heidi Brice", role:"Director of Sales", email:"Heidi@puffnstuff.com", phone:"407.398.6301", photo:"https://puffnstuff.com/_astro/Heidi-Brice.yZC6vVSZ.jpg"},
+  {name:"Lauren Balden", role:"Director of Sales, Tampa", email:"lauren@puffnstuff.com", phone:"813.712.7833", photo:"https://puffnstuff.com/_astro/Lauren-Balden.DSYEuC6Y.jpg"},
+  {name:"Ashley Joiner", role:"Special Event Planner", email:"ashleyj@puffnstuff.com", phone:"407.398.6681", photo:"https://puffnstuff.com/_astro/Ashley-Joiner.DGR-bSj6.jpg"},
+  {name:"Brittany Davis", role:"Special Event Planner", email:"BrittanyD@puffnstuff.com", phone:"407.790.0151", photo:"https://puffnstuff.com/_astro/Brittany-Davis.CEqP0utF.jpg"},
+  {name:"Emily Justice", role:"Special Event Planner", email:"emilyj@puffnstuff.com", phone:"407.478.5820", photo:"https://puffnstuff.com/_astro/Emily-Justice.DkEowThk.jpg"},
+  {name:"Laurel Ehnot", role:"Special Event Planner", email:"Laurell@puffnstuff.com", phone:"407.478.5820", photo:"https://puffnstuff.com/_astro/Laurel-Ehnot.ChEEBW8i.jpg"},
+  {name:"Domenic Crisafulli", role:"Special Event Planner", email:"domenic@puffnstuff.com", phone:"813.580.8368", photo:"https://puffnstuff.com/_astro/Domenic-Crisafulli-V2.C1aZDmbp.jpg"},
+  {name:"Sandy Rule", role:"Special Event Planner", email:"sandyr@puffnstuff.com", phone:"813.299.1653", photo:"https://puffnstuff.com/_astro/Sandy-Rule-V2.CvzqAgUx.jpg"},
+  {name:"Courtney Flynn", role:"Sales Event Planner - Business Development", email:"courtneyf@puffnstuff.com", phone:"813.575.3071", photo:"https://puffnstuff.com/_astro/Courtney-Flynn-2.CNZOAn9q.jpg"},
+  {name:"Alexa Hastings", role:"Special Event Planner", email:"Alexa@puffnstuff.com", phone:"813.580.8369", photo:"https://puffnstuff.com/_astro/Alexa-Hastings.2Wc2YJuY.jpg"},
+  {name:"Amy Kensinger", role:"Special Event Planner", email:"amyk@puffnstuff.com", phone:"813.476.3781", photo:"https://puffnstuff.com/_astro/Amy-kensinger.BZwc8O_V.jpg"},
+  {name:"Jessica Wedinger", role:"Special Event Coordinator, Orlando", email:"jessicaw@puffnstuff.com", phone:"904.387.1955", photo:"https://puffnstuff.com/_astro/Jessica-Wedinger.DU71Vv0c.jpg"},
+  {name:"Sydney Richardson", role:"Special Event Coordinator", email:"sydney@puffnstuff.com", phone:"407.629.4342", photo:"https://puffnstuff.com/_astro/Sydney-Richardson.Dg36O5w4.jpg"},
+  {name:"Trinity Torres", role:"Special Event Coordinator", email:"trinity@puffnstuff.com", phone:"", photo:"https://puffnstuff.com/_astro/trinity.yLefTDl0.jpg"},
+  {name:"Savannah Torres", role:"Special Event Coordinator", email:"savannaht@puffnstuff.com", phone:"", photo:"https://puffnstuff.com/_astro/savannah.CevaVEWn.jpg"},
+  {name:"Heather Gustafson", role:"Special Event Coordinator", email:"heatherg@puffnstuff.com", phone:"", photo:"https://puffnstuff.com/_astro/heather.Dsa40uem.jpg"},
+  {name:"Paloma Roca-Rey", role:"Special Event Coordinator", email:"paloma@puffnstuff.com", phone:"813.575.3072", photo:"https://puffnstuff.com/_astro/paloma-image.X4MEqJpI.webp"}
+];
+
+function plannerOptions(sel){
+  return `<option value="">— Select planner —</option>`+
+    PLANNERS.map((pl,i)=>`<option value="${i}"${String(sel)===String(i)?" selected":""}>${esc(pl.name)}${pl.role?" — "+esc(pl.role):""}</option>`).join("");
+}
+function plannerPreview(i){
+  if(i==null||i==="") return "";
+  const pl=PLANNERS[i]; if(!pl) return "";
+  return `<img src="${pl.photo}" alt="" style="width:56px;height:56px;border-radius:50%;object-fit:cover;background:#eee" onerror="this.style.visibility='hidden'">`+
+    `<div style="font-size:13px;line-height:1.35">`+
+      `<div style="font-weight:600">${esc(pl.name)}</div>`+
+      `<div style="color:#666">${esc(pl.role||"")}</div>`+
+      `<div style="color:#666">${esc(pl.email||"")}${pl.phone?" · "+esc(pl.phone):""}</div>`+
+    `</div>`;
+}
+
 function render(p){
   // meta panel
   let html=`<div class="meta">
@@ -382,14 +418,14 @@ function render(p){
 
   // review sections
   const SECT=["passed","salad","entree","station","dessert"];
-  const labels={passed:"Passed Hors d'Oeuvres",salad:"Salads / Starters",entree:"Entr\u00e9es / Mains",station:"Stations",dessert:"Desserts"};
+  const labels={passed:"Hors d'Oeuvres",salad:"Salads / Starters",entree:"Entr\u00e9es / Mains",station:"Stations",dessert:"Desserts"};
   if(!p.titles) p.titles=Object.assign({},labels);
   renderReview(p);
 }
 
 function renderReview(p){
   const SECT=["passed","salad","entree","station","dessert"];
-  const labels={passed:"Passed Hors d'Oeuvres",salad:"Salads / Starters",entree:"Entr\u00e9es / Mains",station:"Stations",dessert:"Desserts"};
+  const labels={passed:"Hors d'Oeuvres",salad:"Salads / Starters",entree:"Entr\u00e9es / Mains",station:"Stations",dessert:"Desserts"};
   let r="";
   for(const b of SECT){
     const items=p.sections[b];
@@ -422,6 +458,13 @@ function renderReview(p){
     });
     r+=`</div>`;
   }
+  r+=`<div class="planner-pick" style="margin-top:18px;padding-top:14px;border-top:1px solid #e5e2dc">
+    <label for="plsel" style="display:block;font-weight:600;margin-bottom:6px">Planner for this proposal</label>
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+      <select id="plsel" style="padding:8px 10px;font-size:15px;min-width:260px">${plannerOptions(p.planner)}</select>
+      <div id="plprev" style="display:flex;gap:10px;align-items:center;min-height:56px">${plannerPreview(p.planner)}</div>
+    </div>
+  </div>`;
   r+=`<div class="actions">
     <button id="dl">Download CSV</button>
     <button class="ghost" id="reset">Clear</button>
@@ -482,10 +525,19 @@ function wireReview(p){
       if(dragFrom!==null){ moveItem(p,dragFrom,dragIdx,toB); dragFrom=null; renderReview(p); }
     });
   });
+  // planner picker
+  const plsel=$("#plsel");
+  if(plsel){
+    plsel.addEventListener("change",e=>{
+      p.planner = e.target.value===""?null:+e.target.value;
+      $("#plprev").innerHTML=plannerPreview(p.planner);
+    });
+    plsel.addEventListener("click",e=>e.stopPropagation());
+  }
   $("#dl").addEventListener("click",()=>download(p));
   $("#reset").addEventListener("click",()=>{location.reload()});
 }
-function labelFor(b){return {passed:"Passed Hors d'Oeuvres",salad:"Salads / Starters",entree:"Entr\u00e9es / Mains",station:"Stations",dessert:"Desserts"}[b];}
+function labelFor(b){return {passed:"Hors d'Oeuvres",salad:"Salads / Starters",entree:"Entr\u00e9es / Mains",station:"Stations",dessert:"Desserts"}[b];}
 
 function kept(p,b){return p.sections[b].filter((it,i)=>it.keep && i<CAPS[b]);}
 
@@ -497,7 +549,13 @@ function buildRow(p){
   // date + first/last time if present
   if(p.meta.times.length>=2) row.event_date_time=`${p.meta.date}\n${p.meta.times[2]||p.meta.times[0]} - ${p.meta.times[3]||p.meta.times[p.meta.times.length-1]}`;
   else row.event_date_time=p.meta.date;
-  row.sales_contact=p.meta.rep;           // planner_contact left blank -> needs lookup
+  row.sales_contact=p.meta.rep;
+  // planner_contact + headshot from the picker selection
+  if(p.planner!=null && PLANNERS[p.planner]){
+    const pl=PLANNERS[p.planner];
+    row.planner_contact=[pl.name, pl.role, pl.email, pl.phone].filter(Boolean).join("\n");
+    row.planner_headshot_url=pl.photo||"";
+  }
   const T=p.titles||{};
   // menu section 1 = passed (fall back to first non-empty), using the (possibly renamed) title
   const s1b = kept(p,"passed").length?"passed":(kept(p,"salad").length?"salad":"entree");
