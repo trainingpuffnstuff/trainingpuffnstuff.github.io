@@ -187,7 +187,7 @@ const SECTION_MAP = [
   [/entree|course ii|plated dinner|dinner buffet|brunch buffet|buffet/i,"entree"],
 ];
 // items whose name marks them as dessert even with no dessert header
-const DESSERT_NAME = /dessert shooter|macaron|fruit tart|cheesecake|molten cake|brownie|bread pudding|french toast/i;
+const DESSERT_NAME = /dessert shooter|fruit tart|molten cake|bread pudding|french toast|\b(cake|brownie|cookie|macaron|cannoli|gelato|affogato|tart|cupcake|s'?mores|mousse|cheesecake|pie|parfait|sundae|sorbet|dessert|churro|donut|doughnut|beignet|truffle|pastry|eclair)\b/i;
 // items whose name marks them as a salad/starter even under a buffet header
 const SALAD_NAME = /\bsalad\b|caprese|crudite/i;
 // lines that are never client menu items (inclusions, staff, beverages, etc.)
@@ -455,7 +455,7 @@ const MENU_PHOTOS = [
   {slug:"okey-dokey-artichokey",name:"Okey Dokey Artichokey",aliases:["Okey Dokey Artichokey","Spinach Artichoke Dip","Artichoke Dip"]},
   {slug:"charcuterie",name:"Charcuterie",aliases:["Charcuterie","Charcuterie Board","Charcuterie Display","Grazing"]},
   {slug:"cheese-display",name:"Cheese Display",aliases:["Cheese Display","Cheese Board","Artisanal Cheese"]},
-  {slug:"black-bleu-meatball",name:"Black & Bleu Meatball",aliases:["Black & Bleu Meatball","Black and Bleu Meatball","Meatball"]},
+  {slug:"black-bleu-meatball",name:"Black & Bleu Meatball",aliases:["Black & Bleu Meatball","Black and Bleu Meatball","Black Bleu Meatball"]},
   {slug:"mini-lobster-roll",name:"Mini Lobster Roll",aliases:["Mini Lobster Roll","Lobster Roll"]},
   {slug:"mushroom-taleggio-arancini",name:"Mushroom & Taleggio Arancini",aliases:["Mushroom & Taleggio Arancini","Mushroom Arancini","Arancini"]},
   {slug:"seasonal-bruschetta-fall-winter",name:"Seasonal Bruschetta (Fall/Winter)",aliases:["Seasonal Bruschetta","Bruschetta","Fall Winter Bruschetta"]},
@@ -463,16 +463,16 @@ const MENU_PHOTOS = [
   {slug:"chips-dips-platter",name:"Chips & Dips Platter",aliases:["Chips & Dips","Chips and Dips"]},
   {slug:"crudites",name:"Crudites",aliases:["Crudites","Crudite","Crudite Platter","Vegetable Crudite"]},
   {slug:"deviled-eggs-trio",name:"Deviled Eggs Trio",aliases:["Deviled Eggs Trio","Deviled Egg Trio","Deviled Eggs"]},
-  {slug:"shrimp-cocktail",name:"Shrimp Cocktail",aliases:["Shrimp Cocktail","Shrimp Cocktail Shooter"]},
-  {slug:"smoked-salmon",name:"Smoked Salmon",aliases:["Smoked Salmon","Honey Smoked Salmon"]},
+  {slug:"shrimp-cocktail",name:"Shrimp Cocktail Platter",aliases:["Shrimp Cocktail Platter","Shrimp Cocktail Display","Jumbo Shrimp Cocktail"]},
+  {slug:"smoked-salmon",name:"Smoked Salmon Platter",aliases:["Smoked Salmon Platter","Smoked Salmon Display","Honey Smoked Salmon Platter"]},
   {slug:"tea-sandwiches-platter",name:"Tea Sandwiches Platter",aliases:["Tea Sandwiches","Tea Sandwich"]},
-  {slug:"traditional-cheese-display",name:"Traditional Cheese Display",aliases:["Traditional Cheese","Cheese Display","Cheese"]},
+  {slug:"traditional-cheese-display",name:"Traditional Cheese Display",aliases:["Traditional Cheese","Traditional Cheese Display"]},
   {slug:"morning-breads-danish-muffins",name:"Morning Breads, Danish & Muffins",aliases:["Assorted Pastries","Pastries & Croissants","Pastries","Danish","Muffins"]},
   {slug:"french-toast-bread-pudding",name:"French Toast Bread Pudding",aliases:["French Toast Bread Pudding"]},
   {slug:"fresh-house-blended-juices",name:"Fresh House Blended Juices",aliases:["Fresh House Blended Juices","Fresh Juice","Juice Blends","Juice"]},
   {slug:"breakfast-sandwich",name:"Breakfast Sandwich",aliases:["Breakfast Sandwich","Croissant Breakfast Sandwich","Bagel Breakfast Sandwich"]},
   {slug:"frittata",name:"Frittata",aliases:["Frittata"]},
-  {slug:"fresh-fruit-display",name:"Fresh Fruit Display",aliases:["Fresh Fruit Display","Fruit Display","Fresh Fruit Salad","Seasonal Fruit"]},
+  {slug:"fresh-fruit-display",name:"Fresh Fruit Display",aliases:["Fresh Fruit Display","Fruit Display","Seasonal Fruit"]},
   {slug:"mixed-berry-parfait",name:"Mixed Berry Parfait",aliases:["Parfait","Yogurt Parfait","Mixed Berry Parfait","Parfaits"]},
   {slug:"applewood-smoked-bacon",name:"Applewood Smoked Bacon",aliases:["Applewood Smoked Bacon","Bacon"]},
   {slug:"grilled-ham",name:"Grilled Ham",aliases:["Grilled Ham"]},
@@ -556,8 +556,17 @@ const _menuFb = role => (MENU_PHOTOS.find(p=>p.fallback===role)||{}).slug || nul
 function menuNorm(s){ return " "+String(s||"").toLowerCase().replace(/[^a-z0-9]+/g," ").replace(/\s+/g," ").trim()+" "; }
 // best photo for a menu item: longest alias phrase that appears (whole-word) in the item, else a section fallback
 function photoForItem(name, sectionTitle){
-  const it=menuNorm(name); let best=null, bestLen=0;
+  const it=menuNorm(name);
+  // seasonal bruschetta: pick the photo by the season word in the item (either word order)
+  if(it.indexOf(" bruschetta ")>=0){
+    if(/ spring | summer /.test(it)) return "seasonal-bruschetta-spring-summer";
+    if(/ fall | winter | autumn /.test(it)) return "seasonal-bruschetta-fall-winter";
+  }
+  // individual servings (shooters, cups, singles) must never grab a platter/display/board photo
+  const individual = / (shooter|shooters|shot|cup|cups|individual|single|solo) /.test(it);
+  let best=null, bestLen=0;
   for(const p of MENU_PHOTOS){
+    if(individual && /platter|display|board|collection|tray|wall/i.test(p.name)) continue;
     for(const a of p.aliases){
       const an=menuNorm(a);
       if(an.length>3 && it.indexOf(an)>=0 && an.length>bestLen){ best=p.slug; bestLen=an.length; }
@@ -565,9 +574,14 @@ function photoForItem(name, sectionTitle){
   }
   if(best) return best;
   const st=(sectionTitle||"").toLowerCase();
-  if(/salad/.test(st)) return _menuFb("salad");
-  if(/sandwich|handheld|light fare/.test(st)) return _menuFb("sandwich");
-  if(/entr|main|\bland\b|\bsea\b|\bgarden\b|station|dinner|carv|chef|buffet/.test(st)) return _menuFb("entree");
+  const both=(name||"")+" "+st;
+  // desserts never fall back to a savory sides photo
+  if(DESSERT_NAME.test(name||"") || /dessert|sweet/.test(st)) return null;
+  // any salad-named item (any section) → generic salad buffet
+  if(SALAD_NAME.test(name||"") || /salad/.test(st)) return _menuFb("salad");
+  if(/sandwich|slider|handheld|light fare/i.test(both)) return _menuFb("sandwich");
+  // only genuine sides / accompaniments get the sides-display photo
+  if(/\bside\b|sides|accompaniment|enhancement|family.?style/i.test(both)) return _menuFb("entree");
   return null;
 }
 // up to 3 hero photos for a section = photos of the top kept items (deduped)
