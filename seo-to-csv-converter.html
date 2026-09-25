@@ -490,8 +490,9 @@ const MENU_PHOTOS = [
   {slug:"black-bleu-meatball",name:"Black & Bleu Meatball",aliases:["Black & Bleu Meatball","Black and Bleu Meatball","Black Bleu Meatball"]},
   {slug:"mini-lobster-roll",name:"Mini Lobster Roll",aliases:["Mini Lobster Roll","Lobster Roll"]},
   {slug:"mushroom-taleggio-arancini",name:"Mushroom & Taleggio Arancini",aliases:["Mushroom & Taleggio Arancini","Mushroom Arancini","Arancini"]},
-  {slug:"seasonal-bruschetta-fall-winter",name:"Seasonal Bruschetta (Fall/Winter)",aliases:["Seasonal Bruschetta","Bruschetta","Fall Winter Bruschetta"]},
-  {slug:"seasonal-bruschetta-spring-summer",name:"Seasonal Bruschetta (Spring/Summer)",aliases:["Seasonal Bruschetta","Bruschetta","Spring Summer Bruschetta"]},
+  {slug:"seasonal-bruschetta-fall-winter",name:"Seasonal Bruschetta (Fall/Winter)",aliases:["Fall Winter Bruschetta"]},
+  {slug:"seasonal-bruschetta-spring-summer",name:"Seasonal Bruschetta (Spring/Summer)",aliases:["Spring Summer Bruschetta"]},
+  {slug:"fruit-cheese-display",name:"Traditional Fruit & Cheese Display",aliases:["Traditional Fruit and Cheese","Traditional Fruit & Cheese","Fruit and Cheese Display","Fruit & Cheese Display","Fruit and Cheese","Fruit & Cheese"]},
   {slug:"chips-dips-platter",name:"Chips & Dips Platter",aliases:["Chips & Dips","Chips and Dips"]},
   {slug:"crudites",name:"Crudites",aliases:["Crudites","Crudite","Crudite Platter","Vegetable Crudite"]},
   {slug:"deviled-eggs-trio",name:"Deviled Eggs Trio",aliases:["Deviled Eggs Trio","Deviled Egg Trio","Deviled Eggs"]},
@@ -542,6 +543,24 @@ const MENU_PHOTOS = [
   {slug:"penne-alla-vodka",name:"Penne Alla Vodka",aliases:["Penne Alla Vodka","Penne Vodka","Penne"]},
   {slug:"turkey-reuben",name:"Roast Turkey Reuben",aliases:["Roast Turkey Reuben","Turkey Reuben","Reuben"]},
   {slug:"seared-scallops",name:"Seared Jumbo Scallops",aliases:["Seared Jumbo Scallops","Jumbo Scallops","Scallop"]},
+  {slug:"bacon-scallop",name:"Bacon Scallop",aliases:["Bacon Wrapped Scallop","Bacon Braised Scallop","Bacon Jam Scallop","Maple Bacon Scallop","Scallop and Bacon","Scallop with Bacon","Bacon Scallop"]},
+  {slug:"dessert-shooter",name:"Black Forest Shooter",aliases:["Black Forest Shooter","Black Forest Cake Shooter","Chocolate Cherry Shooter","Black Forest","Dessert Shooter","Dessert Shooters"]},
+  {slug:"petite-potato",name:"Petite Twice-Baked Potato",aliases:["Petite Twice Baked Potato","Twice Baked Potato","Petite Potato","Stuffed Petite Potato","Loaded Petite Potato","Duchess Potato","Mini Baked Potato"]},
+  {slug:"bagel-bar",name:"Bagel Bar",aliases:["Bagel Bar","Bagel Display","Bagel Station","Assorted Bagels","Bagels & Spreads","Bagels and Spreads"]},
+  {slug:"crab-cake-benedict",name:"Crab Cake Benedict",aliases:["Crab Cake Benedict","Crab Cake Eggs Benedict","Crab Benedict"]},
+  {slug:"flatbread",name:"Sun-Dried Tomato Flatbread",aliases:["Sun-Dried Tomato Flatbread","Sundried Tomato Flatbread","Tomato Flatbread","Margherita Flatbread","Artisan Flatbread","Flatbread"]},
+  {slug:"chicken-satay",name:"Chicken Satay",aliases:["Chicken Satay","Thai Chicken Satay","Satay Skewer","Satay"]},
+  {slug:"chicken-waffle",name:"Chicken & Waffle",aliases:["Chicken & Waffle","Chicken and Waffle","Chicken & Waffles","Chicken Waffle","Chicken & Waffles Florida Style"]},
+  {slug:"butternut-ravioli",name:"Butternut Squash Ravioli",aliases:["Butternut Squash Ravioli","Squash Ravioli","Butternut Ravioli","Pumpkin Ravioli","Ravioli"]},
+  {slug:"taco-station",name:"Taco Station",aliases:["Taco Station","Taco Bar","Build Your Own Taco","Street Taco","Taco Display"]},
+  {slug:"steak-skewer",name:"Steak Skewer",aliases:["Steak Skewer","Chimichurri Steak","Beef Skewer","Steak Brochette","Churrasco"]},
+  {slug:"mango-margarita",name:"Mango Chili Margarita",aliases:["Mango Chili Margarita","Mango Chile Margarita","Spicy Mango Margarita","Chili Mango Margarita","Mango Margarita"]},
+  {slug:"risotto-cake",name:"Crispy Risotto Cake",aliases:["Crispy Risotto Cake","Risotto Cake","Parmesan Risotto Cake","Arancini Cake"]},
+  {slug:"chicken-puttanesca",name:"Chicken Puttanesca",aliases:["Chicken Puttanesca","Puttanesca"]},
+  {slug:"molten-cake",name:"Molten Chocolate Cake",aliases:["Molten Chocolate Cake","Molten Cake","Chocolate Molten Cake","Chocolate Lava Cake","Lava Cake","S'mores Molten Cake"]},
+  {slug:"cannoli-bar",name:"Cannoli Bar",aliases:["Cannoli Bar","Cannoli Display","Cannoli Station","Assorted Cannoli"]},
+  {slug:"chili-chips",name:"Chili Dusted Chips",aliases:["Chili Dusted Chips","Chili Chips","Chili Lime Chips","Spiced Chips","House-Made Chips"]},
+  {slug:"brownie-shooter",name:"Brownie Shooter",aliases:["Brownie Shooter","Chocolate Brownie Shooter","Brownie Cup"]},
   {slug:"tomahawk",name:"Tomahawk",aliases:["Tomahawk","Tomahawk Steak"]},
   {slug:"short-rib-lettuce-wrap",name:"Short Rib Lettuce Wrap",aliases:["Short Rib Lettuce Wrap","Lettuce Wrap"]},
   {slug:"tofu-scallop",name:"Tofu Scallops",aliases:["Tofu Scallops","Tofu Scallop","Tofu"]},
@@ -561,18 +580,18 @@ const MENU_PHOTOS = [
   {slug:"beef-wellington",name:"Beef Wellington",aliases:["Beef Wellington","Wellington"]},
   {slug:"cauliflower-steak",name:"Cauliflower Steak",aliases:["Cauliflower Steak","Roasted Cauliflower Steak"]},
   {slug:"cobb-salad",name:"Cobb Salad",aliases:["Cobb Salad"]},
-  {slug:"roasted-squash-salad",name:"Roasted Squash Salad",aliases:["Roasted Squash Salad","Squash Salad","Autumn Squash Salad"]},
+  {slug:"roasted-squash-salad",name:"Roasted Squash Salad",aliases:["Roasted Squash Salad","Squash Salad","Autumn Squash Salad","Winter Squash Salad","Harvest Salad","Butternut Squash Salad"]},
   {slug:"tomato-watermelon-feta-salad",name:"Tomato, Watermelon & Feta Salad",aliases:["Tomato, Watermelon & Feta Salad","Watermelon Feta Salad","Watermelon & Feta"]},
   {slug:"duck-flatbread",name:"Duck Flatbread",aliases:["Duck Flatbread","Duck Confit Flatbread"]},
   {slug:"herb-de-provence-chicken",name:"Herb de Provence Chicken",aliases:["Herb de Provence Chicken","Herbs de Provence Chicken","Provence Chicken"]},
   {slug:"tuna-crudo",name:"Tuna Crudo",aliases:["Tuna Crudo"]},
   {slug:"hearts-of-palm-cake",name:"Hearts of Palm Cake",aliases:["Hearts of Palm Cake","Hearts of Palm"]},
   {slug:"sushi-wall",name:"Sushi Wall",aliases:["Sushi Wall","Sushi Display","Sushi Station"]},
-  {slug:"short-rib-eggs-benedict",name:"Short Rib Eggs Benedict",aliases:["Short Rib Eggs Benedict","Eggs Benedict","Benedict"]},
+  {slug:"short-rib-eggs-benedict",name:"Short Rib Eggs Benedict",aliases:["Short Rib Eggs Benedict","Short Rib Benedict","Braised Beef Benedict","Eggs Benedict","Benedict"]},
   {slug:"omelette",name:"Omelette Station",aliases:["Omelette","Omelette Station","Made to Order Omelette"]},
   {slug:"acai-bowl",name:"Acai Bowl",aliases:["Acai Bowl","Açaí Bowl","Acai"]},
   {slug:"gelato-cart",name:"Gelato Cart",aliases:["Gelato Cart","Gelato","Gelato Station"]},
-  {slug:"mini-cupcakes",name:"Mini Cupcakes",aliases:["Mini Cupcakes","Cupcakes"]},
+  {slug:"mini-cupcakes",name:"Mini Cupcakes",aliases:["Mini Cupcakes","Mini Cupcake","Cupcake Platter","Assorted Cupcakes","Cupcakes"]},
   {slug:"apple-cranberry-tart",name:"Apple Cranberry Tart",aliases:["Apple Cranberry Tart","Cranberry Tart"]},
   {slug:"affogato",name:"Affogato",aliases:["Affogato"]},
   {slug:"walking-cannoli",name:"Walking Cannoli",aliases:["Walking Cannoli","Cannoli"]},
@@ -587,12 +606,15 @@ const MENU_PHOTOS = [
 const _menuFb = role => (MENU_PHOTOS.find(p=>p.fallback===role)||{}).slug || null;
 function menuNorm(s){ return " "+String(s||"").toLowerCase().replace(/[^a-z0-9]+/g," ").replace(/\s+/g," ").trim()+" "; }
 // best photo for a menu item: longest alias phrase that appears (whole-word) in the item, else a section fallback
-function photoForItem(name, sectionTitle){
+function photoForItem(name, sectionTitle, desc){
   const it=menuNorm(name);
   // seasonal bruschetta: pick the photo by the season word in the item (either word order)
   if(it.indexOf(" bruschetta ")>=0){
-    if(/ spring | summer /.test(it)) return "seasonal-bruschetta-spring-summer";
-    if(/ fall | winter | autumn /.test(it)) return "seasonal-bruschetta-fall-winter";
+    // pick by season word OR signature topping; if neither, skip rather than guess
+    const bt=menuNorm((name||"")+" "+(desc||""));
+    if(/ spring | summer |tomato|watermelon|peach|corn|berr|strawberr|burrata|heirloom|basil/.test(bt)) return "seasonal-bruschetta-spring-summer";
+    if(/ fall | winter | autumn |squash|butternut|pear|apple|cranberr|\bfig\b|mushroom|pumpkin|brussels/.test(bt)) return "seasonal-bruschetta-fall-winter";
+    return null;
   }
   // individual servings (shooters, cups, singles) must never grab a platter/display/board photo
   const individual = / (shooter|shooters|shot|cup|cups|individual|single|solo) /.test(it);
@@ -611,7 +633,7 @@ function photoForItem(name, sectionTitle){
   if(DESSERT_NAME.test(name||"") || /dessert|sweet/.test(st)) return null;
   // any salad-named item (any section) → generic salad buffet
   if(SALAD_NAME.test(name||"") || /salad/.test(st)) return _menuFb("salad");
-  if(/sandwich|slider|handheld|light fare/i.test(both)) return _menuFb("sandwich");
+  if(/sandwich|handheld|light fare/i.test(both)) return _menuFb("sandwich");
   // only genuine sides / accompaniments get the sides-display photo
   if(/\bside\b|sides|accompaniment|enhancement|family.?style/i.test(both)) return _menuFb("entree");
   return null;
@@ -621,7 +643,7 @@ function sectionHeroes(sec){
   const out=[], seen=new Set();
   for(const it of (sec.items||[])){
     if(!it.keep) continue;
-    const slug=photoForItem(it.name, sec.title);
+    const slug=photoForItem(it.name, sec.title, it.desc);
     if(slug && !seen.has(slug)){ seen.add(slug); out.push(slug); }
     if(out.length>=3) break;
   }
@@ -670,7 +692,7 @@ function renderReview(p){
     sec.items.forEach((it,ii)=>{
       const over = it.keep && (shown++ >= SEC_MAX);
       const flagged=it.flags&&it.flags.length;
-      const ph = it.keep ? photoForItem(it.name, sec.title) : null;
+      const ph = it.keep ? photoForItem(it.name, sec.title, it.desc) : null;
       r+=`<div class="row ${it.keep?'':'off'} ${over?'cut':''}" data-si="${si}" data-ii="${ii}">
         <input type="checkbox" ${it.keep?'checked':''} title="Include in proposal">
         <span class="ord"><button type="button" data-mv="up" title="Move up (top items become the section photos)">▲</button><button type="button" data-mv="dn" title="Move down">▼</button></span>
