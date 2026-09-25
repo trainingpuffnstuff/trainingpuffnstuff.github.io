@@ -396,6 +396,38 @@ function parse(lines){
     out.meta.wine = (parts[2]||"").trim();
   }
 
+  // --- beverage section (captured from the SEO, editable in review) ---
+  (function(){
+    const BEV_ITEM=/^(mimosa bar|bloody mary bar|soft drink bar|soft drinks|iced tea|sweet tea|unsweet(?:ened)? tea|individual juices|juice bar|assorted juices|water bar|sparkling water|coffee(?: bar| service| station)?|hot coffee|iced coffee|cold brew|espresso(?: bar| martini)?|hot tea|full bar|premium full bar|beer(?: & | and )?wine|wine service|house wine|champagne(?: toast| service)?|prosecco|signature (?:cocktail|drink|mocktail)s?|specialty (?:cocktail|mocktail)s?|mocktail bar|craft cocktails?|sangria(?: bar)?|punch|spiked lemonade|lemonade(?: bar)?|hot chocolate(?: bar)?|hot cocoa|apple cider|cider bar)\b/i;
+    const BEV_NOTE=/^(set ?up|client to|pns to|includes?|presented|served|black chafer|display|carafes|pitchers|two way|delivered|linen|appropriate|variety of soft|to provide|to bring)/i;
+    const items=[]; const seen=new Set();
+    for(let i=0;i<lines.length;i++){
+      const l=lines[i];
+      if(/Terms & Conditions|Terms And Conditions|SERVICE PERSONNEL|INVESTMENT BREAKDOWN/i.test(l)) break;
+      if(!BEV_ITEM.test(l) || l.length>48) continue;
+      const name=l.replace(/\s*[:–-].*$/,"").replace(/\s*\(\d+\)\s*$/,"").trim();
+      const key=name.toLowerCase();
+      if(!name || seen.has(key)) continue; seen.add(key);
+      let desc=[];
+      for(let j=i+1;j<lines.length && desc.length<2;j++){
+        const nx=lines[j];
+        if(/^\(\d+\)/.test(nx)||BEV_ITEM.test(nx)||/Menu & Inclusions|Beverages\s*:|^BEVERAGES|Page \d+ of|SPECIAL EVENT ORDER|ADDITIONAL SERVICES|Puff ['’]?n Stuff Catering/i.test(nx)) break;
+        if(BEV_NOTE.test(nx)) continue;
+        if(/^[a-z]/.test(nx)) continue;   // wrapped note/continuation fragment, not client copy
+        if(DIET.test(nx) && nx.length<40) continue;
+        desc.push(nx);
+      }
+      items.push({ name, desc:desc.join(" "), tags:"", flags:[], keep:true });
+    }
+    // lead with the bar package when we know its type
+    if(out.meta.bar_type){
+      const bits=[out.meta.spirits,out.meta.wine,out.meta.beer].filter(Boolean).join("; ");
+      const label=out.meta.bar_type==="Full Bar"?"Premium Full Bar":out.meta.bar_type;
+      if(!seen.has(label.toLowerCase())) items.unshift({ name:label, desc:bits, tags:"", flags:[], keep:true });
+    }
+    if(items.length) out.menuSections.push({ title:"Bar & Beverage", items, bev:true });
+  })();
+
   // multi-menu (extreme) detection: one menu prints one "Menu & Inclusions :" subtotal
   const menuBlocks=(joined.match(/Menu\s*&\s*Inclusions\s*:/gi)||[]).length;
   out.meta.menu_count=menuBlocks;
