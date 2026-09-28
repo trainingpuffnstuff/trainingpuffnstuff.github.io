@@ -538,7 +538,7 @@ const MENU_PHOTOS = [
     "Rice Pilaf","Wild Rice","Yellow Rice","Coconut Rice","Jasmine Rice","Basmati Rice","Saffron Rice",
     "Fondant Potatoes","Smashed Potatoes","Potato Puree","Duchess Potatoes",
     "Chive Mash","Garlic Mashed Potatoes","Yukon Mashed Potatoes",
-    "Charred Broccoli","Roasted Broccoli","Broccolini","Charred Broccolini",
+    "Charred Broccoli","Roasted Broccoli",
     "Grilled Asparagus","Roasted Asparagus",
     "Glazed Carrots","Honey Glazed Carrots","Roasted Carrots",
     "Farro Pilaf","Quinoa Pilaf","Grain Pilaf","Creamed Spinach","Grilled Corn","Street Corn","Elote"
@@ -612,7 +612,6 @@ const MENU_PHOTOS = [
   {slug:"cuban-cigars",name:"Cuban Cigars",aliases:["Cuban Cigars","Cuban Cigar","Cigars"]},
   {slug:"grain-bowl",name:"Build-Your-Own Bowl",aliases:["Build-Your-Own Bowl","Build Your Own Salad Bowl","Grain Bowl","Salad Bowl"]},
   {slug:"espresso-martini",name:"Espresso Martini",aliases:["Espresso Martini"]},
-  {slug:"jerk-chicken",name:"Grilled Caribbean Jerk Chicken",aliases:["Grilled Caribbean Jerk Chicken","Caribbean Jerk Chicken","Jerk Chicken"]},
   {slug:"champagne-chicken",name:"Pan Roasted Frenched Chicken Champagne",aliases:["Pan Roasted Frenched Chicken Champagne","Frenched Chicken Champagne","Champagne Chicken"]},
   {slug:"rice-crispy-station",name:"Rice Crispy Bar Station",aliases:["Rice Crispy Bar Station","Rice Crispy Station","Rice Crispy Treat"]},
   {slug:"smores-station",name:"S'mores Station",aliases:["S'mores Station","Smores Station","S'mores","Smores"]},
@@ -679,8 +678,21 @@ const MENU_PHOTOS = [
   {slug:"chickpea-fritter",name:"Chickpea Fritter",aliases:["Chickpea Fritter","Chickpea Fritters"]},
   {slug:"berries-greens-starter",name:"Berries & Greens",aliases:["Berries & Greens", "Berries and Greens Starter"]},
   {slug:"whipped-yukon-potatoes",name:"Whipped Yukon Gold Potatoes",aliases:["Whipped Yukon Gold Potatoes", "Whipped Yukon Potatoes", "Whipped Potatoes"]},
-  {slug:"oven-roasted-broccolini",name:"Oven Roasted Broccolini",aliases:["Oven Roasted Broccolini", "Roasted Broccolini"]},
+  {slug:"oven-roasted-broccolini",name:"Oven Roasted Broccolini",aliases:["Oven Roasted Broccolini","Roasted Broccolini","Charred Broccolini"]},
   {slug:"creamy-polenta",name:"Creamy Polenta",aliases:["Creamy Polenta", "Polenta"]},
+  {slug:"roast-chicken-quarter",name:"Roast Chicken Quarter",aliases:["Roast Chicken Quarter"]},
+  {slug:"smoked-farro",name:"Smoked Farro",aliases:["Smoked Farro"]},
+  {slug:"romanesco",name:"Romanesco",aliases:["Romanesco"]},
+  {slug:"breakfast-sausage-links",name:"Breakfast Sausage Links",aliases:["Breakfast Sausage Links", "Breakfast Sausage", "Sausage Links"]},
+  {slug:"whipped-feta",name:"Whipped Feta",aliases:["Whipped Feta"]},
+  {slug:"mango-pepper-jam",name:"Mango Pepper Jam",aliases:["Mango Pepper Jam"]},
+  {slug:"fig-jam",name:"Fig Jam",aliases:["Fig Jam"]},
+  {slug:"whole-chicken",name:"Whole Chicken",aliases:["Whole Chicken"]},
+  {slug:"ny-strip",name:"NY Strip Steak",aliases:["NY Strip Steak", "New York Strip Steak", "New York Strip"]},
+  {slug:"hot-muffaletta",name:"Hot Muffaletta",aliases:["Hot Muffaletta", "Muffaletta", "Muffuletta"]},
+  {slug:"sauteed-mushrooms",name:"Sautéed Mushrooms",aliases:["Sautéed Mushrooms", "Sauteed Mushrooms"]},
+  {slug:"rainbow-chard",name:"Sautéed Rainbow Chard",aliases:["Sautéed Rainbow Chard", "Rainbow Chard"]},
+  {slug:"farro-rice-quinoa",name:"Farro, Brown Rice & Quinoa Blend",aliases:["Farro, Brown Rice & Quinoa Blend", "Farro Brown Rice Quinoa"]},
   {slug:"omelette",name:"Omelette Station",aliases:["Omelette","Omelet","Omelette Station","Omelet Station","Made to Order Omelette"]},
   {slug:"acai-bowl",name:"Acai Bowl",aliases:["Acai Bowl","Açaí Bowl","Acai"]},
   {slug:"gelato-cart",name:"Gelato Cart",aliases:["Gelato Cart","Gelato","Gelato Station"]},
@@ -699,8 +711,11 @@ const MENU_PHOTOS = [
 const _menuFb = role => (MENU_PHOTOS.find(p=>p.fallback===role)||{}).slug || null;
 function menuNorm(s){ return " "+String(s||"").toLowerCase().replace(/[^a-z0-9]+/g," ").replace(/\s+/g," ").trim()+" "; }
 // best photo for a menu item: longest alias phrase that appears (whole-word) in the item, else a section fallback
+const MENU_NO_PHOTO=["greek salad with shrimp"];
 function photoForItem(name, sectionTitle, desc){
   const it=menuNorm(name);
+  // items where the closest photo would misrepresent the dish (e.g. missing the protein) — show none
+  if(MENU_NO_PHOTO.indexOf(it.trim())>=0) return null;
   // seasonal bruschetta: pick the photo by the season word in the item (either word order)
   if(it.indexOf(" bruschetta ")>=0){
     // pick by season word OR signature topping; if neither, skip rather than guess
