@@ -536,7 +536,7 @@ const MENU_PHOTOS = [
   {slug:"pie-in-a-jar",name:"Pie in a Jar",aliases:["Pie in a Jar","Apple Pie in a Jar","Banana Pudding Jar"]},
   {slug:"potato-chips",name:"Potato Chips",aliases:["Potato Chips","Fresh Potato Chips","Chips"]},
   {slug:"sides-display",name:"Sides Display",fallback:"entree",aliases:[
-    "Fire Roasted Vegetables","Roasted Vegetables","Roasted Seasonal Vegetables","Char Grilled Vegetables","Grilled Vegetables","Seasonal Vegetables","Roasted Root Vegetables",
+    "Fire Roasted Vegetables","Roasted Vegetables","Roasted Seasonal Vegetables","Char Grilled Vegetables","Grilled Vegetables","Seasonal Vegetables",
     "Rice Pilaf","Wild Rice","Yellow Rice","Coconut Rice","Jasmine Rice","Basmati Rice","Saffron Rice",
     "Fondant Potatoes","Smashed Potatoes","Potato Puree","Duchess Potatoes",
     "Chive Mash","Garlic Mashed Potatoes","Yukon Mashed Potatoes",
@@ -561,7 +561,7 @@ const MENU_PHOTOS = [
   {slug:"mistletoe-margarita",name:"Mistletoe Margarita",aliases:["Mistletoe Margarita","Cranberry Margarita","Holiday Margarita","Winter Margarita","White Cranberry Margarita"]},
   {slug:"pork-loin",name:"Pork Loin",aliases:["Pork Loin","Roasted Pork Loin","Herb Roasted Pork Loin","Sliced Pork Loin"]},
   {slug:"apple-pie",name:"Apple Pie",aliases:["Classic Apple Pie","Apple Pie"]},
-  {slug:"pumpkin-chiffon-pie",name:"Pumpkin Chiffon Pie",aliases:["Pumpkin Chiffon Pie","Pumpkin Chiffon","Individual Sweet Pumpkin Pie","Sweet Pumpkin Pie","Pumpkin Pie"]},
+  {slug:"pumpkin-chiffon-pie",name:"Pumpkin Chiffon Pie",aliases:["Pumpkin Chiffon Pie","Pumpkin Chiffon","Pumpkin Pie"]},
   {slug:"turtle-cheesecake",name:"Turtle Cheesecake",aliases:["Turtle Cheesecake","Caramel Pecan Cheesecake"]},
   {slug:"pumpkin-pie-martini",name:"Pumpkin Pie Martini",aliases:["Pumpkin Pie Martini","Pumpkin Martini"]},
   {slug:"apple-cider-bourbon",name:"Apple Cider Bourbon",aliases:["Apple Cider Bourbon","Apple Cider Cocktail","Cider Bourbon"]},
@@ -639,7 +639,8 @@ const MENU_PHOTOS = [
   {slug:"cannoli-bar",name:"Cannoli Bar",aliases:["Cannoli Bar","Cannoli Display","Cannoli Station","Assorted Cannoli"]},
   {slug:"chili-chips",name:"Chili Dusted Chips",aliases:["Chili Dusted Chips","Chili Chips","Chili Lime Chips","Spiced Chips","House-Made Chips"]},
   {slug:"brownie-shooter",name:"Brownie Shooter",aliases:["Brownie Shooter","Chocolate Brownie Shooter","Brownie Cup"]},
-  {slug:"tomahawk",name:"Tomahawk",alts:["tomahawk-2"],aliases:["Tomahawk","Tomahawk Steak"]},
+  {slug:"tomahawk",name:"Tomahawk",alts:["tomahawk-2"],aliases:["Tomahawk"]},
+  {slug:"holiday-tomahawk",name:"Tomahawk Steak (Carving)",alts:["tomahawk","tomahawk-2"],aliases:["Tomahawk Steak","Chef Carved Tomahawk"]},
   {slug:"short-rib-lettuce-wrap",name:"Short Rib Lettuce Wrap",aliases:["Short Rib Lettuce Wrap","Lettuce Wrap"]},
   {slug:"tofu-scallop",name:"Tofu Scallops",aliases:["Tofu Scallops","Tofu Scallop","Tofu"]},
   {slug:"vintage-revival",name:"Vintage Revival",aliases:["Vintage Revival"]},
@@ -696,6 +697,9 @@ const MENU_PHOTOS = [
   {slug:"rainbow-chard",name:"Sautéed Rainbow Chard",aliases:["Sautéed Rainbow Chard", "Rainbow Chard"]},
   {slug:"farro-rice-quinoa",name:"Farro, Brown Rice & Quinoa Blend",aliases:["Farro, Brown Rice & Quinoa Blend", "Farro Brown Rice Quinoa"]},
   {slug:"pbj-beignet",name:"Peanut Butter & Jelly Beignet",alts:["beignets"],aliases:["Peanut Butter & Jelly Beignet","PB&J Beignet","Peanut Butter and Jelly Beignet"]},
+  {slug:"holiday-roasted-salmon",name:"Roasted Salmon",aliases:["Roasted Salmon"]},
+  {slug:"sweet-pumpkin-pies",name:"Individual Sweet Pumpkin Pies",aliases:["Individual Sweet Pumpkin Pies", "Individual Sweet Pumpkin Pie", "Sweet Pumpkin Pies", "Sweet Pumpkin Pie", "Mini Pumpkin Pies"]},
+  {slug:"maple-root-vegetables",name:"Maple Glazed Roasted Root Vegetables",aliases:["Maple Glazed Roasted Root Vegetables", "Roasted Root Vegetables", "Maple Glazed Root Vegetables"]},
   {slug:"omelette",name:"Omelette Station",aliases:["Omelette","Omelet","Omelette Station","Omelet Station","Made to Order Omelette"]},
   {slug:"acai-bowl",name:"Acai Bowl",aliases:["Acai Bowl","Açaí Bowl","Acai"]},
   {slug:"gelato-cart",name:"Gelato Cart",aliases:["Gelato Cart","Gelato","Gelato Station"]},
@@ -714,7 +718,7 @@ const MENU_PHOTOS = [
 const _menuFb = role => (MENU_PHOTOS.find(p=>p.fallback===role)||{}).slug || null;
 function menuNorm(s){ return " "+String(s||"").toLowerCase().replace(/[^a-z0-9]+/g," ").replace(/\s+/g," ").trim()+" "; }
 // best photo for a menu item: longest alias phrase that appears (whole-word) in the item, else a section fallback
-const MENU_NO_PHOTO=["caviar on housemade potato chip","greek salad with shrimp","beef tenderloin toast","pan roasted beef tenderloin","wild mushroom ravioli","short rib cube"];
+const MENU_NO_PHOTO=["caviar on housemade potato chip","greek salad with shrimp","beef tenderloin toast","pan roasted beef tenderloin","wild mushroom ravioli","short rib cube","pan roasted salmon"];
 function photoForItem(name, sectionTitle, desc){
   const it=menuNorm(name);
   // items where the closest photo would misrepresent the dish (e.g. missing the protein) — show none
