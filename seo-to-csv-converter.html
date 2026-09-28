@@ -498,7 +498,8 @@ function plannerPreview(i){
 
 // ---- menu photo catalog (curated pro shots, hosted at img/menu/) ----
 const MENU_PHOTOS = [
-  {slug:"petite-macarons",name:"Petite Macarons",aliases:["Petite Macarons","Macarons","Grown Up Macarons"]},
+  {slug:"petite-macarons",name:"Petite Macarons",aliases:["Petite Macarons","Macarons"]},
+  {slug:"grown-up-macaron",name:"Grown Up Macarons",aliases:["Grown Up Macarons","Grown Up Macaron","Grown-Up Macarons"]},
   {slug:"seared-ahi-tuna",name:"Seared Ahi Tuna",aliases:["Seared Ahi Tuna","Cold Smoked Seared Ahi Tuna","Ahi Tuna"]},
   {slug:"okey-dokey-artichokey",name:"Okey Dokey Artichokey",aliases:["Okey Dokey Artichokey","Spinach Artichoke Dip","Artichoke Dip"]},
   {slug:"charcuterie",name:"Charcuterie",aliases:["Charcuterie","Charcuterie Board","Charcuterie Display","Grazing"]},
@@ -633,7 +634,6 @@ const MENU_PHOTOS = [
   {slug:"taco-station",name:"Taco Station",aliases:["Taco Station","Taco Bar","Build Your Own Taco","Street Taco","Street Tacos","Taco Display"]},
   {slug:"steak-skewer",name:"Steak Skewer",aliases:["Steak Skewer","Chimichurri Steak","Beef Skewer","Steak Brochette","Churrasco"]},
   {slug:"mango-margarita",name:"Mango Chili Margarita",aliases:["Mango Chili Margarita","Mango Chile Margarita","Spicy Mango Margarita","Chili Mango Margarita","Mango Margarita"]},
-  {slug:"risotto-cake",name:"Crispy Risotto Cake",alts:["risotto-cake-2"],aliases:["Crispy Risotto Cake","Risotto Cake","Parmesan Risotto Cake","Arancini Cake"]},
   {slug:"chicken-puttanesca",name:"Chicken Puttanesca",aliases:["Chicken Puttanesca","Puttanesca","Pan Roasted Frenched Chicken"]},
   {slug:"molten-cake",name:"Molten Chocolate Cake",aliases:["Molten Chocolate Cake","Molten Cake","Chocolate Molten Cake","Chocolate Lava Cake","Lava Cake","S'mores Molten Cake"]},
   {slug:"cannoli-bar",name:"Cannoli Bar",aliases:["Cannoli Bar","Cannoli Display","Cannoli Station","Assorted Cannoli"]},
@@ -663,7 +663,7 @@ const MENU_PHOTOS = [
   {slug:"duck-flatbread",name:"Duck Flatbread",aliases:["Duck Flatbread","Duck Confit Flatbread"]},
   {slug:"herb-de-provence-chicken",name:"Herb de Provence Chicken",aliases:["Herb de Provence Chicken","Herbs de Provence Chicken","Provence Chicken"]},
   {slug:"tuna-crudo",name:"Tuna Crudo",aliases:["Tuna Crudo"]},
-  {slug:"hearts-of-palm-cake",name:"Hearts of Palm Cake",aliases:["Hearts of Palm Cake","Hearts of Palm"]},
+  {slug:"hearts-of-palm-cake",name:"Hearts of Palm Cake",alts:["hearts-of-palm-cake-2","hearts-of-palm-cake-3"],aliases:["Hearts of Palm Cake","Hearts of Palm"]},
   {slug:"sushi-wall",name:"Sushi Wall",aliases:["Sushi Wall","Sushi Display","Sushi Station"]},
   {slug:"short-rib-eggs-benedict",name:"Short Rib Eggs Benedict",aliases:["Short Rib Eggs Benedict","Short Rib Benedict","Braised Beef Benedict","Eggs Benedict","Benedict"]},
   {slug:"enhanced-cream-cheese",name:"Enhanced Cream Cheese",alts:["enhanced-cream-cheese-2"],aliases:["Enhanced Cream Cheese", "Whipped Cream Cheese"]},
@@ -714,7 +714,7 @@ const MENU_PHOTOS = [
 const _menuFb = role => (MENU_PHOTOS.find(p=>p.fallback===role)||{}).slug || null;
 function menuNorm(s){ return " "+String(s||"").toLowerCase().replace(/[^a-z0-9]+/g," ").replace(/\s+/g," ").trim()+" "; }
 // best photo for a menu item: longest alias phrase that appears (whole-word) in the item, else a section fallback
-const MENU_NO_PHOTO=["greek salad with shrimp","beef tenderloin toast","pan roasted beef tenderloin","wild mushroom ravioli","short rib cube"];
+const MENU_NO_PHOTO=["caviar on housemade potato chip","greek salad with shrimp","beef tenderloin toast","pan roasted beef tenderloin","wild mushroom ravioli","short rib cube"];
 function photoForItem(name, sectionTitle, desc){
   const it=menuNorm(name);
   // items where the closest photo would misrepresent the dish (e.g. missing the protein) — show none
