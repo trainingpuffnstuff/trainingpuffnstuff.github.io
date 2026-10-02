@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Buffet Line Planogram | Puff 'n Stuff</title>
+<style>
+:root{--wine:#7a1e2d;--gold:#b08d57;--ink:#2b2622;--soft:#8a817a;--line:#e5e0d8;--bg:#faf7f2;--panel:#fffdfa;--hot:#c0392b;--cold:#1f6fb2;--ware:#6b6b6b;--tent:#fff3b0}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--bg);font-size:14px}
+header{background:var(--panel);border-bottom:1px solid var(--line);padding:14px 20px}
+header h1{font-family:Georgia,'Times New Roman',serif;color:var(--wine);margin:0;font-size:1.5rem}
+header p{margin:3px 0 0;color:var(--soft);font-size:.86rem}
+.wrap{display:grid;grid-template-columns:380px 1fr;gap:16px;padding:16px 20px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+.panel h2{font-family:Georgia,serif;color:var(--wine);font-size:1.05rem;margin:14px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+.panel h2:first-child{margin-top:0}
+label.f{display:block;font-size:.78rem;color:var(--soft);margin:6px 0 2px}
+input[type=text],input[type=number],input[type=date],select{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-size:.88rem;background:#fff;font-family:inherit}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#fff;flex-wrap:wrap}
+.seg button{border:0;background:none;padding:6px 11px;font-size:.8rem;cursor:pointer;color:var(--ink);font-family:inherit}
+.seg button.on{background:var(--wine);color:#fff}
+.chk{display:flex;gap:7px;align-items:flex-start;font-size:.84rem;margin:5px 0;cursor:pointer}
+.chk input{margin-top:2px}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 11px;font-size:.82rem;cursor:pointer;font-family:inherit;color:var(--ink)}
+.btn:hover{background:#f6efe3}
+.btn.pri{background:var(--wine);color:#fff;border-color:var(--wine)}
+.btn.sm{padding:3px 8px;font-size:.75rem}
+.btnrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+/* item rows */
+#items{display:flex;flex-direction:column;gap:6px}
+.it{border:1px solid var(--line);border-radius:9px;padding:6px 6px 6px 4px;background:#fff;display:grid;grid-template-columns:18px 1fr;gap:4px}
+.it.dragover{border-color:var(--gold);box-shadow:0 -3px 0 var(--gold)}
+.it.dragging{opacity:.45}
+.grip{cursor:grab;color:#b9aea2;font-size:15px;line-height:1;text-align:center;padding-top:4px;user-select:none}
+.it .g1{display:grid;grid-template-columns:1fr 64px;gap:5px}
+.it .g2{display:grid;grid-template-columns:1fr 1fr 74px auto;gap:5px;margin-top:5px;align-items:center}
+.it input,.it select{font-size:.8rem;padding:4px 6px}
+.it .x{border:0;background:none;color:#b55;cursor:pointer;font-size:16px;line-height:1;padding:0 3px}
+.it .mv{display:flex;flex-direction:column}
+.it .mv button{border:0;background:none;color:#aaa;cursor:pointer;font-size:10px;line-height:1;padding:1px}
+.it.t-hot{border-left:4px solid var(--hot)}.it.t-gravy{border-left:4px solid var(--hot)}.it.t-cold{border-left:4px solid var(--cold)}.it.t-sauce{border-left:4px solid var(--cold)}.it.t-ware{border-left:4px solid var(--ware)}
+.drop{border:1.5px dashed #c9b9a6;border-radius:10px;padding:10px 12px;background:#fff;font-size:.84rem;text-align:center}
+.drop.hot{border-color:var(--gold);background:#f6efe3}
+.beomsg{margin-top:8px;border-radius:9px;padding:8px 10px;font-size:.8rem;background:#f6efe3;border:1px solid #e2cfa2}
+.beomsg ul{margin:4px 0 0;padding-left:16px}.beomsg .err{color:#a8321f}
+.hint{font-size:.72rem;color:var(--soft);margin-top:3px}
+/* dessert */
+#pies .pr{display:grid;grid-template-columns:1fr auto;gap:5px;margin-bottom:4px}
+/* output */
+.out{min-width:0}
+.summary{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px;min-width:110px}
+.stat b{display:block;font-size:1.15rem;color:var(--wine);font-family:Georgia,serif}
+.stat span{font-size:.72rem;color:var(--soft)}
+.planbox{background:#fff;border:1px solid var(--line);border-radius:12px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.planbox svg{display:block;width:100%;min-width:900px;height:auto}
+.notes{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-top:10px;font-size:.84rem}
+.notes h3{margin:4px 0 6px;font-size:.92rem;color:var(--wine);font-family:Georgia,serif}
+.notes ul{margin:0 0 6px;padding-left:18px}.notes li{margin:2px 0}
+.warn{color:#a8321f;font-weight:600}
+.why{font-size:.8rem;color:#4b443e}
+.printhead{display:none}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.76rem;color:var(--soft);margin:8px 2px 0}
+.legend i{display:inline-block;width:14px;height:10px;border:1.5px solid;margin-right:4px;vertical-align:-1px}
+@media (max-width:900px){.wrap{grid-template-columns:1fr;padding:10px}.planbox svg{min-width:1000px}}
+@media print{
+  @page{size:landscape;margin:0.35in}
+  body{background:#fff;font-size:10px}
+  header,.panel,.btnrow,.noprint{display:none!important}
+  .wrap{display:block;padding:0}
+  .printhead{display:block;font-family:Georgia,serif;margin-bottom:4px}
+  .printhead b{font-size:14px;color:#000}.printhead span{font-size:10px;color:#333;margin-left:8px}
+  .summary{gap:6px;margin-bottom:4px}.stat{padding:3px 8px;min-width:0;border-color:#ccc}.stat b{font-size:12px}
+  .planbox{border:0;overflow:visible}
+  .planbox svg{min-width:0;width:100%;max-height:5.2in}
+  .notes{border:0;padding:2px 0;margin-top:2px;font-size:8.5px;column-count:2;column-gap:18px}
+  .notes h3{font-size:9.5px;margin:2px 0}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Buffet Line Planogram</h1>
+  <p>To-scale, top-down plan of a delivery buffet line. 1 grid square = 6". House rules apply automatically; the "Why" notes explain each choice.</p>
+</header>
+<div class="wrap">
+<aside class="panel" id="panel">
+  <h2>Load from a BEO</h2>
+  <div class="drop" id="drop">
+    <input type="file" id="beoFile" accept="application/pdf" style="display:none">
+    <div><b>Drop the Caterease Special Event Order PDF here</b> or <button class="btn sm" onclick="document.getElementById('beoFile').click()">choose file</button></div>
+    <div class="hint">Fills in the event, guest count, line style from the notes, every menu item with its count, and a pie/dessert station if there is one. Check the types it guessed before you print.</div>
+  </div>
+  <div id="beoMsg" class="beomsg" style="display:none"></div>
+
+  <h2>Event</h2>
+  <label class="f">Event name</label><input type="text" id="evName" placeholder="e.g. Gerdau Thanksgiving">
+  <div class="row2"><div><label class="f">Date</label><input type="date" id="evDate"></div><div><label class="f">Guest count</label><input type="number" id="evGuests" min="1" value="50"></div></div>
+
+  <h2>Tables</h2>
+  <div class="row2">
+    <div><label class="f">Table length</label><div class="seg" id="tlen"><button data-v="72">6 ft</button><button data-v="96" class="on">8 ft</button></div></div>
+    <div><label class="f">Table depth (in)</label><input type="number" id="tdepth" value="30" min="18" max="48"></div>
+  </div>
+  <label class="f">Line style</label>
+  <div class="seg" id="lstyle"><button data-v="auto" class="on">Auto</button><button data-v="single">Single sided</button><button data-v="double">Double sided</button></div>
+  <div class="hint" id="lstyleHint"></div>
+  <label class="f">Chafer type</label>
+  <div class="seg" id="chafer"><button data-v="wire" class="on">Wire rack (rectangular)</button><button data-v="round">Reusable round 7 qt</button></div>
+  <div id="roundBox" style="display:none"><label class="f">Round 7 qt chafer diameter (in, estimate)</label><input type="number" id="roundDia" value="18" min="10" max="30" step="0.5"></div>
+
+  <h2>Menu items</h2>
+  <div class="hint">Drag ⠿ to reorder. Sauces and gravy sit right after the item above them. Size override: "L x D" in inches (L runs along the table), or one number for a round vessel.</div>
+  <div id="items" style="margin-top:8px"></div>
+  <div class="btnrow">
+    <button class="btn" onclick="addItem()">+ Add item</button>
+    <button class="btn" onclick="autoOrder()" title="Menu sign, plates, cold salads, hot sides, proteins (with their gravy/sauces), bread, butter, flatware">Sort to house order</button>
+  </div>
+
+  <h2>Labels &amp; signs</h2>
+  <label class="chk"><input type="checkbox" id="optMenu" checked> Menu sign at the start of the line</label>
+  <label class="chk"><input type="checkbox" id="optLabels" checked> Tent label and utensil in front of each item</label>
+
+  <h2>Dessert station <span style="font-size:.75rem;color:var(--soft);font-family:'Segoe UI',sans-serif">(separate table)</span></h2>
+  <label class="chk"><input type="checkbox" id="dsOn"> Add a dessert station</label>
+  <div id="dsBox" style="display:none">
+    <label class="f">Sides</label>
+    <div class="seg" id="dsSides"><button data-v="double" class="on">Double sided</button><button data-v="single">Single sided</button></div>
+    <label class="f">Items out per side (pies get a pie server)</label>
+    <div id="pies"></div>
+    <div class="btnrow" style="margin-top:2px"><button class="btn sm" onclick="addPie()">+ Add item</button></div>
+    <label class="f">Backup pie boxes down the center</label><input type="number" id="dsBoxes" value="0" min="0" max="40">
+    <label class="chk"><input type="checkbox" id="dsPlates" checked> Dessert plates (9 x 9)</label>
+    <label class="chk"><input type="checkbox" id="dsWhip" checked> Whipped cream bowl (8" dia)</label>
+    <label class="chk"><input type="checkbox" id="dsCups" checked> Fork and spoon cups (4" dia each)</label>
+  </div>
+
+  <h2>Examples</h2>
+  <div class="btnrow" style="margin-top:0">
+    <button class="btn sm" onclick="loadExample('gerdau')">Gerdau Thanksgiving (150)</button>
+    <button class="btn sm" onclick="loadExample('team')">TeamStrength Lunch (10)</button>
+    <button class="btn sm" onclick="if(confirm('Clear all items?')){S.items=[];renderItems();update();}">Clear items</button>
+  </div>
+</aside>
+
+<main class="out">
+  <div class="printhead" id="printhead"></div>
+  <div class="summary" id="summary"></div>
+  <div class="btnrow noprint" style="margin:0 0 10px"><button class="btn pri" onclick="window.print()">Print / Save PDF</button></div>
+  <div class="planbox" id="planbox"></div>
+  <div class="legend noprint">
+    <span><i style="border-color:var(--hot)"></i>Hot (sterno), dashed = pan</span>
+    <span><i style="border-color:var(--cold)"></i>Cold / room temp</span>
+    <span><i style="border-color:var(--ware)"></i>Service ware</span>
+    <span><i style="border-color:#8a7a2a;background:var(--tent)"></i>Tent label</span>
+  </div>
+  <div class="notes" id="notes"></div>
+</main>
+</div>
+
+<script>
+/* ===================== constants (inches) ===================== */
+const SZ={fullRack:[22,13],halfRack:[13,10.5],plates:[11,11],flatware:[12,10],butter:[6,6],menu:[9,4],tent:[3.5,1.5],pie:9.5,pieBox:10,dPlates:9,whip:8,cup:4,bowl:6,coldDefault:[12,12]};
+const GAP=2, END=3, SINGLE_BACK=6;
+const UT={ // length, display name, width (for single-sided perpendicular footprint)
+  tongs12:{L:12,n:'12" tongs',w:1.4}, tongs9:{L:9,n:'9" tongs',w:1.3}, spoon:{L:13,n:'solid spoon',w:2.6},
+  slotted:{L:13,n:'slotted spoon',w:2.6}, ladle2:{L:12,n:'2 oz ladle',w:2.8}, sladle:{L:12,n:'small ladle/spoon',w:2.4},
+  knife:{L:7,n:'butter knife',w:0.8}, server:{L:9,n:'pie server',w:2.5}, none:{L:0,n:'–',w:0}
+};
+const UT_CHOICES=[['auto','Utensil: auto'],['tongs12','12" tongs'],['tongs9','9" tongs'],['spoon','Solid spoon'],['slotted','Slotted spoon'],['ladle2','2 oz ladle'],['sladle','Small ladle/spoon'],['knife','Butter knife'],['server','Pie server'],['none','No utensil']];
+const TYPES=[['hot','Hot'],['cold','Cold'],['sauce','Sauce / dressing'],['gravy','Gravy'],['plates','Ware: plates'],['flatware','Ware: flatware'],['menu','Ware: menu sign']];
+const isWare=t=>t==='plates'||t==='flatware'||t==='menu';
+const PROTEIN=/\b(turkey|ham|chicken|beef|salmon|short ?ribs?|pork|steak|meatloaf|shrimp|fish|brisket|tenderloin|lamb|duck|grouper|mahi|cod|sausage|meatballs?|carved|prime rib)\b/i;
+
+/* ===================== state ===================== */
+let uid=1;
+const S={
+  name:'',date:'',guests:50,tlen:96,tdepth:30,lstyle:'auto',chafer:'wire',roundDia:18,
+  optMenu:true,optLabels:true,
+  items:[],
+  ds:{on:false,sides:'double',pies:[],boxes:0,plates:true,whip:true,cups:true}
+};
+function mkItem(o){return Object.assign({id:uid++,name:'',count:'',type:'hot',ut:'auto',size:''},o);}
+
+/* ===================== rules ===================== */
+function autoUtensil(it){
+  const n=(it.name||'').toLowerCase();
+  if(isWare(it.type)) return 'none';
+  if(it.type==='gravy') return 'ladle2';
+  if(it.type==='sauce') return 'sladle';
+  if(/\bbutter\b/.test(n)) return 'knife';
+  if(/\bpie\b/.test(n)) return 'server';
+  if(it.type==='hot'){
+    if(/green beans?|haricot/.test(n)) return 'tongs12';
+    if(/medley|vegetable|veggie|\bveg\b/.test(n)) return 'slotted';
+    if(/mash|whipped|pur[eé]e|yam|sweet potato|dressing|stuffing|rice|risotto(?! cake)|mac|polenta|grits|couscous/.test(n)) return 'spoon';
+    if(PROTEIN.test(n)||/cake|cutlet|patty/.test(n)) return 'tongs12';
+    return 'spoon';
+  }
+  // cold
+  return 'tongs9'; // salad, bread, platters
+}
+function utensilWhy(it,u){
+  const n=(it.name||'').toLowerCase();
+  if(it.ut&&it.ut!=='auto') return 'utensil set manually';
+  if(u==='ladle2') return 'gravy always gets a 2 oz ladle';
+  if(u==='sladle') return 'sauce/dressing bowl gets a small ladle or spoon';
+  if(u==='knife') return 'butter gets a butter knife';
+  if(u==='server') return 'one pie server per pie';
+  if(u==='tongs12') return /green beans?/.test(n)?'green beans get 12" tongs':'proteins get 12" tongs';
+  if(u==='slotted') return 'vegetable medley gets a slotted spoon';
+  if(u==='spoon') return 'mashed foods, yams, dressing and rice get a solid spoon';
+  if(u==='tongs9') return 'salad, bread and platters get 9" tongs';
+  return '';
+}
+function parseSize(s){
+  s=(s||'').trim(); if(!s) return null;
+  const m=s.match(/^(\d+(?:\.\d+)?)\s*(?:["”]?\s*[x×]\s*(\d+(?:\.\d+)?))?/i);
+  if(!m) return null;
+  if(m[2]) return {L:+m[1],D:+m[2],round:false};
+  return {L:+m[1],D:+m[1],round:true};
+}
+function isDouble(){ return S.lstyle==='double' || (S.lstyle==='auto' && (+S.guests||0)>50); }
+function cnt(it){ const c=parseInt(it.count,10); return isNaN(c)?null:c; }
+
+/* resolve every item into a drawable vessel with a reason */
+function resolve(){
+  const out=[]; const why=[];
+  let list=S.items.slice();
+  if(S.optMenu && !list.some(i=>i.type==='menu')) list=[mkItem({name:'Menu sign',type:'menu',_auto:true})].concat(list);
+  if(!S.optMenu) list=list.filter(i=>i.type!=='menu');
+  const round=S.chafer==='round', rd=+S.roundDia||18;
+  for(const it of list){
+    const ov=parseSize(it.size); const c=cnt(it); const n=it.name||'(unnamed)';
+    let v={src:it,name:n,type:it.type,count:c,shape:'rect',L:0,D:0,pan:null,front:false,kind:'cold',reason:''};
+    if(it.type==='hot'){
+      v.kind='hot';
+      if(round){ v.shape='round'; v.L=v.D=rd; v.pan='round'; v.reason=`round 7 qt chafer, about ${rd}" dia (estimate)`; }
+      else{
+        const full = c===null ? true : c>25;
+        const s=full?SZ.fullRack:SZ.halfRack; v.L=s[0]; v.D=s[1]; v.pan=full?'full':'half';
+        v.reason = c===null ? `no count given, assumed full pan (${s[0]}" x ${s[1]}" wire rack)` :
+          `${c} portions ${full?'> 25 → full pan':'≤ 25 → half pan'} (${s[0]}" x ${s[1]}" wire rack), from the total count, not per side`;
+      }
+    } else if(it.type==='gravy'){
+      v.kind='hot';
+      if(round){ v.shape='round'; v.L=v.D=rd; v.pan='round'; v.reason=`gravy is the only sauce in a pan; round 7 qt chafer (~${rd}" dia, estimate)`; }
+      else { v.L=SZ.halfRack[0]; v.D=SZ.halfRack[1]; v.pan='half'; v.reason='gravy is the only sauce in a pan: always a half pan (13" x 10.5" half rack), right after its protein'; }
+    } else if(it.type==='sauce'){
+      v.kind='cold'; v.shape='round'; v.L=v.D=SZ.bowl; v.reason='sauces and dressings go in a 6" bowl next to their item';
+    } else if(it.type==='plates'){ v.kind='ware'; [v.L,v.D]=SZ.plates; v.reason='plate stack 11" x 11"'; }
+    else if(it.type==='flatware'){ v.kind='ware'; [v.L,v.D]=SZ.flatware; v.reason='rolled flatware box 12" x 10"'; }
+    else if(it.type==='menu'){ v.kind='ware'; [v.L,v.D]=SZ.menu; v.front=true; v.reason='menu sign in acrylic stand 9" x 4", at the guest edge'; }
+    else { // cold
+      v.kind='cold';
+      if(/\bbutter\b/i.test(n)){ [v.L,v.D]=SZ.butter; v.reason='butter 6" x 6"'; }
+      else if(/\bpie\b/i.test(n)){ v.shape='round'; v.L=v.D=SZ.pie; v.reason='pie 9.5" dia'; }
+      else { [v.L,v.D]=SZ.coldDefault; v.reason='cold items keep their own vessel; salad and bread max 12" x 12" (the pan rule does not apply)'; }
+    }
+    if(ov){
+      if(it.type==='hot'||it.type==='gravy'){ v.reason+=`; size overridden to ${ov.L}"${ov.round?' dia':' x '+ov.D+'"'}`; }
+      else v.reason=`size set to ${ov.L}"${ov.round?' dia':' x '+ov.D+'"'}`;
+      v.L=ov.L; v.D=ov.D; v.shape=ov.round?'round':'rect';
+    }
+    let u = it.ut&&it.ut!=='auto' ? it.ut : autoUtensil(it);
+    if(isWare(it.type)) u = (it.ut&&it.ut!=='auto')?it.ut:'none';
+    v.ut=u; v.utWhy=u!=='none'?utensilWhy(it,u):'';
+    v.label = S.optLabels && !isWare(it.type);
+    out.push(v);
+  }
+  return out;
+}
+
+/* ===================== layout ===================== */
+function slotLen(v,ds){
+  // along-table footprint including its tent label + utensil (so neighbors never collide)
+  if(v.front) return v.L;
+  if(!v.label) return v.L;
+  const u=UT[v.ut]||UT.none;
+  const span = ds ? SZ.tent[0] + (u.L? 0.75+u.L:0) : SZ.tent[0] + (u.L? 0.75+u.w:0);
+  return Math.max(v.L, span);
+}
+function layoutLine(vs,TL,ds){
+  let x=END; const pl=[];
+  for(const v of vs){
+    const L=slotLen(v,ds);
+    const seamEnd = (Math.floor(x/TL)+1)*TL - END;
+    if(x+L>seamEnd){ x=(Math.floor(x/TL)+1)*TL+END; }
+    pl.push({v,x,L}); x+=L+GAP;
+  }
+  const last=pl[pl.length-1];
+  const n = pl.length? Math.ceil((last.x+last.L+END)/TL) : 1;
+  // minimal run (before spreading)
+  // continuous run if the line were one long table: end margins + every item + 2" gaps
+  const run = pl.length? 2*END + pl.reduce((a,p)=>a+p.L,0) + GAP*(pl.length-1) : 0;
+  // spread evenly within each table
+  for(let t=0;t<n;t++){
+    const g=pl.filter(p=>p.x>=t*TL && p.x<(t+1)*TL);
+    if(!g.length) continue;
+    const used=g.reduce((a,p)=>a+p.L,0);
+    const gap = g.length>1 ? (TL-2*END-used)/(g.length-1) : 0;
+    let x=t*TL+END + (g.length===1 ? (TL-2*END-used)/2 : 0);
+    for(const p of g){ p.x=x; x+=p.L+gap; }
+  }
+  // vessel x is centered within its slot
+  for(const p of pl){ p.vx=p.x+(p.L-p.v.L)/2; }
+  const oversize=pl.filter(p=>p.L>TL-2*END);
+  return {pl,n,run,oversize};
+}
+
+/* ===================== drawing helpers ===================== */
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const COL={hot:'#c0392b',cold:'#1f6fb2',ware:'#6b6b6b',box:'#8a6d3b'};
+function wrapText(t,maxW,fs){
+  const words=String(t).split(/\s+/); const lines=[]; let cur='';
+  const cw=fs*0.55;
+  for(const w of words){ const tryS=cur?cur+' '+w:w; if(tryS.length*cw<=maxW||!cur) cur=tryS; else {lines.push(cur);cur=w;} }
+  if(cur) lines.push(cur); return lines;
+}
+function label(x,y,w,h,t,color){
+  let fs=Math.min(2.6,Math.max(1.1,Math.min(w,h)/4.2));
+  let lines=wrapText(t,w-1,fs);
+  while((lines.length*fs*1.1>h-0.8 || lines.some(l=>l.length*fs*0.55>w-0.6)) && fs>0.9){ fs-=0.15; lines=wrapText(t,w-0.8,fs); }
+  const y0=y+h/2-(lines.length-1)*fs*1.1/2;
+  const ts=lines.map((l,i)=>`<tspan x="${x+w/2}" dy="${i?fs*1.1:0}">${esc(l)}</tspan>`).join('');
+  const base=`y="${y0}" font-size="${fs.toFixed(2)}" text-anchor="middle" dominant-baseline="middle" font-family="Segoe UI,Arial,sans-serif"`;
+  return `<g class="lbl"><text x="${x+w/2}" ${base} fill="#fff" stroke="#fff" stroke-width="${(fs*0.3).toFixed(2)}" stroke-linejoin="round">${ts}</text><text x="${x+w/2}" ${base} fill="${color}">${ts}</text></g>`;
+}
+function vessel(v,x,y){ // x,y top-left
+  const c=COL[v.kind]; let s='';
+  if(v.shape==='round'){
+    const r=v.L/2, cx=x+r, cy=y+v.D/2;
+    s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="#fff" stroke="${c}" stroke-width="0.35"/>`;
+    if(v.kind==='hot') s+=`<circle cx="${cx}" cy="${cy}" r="${Math.max(r-1.2,0.5)}" fill="none" stroke="${c}" stroke-width="0.18" stroke-dasharray="0.8 0.6"/>`;
+    s+=label(cx-r*0.72,cy-r*0.72,r*1.44,r*1.44,v.name,c);
+  } else {
+    s+=`<rect x="${x}" y="${y}" width="${v.L}" height="${v.D}" fill="#fff" stroke="${c}" stroke-width="0.35"/>`;
+    if(v.kind==='hot') s+=`<rect x="${x+0.8}" y="${y+0.8}" width="${v.L-1.6}" height="${v.D-1.6}" fill="none" stroke="${c}" stroke-width="0.18" stroke-dasharray="0.8 0.6"/>`;
+    s+=label(x,y,v.L,v.D,v.name,c);
+  }
+  return s;
+}
+function tent(x,y){ return `<rect x="${x}" y="${y}" width="${SZ.tent[0]}" height="${SZ.tent[1]}" fill="#fff3b0" stroke="#8a7a2a" stroke-width="0.18"/>`; }
+/* utensil, parallel to the edge (double sided lane). x = handle start, yc = centerline, dir = +1 head to right */
+function utParallel(k,x,yc){
+  const u=UT[k]; if(!u||!u.L) return ''; const L=u.L, c='#444'; let s='';
+  if(k.startsWith('tongs')){ s+=`<path d="M${x},${yc-0.15} L${x+L},${yc-0.6} M${x},${yc+0.15} L${x+L},${yc+0.6}" stroke="${c}" stroke-width="0.35" stroke-linecap="round" fill="none"/>`; }
+  else if(k==='spoon'||k==='slotted'){ s+=`<rect x="${x}" y="${yc-0.25}" width="${L-3}" height="0.5" fill="${c}"/><ellipse cx="${x+L-1.6}" cy="${yc}" rx="1.6" ry="1.3" fill="#ccc" stroke="${c}" stroke-width="0.2"/>`; if(k==='slotted') s+=`<path d="M${x+L-2.4},${yc} h1.6" stroke="${c}" stroke-width="0.25"/>`; }
+  else if(k==='ladle2'||k==='sladle'){ s+=`<rect x="${x}" y="${yc-0.22}" width="${L-2.8}" height="0.44" fill="${c}"/><circle cx="${x+L-1.4}" cy="${yc}" r="1.4" fill="#ccc" stroke="${c}" stroke-width="0.2"/>`; }
+  else { s+=`<rect x="${x}" y="${yc-0.35}" width="${L}" height="0.7" fill="#ccc" stroke="${c}" stroke-width="0.15"/>`; }
+  return s;
+}
+/* utensil perpendicular to the edge (single sided): handle at y0 (guest edge), head pointing back into the vessel */
+function utPerp(k,xc,y0){
+  const u=UT[k]; if(!u||!u.L) return ''; const L=u.L, c='#444'; let s='';
+  const yH=y0-L; // head end
+  if(k.startsWith('tongs')){ s+=`<path d="M${xc-0.15},${y0} L${xc-0.6},${yH} M${xc+0.15},${y0} L${xc+0.6},${yH}" stroke="${c}" stroke-width="0.35" stroke-linecap="round" fill="none"/>`; }
+  else if(k==='spoon'||k==='slotted'){ s+=`<rect x="${xc-0.25}" y="${yH+3}" width="0.5" height="${L-3}" fill="${c}"/><ellipse cx="${xc}" cy="${yH+1.6}" rx="1.3" ry="1.6" fill="#ccc" stroke="${c}" stroke-width="0.2"/>`; }
+  else if(k==='ladle2'||k==='sladle'){ s+=`<rect x="${xc-0.22}" y="${yH+2.8}" width="0.44" height="${L-2.8}" fill="${c}"/><circle cx="${xc}" cy="${yH+1.4}" r="1.4" fill="#ccc" stroke="${c}" stroke-width="0.2"/>`; }
+  else { s+=`<rect x="${xc-0.35}" y="${yH}" width="0.7" height="${L}" fill="#ccc" stroke="${c}" stroke-width="0.15"/>`; }
+  return s;
+}
+function dimH(x1,x2,y,t,fs=2.2){
+  return `<g stroke="#333" stroke-width="0.18"><line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}"/><line x1="${x1}" y1="${y-1.2}" x2="${x1}" y2="${y+1.2}"/><line x1="${x2}" y1="${y-1.2}" x2="${x2}" y2="${y+1.2}"/></g>`+
+    `<path d="M${x1},${y} l1.2,-0.6 v1.2 z M${x2},${y} l-1.2,-0.6 v1.2 z" fill="#333"/>`+
+    `<text x="${(x1+x2)/2}" y="${y-0.8}" font-size="${fs}" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" fill="#222">${esc(t)}</text>`;
+}
+
+/* ===================== main draw ===================== */
+function compute(){
+  const TL=+S.tlen, TD=+S.tdepth||30, ds=isDouble();
+  const vs=resolve();
+  const L=layoutLine(vs,TL,ds);
+  const body=vs.filter(v=>!v.front);
+  const deep=body.length?Math.max(...body.map(v=>v.D)):0;
+  const lane= ds ? (TD-2*deep)/2 : SINGLE_BACK;
+  const sides=ds?2:1;
+  // chafer counts
+  let full=0,half=0,roundC=0;
+  for(const v of vs){ if(v.kind!=='hot') continue; if(v.pan==='full') full+=sides; else if(v.pan==='half') half+=sides; else if(v.pan==='round') roundC+=sides; }
+  return {TL,TD,ds,vs,L,deep,lane,sides,full,half,roundC};
+}
+
+function draw(){
+  const C=compute(); const {TL,TD,ds,L,lane}=C; const n=L.n, W=n*TL;
+  const top=ds?10:5; // space above for the side 2 label
+  const y0=top; const mid=y0+TD/2;
+  let s=''; const notes=[]; const warns=[];
+  // tables
+  for(let i=0;i<n;i++) s+=`<rect x="${i*TL}" y="${y0}" width="${TL}" height="${TD}" fill="#f4efe4" stroke="#222" stroke-width="0.35"/>`;
+  if(ds) s+=`<line x1="0" y1="${mid}" x2="${W}" y2="${mid}" stroke="#999" stroke-width="0.15" stroke-dasharray="1 1"/>`;
+  // items
+  for(const p of L.pl){
+    const v=p.v, cx=p.x+p.L/2;
+    if(v.front){
+      s+=vessel(v,p.vx,y0+TD-0.5-v.D);
+      if(ds) s+=vessel(v,p.vx,y0+0.5);
+      continue;
+    }
+    if(ds){ s+=vessel(v,p.vx,mid-v.D); s+=vessel(v,p.vx,mid); }
+    else { s+=vessel(v,p.vx,y0+TD-SINGLE_BACK-v.D); }
+    if(v.label){
+      const u=UT[v.ut]||UT.none;
+      if(ds){
+        const span=SZ.tent[0]+(u.L?0.75+u.L:0); const x0=cx-span/2;
+        // guest side A (bottom edge) and B (top edge)
+        s+=tent(x0,y0+TD-0.25-SZ.tent[1]); s+=utParallel(v.ut,x0+SZ.tent[0]+0.75,y0+TD-1);
+        s+=tent(x0,y0+0.25); s+=utParallel(v.ut,x0+SZ.tent[0]+0.75,y0+1);
+      } else {
+        const span=SZ.tent[0]+(u.L?0.75+u.w:0); const x0=cx-span/2;
+        s+=tent(x0,y0+TD-0.25-SZ.tent[1]);
+        if(u.L) s+=utPerp(v.ut,x0+SZ.tent[0]+0.75+u.w/2,y0+TD-0.5);
+      }
+    }
+  }
+  // guest side labels
+  const sideLbl=(y,t)=>`<text x="${W/2}" y="${y}" font-size="3" font-weight="700" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" fill="#222">${t}</text>`;
+  if(ds){ s+=sideLbl(y0-3,'SIDE 2 guests · flow left → right'); }
+  s+=sideLbl(y0+TD+5,ds?'SIDE 1 guests · flow left → right':'GUESTS · flow left → right');
+  // depth dim
+  s+=`<g stroke="#333" stroke-width="0.18"><line x1="-4" y1="${y0}" x2="-4" y2="${y0+TD}"/><line x1="-5.2" y1="${y0}" x2="-2.8" y2="${y0}"/><line x1="-5.2" y1="${y0+TD}" x2="-2.8" y2="${y0+TD}"/></g><text x="-5.5" y="${mid}" font-size="2.2" text-anchor="middle" transform="rotate(-90 -5.5 ${mid})" font-family="Segoe UI,Arial,sans-serif">${TD}"</text>`;
+  if(!ds) s+=`<g stroke="#999" stroke-width="0.15" stroke-dasharray="0.8 0.6"><line x1="0" y1="${y0+TD-SINGLE_BACK}" x2="${W}" y2="${y0+TD-SINGLE_BACK}"/></g><text x="${W+1}" y="${y0+TD-SINGLE_BACK/2}" font-size="1.8" dominant-baseline="middle" font-family="Segoe UI,Arial,sans-serif" fill="#666">6" lane</text>`;
+  // dimension lines
+  let yd=y0+TD+11;
+  for(let i=0;i<n;i++) s+=dimH(i*TL,(i+1)*TL,yd,`${TL}" (${TL/12} ft) table`);
+  yd+=7; s+=dimH(0,W,yd,`${n} × ${TL/12} ft tables = ${W/12} ft`,2.5);
+  // item length / utensil row (rotated text)
+  yd+=4;
+  s+=`<text x="-1" y="${yd}" font-size="1.7" text-anchor="end" font-family="Segoe UI,Arial,sans-serif" fill="#555"><tspan x="-1">length</tspan><tspan x="-1" dy="2">· utensil</tspan></text>`;
+  let maxRow=0;
+  for(const p of L.pl){
+    const v=p.v; const u=UT[v.ut]||UT.none;
+    const txt=`${v.shape==='round'?v.L+'" dia':v.L+'"'} · ${u.n}`;
+    maxRow=Math.max(maxRow,txt.length*1.9*0.55);
+    s+=`<text x="${p.x+p.L/2}" y="${yd}" font-size="1.9" text-anchor="end" transform="rotate(-90 ${p.x+p.L/2} ${yd})" font-family="Segoe UI,Arial,sans-serif" fill="#333">${esc(txt)}</text>`;
+  }
+  let yEnd=yd+maxRow+4;
+  // dessert station
+  let dsRes=null;
+  if(S.ds.on){ dsRes=drawDessert(TL,TD,yEnd+14); s+=dsRes.svg; yEnd=dsRes.yEnd; }
+  // grid behind
+  const vbX=-14, vbW=Math.max(W,TL)+ 26, vbY=0, vbH=yEnd+4;
+  let grid='';
+  for(let gx=0; gx<=vbW+vbX; gx+=6) grid+=`<line x1="${gx}" y1="${vbY}" x2="${gx}" y2="${vbH}" stroke="#eee" stroke-width="0.12"/>`;
+  for(let gy=0; gy<=vbH; gy+=6) grid+=`<line x1="${vbX}" y1="${gy}" x2="${vbX+vbW}" y2="${gy}" stroke="#eee" stroke-width="0.12"/>`;
+  // lift every item-name label above utensils
+  const lbls=[]; s=s.replace(/<g class="lbl">[\s\S]*?<\/g>/g,m=>{lbls.push(m);return '';});
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vbX} ${vbY} ${vbW} ${vbH}" preserveAspectRatio="xMinYMin meet">${grid}${s}${lbls.join('')}</svg>`;
+  document.getElementById('planbox').innerHTML=svg;
+
+  /* -------- notes -------- */
+  const deepItem=C.vs.filter(v=>!v.front).sort((a,b)=>b.D-a.D)[0];
+  if(ds){
+    let t=`Front lane: ${C.deep}" + ${C.deep}" back to back on a ${TD}" table leaves ${fmt(lane)}" in front of each item on each side.`;
+    if(lane<0){ warns.push(`Too deep to go back to back: ${C.deep}" + ${C.deep}" = ${2*C.deep}" on a ${TD}" table, so items hang ${fmt(-lane)}" past each edge. Use smaller vessels, a deeper table, or single sided.`); }
+    else if(lane<2){ warns.push(t+' Under 2": tent labels won\'t fit on the table. Clip labels to the racks/pans instead.'); }
+    else { if(lane<2.6 && C.vs.some(v=>v.label&&(v.ut==='spoon'||v.ut==='slotted'))) t+=' Under 2.6": spoon bowls (~2.6" wide) will rest on the pan lip.'; notes.push(t); }
+  } else {
+    notes.push(`Single sided: every vessel sits ${SINGLE_BACK}" back from the guest edge. The tent label sits at the edge and each utensil handle points toward the guest.`);
+    const tooDeep=C.vs.filter(v=>!v.front && SINGLE_BACK+v.D>TD);
+    if(tooDeep.length) warns.push(`Too deep for a ${TD}" table with the 6" front lane: ${tooDeep.map(v=>`${v.name} (${v.D}")`).join(', ')}.`);
+  }
+  if(L.oversize.length) warns.push(`Longer than one table (minus 3" margins), so they can't avoid a seam: ${L.oversize.map(p=>p.v.name).join(', ')}.`);
+  const est=['Butter, flatware box, bowl, cup and menu-sign sizes are standard estimates.'];
+  if(S.chafer==='round') est.unshift(`Round 7 qt chafer = about ${S.roundDia}" diameter (estimate, editable). The half/full pan rule sets wire rack size only.`);
+  if(C.vs.some(v=>v.kind==='hot'&&v.count===null&&v.pan==='full')) est.push('Hot items with no portion count were drawn as full pans.');
+  if(dsRes) dsRes.notes.forEach(x=>(x.warn?warns:notes).push(x.t));
+
+  const whyRows=C.vs.map(v=>`<li><b>${esc(v.name)}</b>: ${esc(v.reason)}${v.ut&&v.ut!=='none'?`; ${esc(UT[v.ut].n)}${v.utWhy?` (${esc(v.utWhy)})`:''}`:''}${ds&&!v.front?'; mirrored on both sides':''}.</li>`).join('');
+  const lineWhy = S.lstyle==='auto' ? `Line style: auto → ${S.guests} guests is ${ds?'over 50, so double sided':'50 or fewer, so single sided'}.` : `Line style set to ${ds?'double':'single'} sided.`;
+  document.getElementById('notes').innerHTML=
+    (warns.length?`<h3>Warnings</h3><ul>${warns.map(w=>`<li class="warn">${esc(w)}</li>`).join('')}</ul>`:'')+
+    `<h3>Notes</h3><ul>${notes.map(w=>`<li>${esc(w)}</li>`).join('')}<li>${esc(lineWhy)}</li><li>Items placed left to right with ≥ 2" gaps and 3" table-end margins, never across a table seam, then spread evenly within each table. Continuous length the line needs: ${fmt(L.run)}" (${fmt(L.run/12)} ft), laid out on ${n} × ${TL/12} ft tables = ${W/12} ft.</li></ul>`+
+    `<h3>Estimates used</h3><ul>${est.map(w=>`<li>${esc(w)}</li>`).join('')}</ul>`+
+    `<h3>Why each item looks the way it does</h3><ul class="why">${whyRows}</ul>`;
+
+  /* -------- summary -------- */
+  const st=(b,t)=>`<div class="stat"><b>${b}</b><span>${t}</span></div>`;
+  let chaf='';
+  if(S.chafer==='wire') chaf=st(`${C.full} full + ${C.half} half`,'wire racks');
+  else chaf=st(`${C.roundC}`,'round 7 qt chafers');
+  const dTables=dsRes?1:0;
+  document.getElementById('summary').innerHTML=
+    st(`${n}${dTables?` + ${dTables}`:''}`, dTables?'line tables + dessert table':'line tables')+
+    st(`${W/12} ft`,`line (${n} × ${TL/12} ft)`)+
+    st(`${fmt(L.run/12)} ft`,'line length needed')+
+    st(ds?'Double':'Single','sided'+(S.lstyle==='auto'?' (auto)':''))+
+    chaf+
+    st(`${fmt(lane)}"`,'front lane');
+  document.getElementById('printhead').innerHTML=`<b>${esc(S.name||'Buffet line')}</b><span>${esc(fmtDate(S.date))}${S.date?' · ':''}${S.guests} guests · ${ds?'double':'single'} sided · ${TL/12} ft x ${TD}" tables · ${S.chafer==='wire'?'wire rack chafers':'round 7 qt chafers'} · scale: 1 grid square = 6"</span>`;
+}
+const fmt=x=>(Math.round(x*10)/10).toString();
+function fmtDate(d){ if(!d) return ''; const [y,m,dd]=d.split('-'); return `${+m}/${+dd}/${y}`; }
+
+/* ===================== dessert station ===================== */
+function drawDessert(TL,TD,y0){
+  const D=S.ds, ds=D.sides==='double', notes=[]; let s='';
+  const edge=[];
+  if(D.plates) edge.push({n:'Dessert plates',sz:SZ.dPlates,shape:'rect',kind:'ware',gap:3});
+  for(const p of D.pies){ const isPie=/pie/i.test(p.name)||p.pie; edge.push({n:p.name||'Pie',sz:p.size||SZ.pie,shape:'round',kind:'cold',server:isPie,gap:1}); }
+  if(D.whip) edge.push({n:'Whipped cream',sz:SZ.whip,shape:'round',kind:'cold',gap:2});
+  if(D.cups){ edge.push({n:'Forks',sz:SZ.cup,shape:'round',kind:'ware',gap:1}); edge.push({n:'Spoons',sz:SZ.cup,shape:'round',kind:'ware',gap:1}); }
+  s+=`<rect x="0" y="${y0}" width="${TL}" height="${TD}" fill="#f4efe4" stroke="#222" stroke-width="0.35"/>`;
+  const deep=edge.length?Math.max(...edge.map(e=>e.sz)):0;
+  function row(yc,flip){
+    let x=END;
+    for(const e of edge){
+      const v={name:e.n,kind:e.kind,shape:e.shape,L:e.sz,D:e.sz};
+      s+=vessel(v,x,yc-e.sz/2);
+      x+=e.sz+e.gap;
+      if(e.server){ const L=UT.server.L; s+=`<rect x="${x-0.4}" y="${yc-L/2}" width="2.5" height="${L}" fill="#ddd" stroke="#555" stroke-width="0.15"/>`; x+=2.5+2; }
+    }
+    return x;
+  }
+  const yA=y0+TD-0.5-deep/2, yB=y0+0.5+deep/2;
+  let used=row(yA);
+  if(ds) used=Math.max(used,row(yB));
+  // center boxes
+  const nb=Math.max(0,+D.boxes||0);
+  if(nb){
+    const yc = ds ? y0+TD/2-SZ.pieBox/2 : y0+0.5;
+    const rowLen=nb*SZ.pieBox+(nb-1)*0.5;
+    let x=Math.max(0.5,(TL-rowLen)/2);
+    for(let i=0;i<nb;i++){ s+=`<rect x="${x}" y="${yc}" width="${SZ.pieBox}" height="${SZ.pieBox}" fill="#efe2c8" stroke="#8a6d3b" stroke-width="0.25"/>`+label(x,yc,SZ.pieBox,SZ.pieBox,'backup box','#8a6d3b'); x+=SZ.pieBox+0.5; }
+    used=Math.max(used,x);
+  }
+  const st=(t,warn)=>notes.push({t,warn});
+  const sideTxt=ds?'SIDE 1 guests ↑ (bottom) · SIDE 2 guests ↓ (top)':'GUESTS ↑ (bottom edge)';
+  s+=`<text x="${TL/2}" y="${y0-3}" font-size="3" font-weight="700" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif">DESSERT STATION · ${TL/12} ft x ${TD}" table · ${ds?'double':'single'} sided</text>`;
+  s+=`<text x="${TL/2}" y="${y0+TD+4}" font-size="2.2" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" fill="#444">${sideTxt}</text>`;
+  s+=dimH(0,TL,y0+TD+9,`${TL}" table`);
+  // checks
+  if(ds){
+    const need=deep+(nb?SZ.pieBox:0)+deep;
+    const t=`Dessert depth: ${deep}" + ${nb?SZ.pieBox+'" box + ':''}${deep}" = ${fmt(need)}" of ${TD}".`;
+    st(need>TD? t+' OVERFLOW: items will hang off the table.':t, need>TD);
+  } else {
+    const need=deep+(nb?SZ.pieBox+0.5:0)+0.5;
+    st(`Dessert depth: ${fmt(need)}" of ${TD}".`+(need>TD?' OVERFLOW.':''), need>TD);
+  }
+  if(used>TL) st(`Dessert items run ${fmt(used-TL)}" past the end of the ${TL/12} ft table. Use fewer items per side or a second table.`,true);
+  else st(`Dessert table length used: ${fmt(used)}" of ${TL}".`,false);
+  if(nb) st(`${nb} backup boxes (10" x 10") down the center.`,false);
+  if(ds && deep+SZ.pieBox+deep>TD-3) st('No room for tent labels in front of dessert items; use pick labels.',false);
+  return {svg:s,yEnd:y0+TD+12,notes};
+}
+
+/* ===================== item UI ===================== */
+function renderItems(){
+  const box=document.getElementById('items');
+  box.innerHTML=S.items.map((it,i)=>{
+    const ov=(it.size||'');
+    const typeOpts=TYPES.map(([v,t])=>`<option value="${v}"${it.type===v?' selected':''}>${t}</option>`).join('');
+    const utOpts=UT_CHOICES.map(([v,t])=>`<option value="${v}"${it.ut===v?' selected':''}>${t}</option>`).join('');
+    const tclass= isWare(it.type)?'t-ware':'t-'+it.type;
+    return `<div class="it ${tclass}" data-id="${it.id}" draggable="false">
+      <div class="grip" draggable="true" title="Drag to reorder">⠿<div class="mv"><button onclick="mv(${it.id},-1)" title="Up">▲</button><button onclick="mv(${it.id},1)" title="Down">▼</button></div></div>
+      <div>
+        <div class="g1"><input type="text" value="${esc(it.name)}" placeholder="Item name" oninput="setF(${it.id},'name',this.value)"><input type="number" min="0" value="${esc(it.count)}" placeholder="count" title="Portion count" oninput="setF(${it.id},'count',this.value)"></div>
+        <div class="g2"><select onchange="setF(${it.id},'type',this.value,true)">${typeOpts}</select><select onchange="setF(${it.id},'ut',this.value)">${utOpts}</select><input type="text" value="${esc(ov)}" placeholder="size" title="Optional size override, e.g. 12x16 or 9.5 for round" oninput="setF(${it.id},'size',this.value)"><button class="x" onclick="rm(${it.id})" title="Remove">×</button></div>
+      </div></div>`;
+  }).join('');
+  wireDnD();
+}
+function setF(id,k,v,rerender){ const it=S.items.find(x=>x.id===id); if(!it) return; it[k]=v; if(rerender) renderItems(); update(); }
+function rm(id){ S.items=S.items.filter(x=>x.id!==id); renderItems(); update(); }
+function mv(id,d){ const i=S.items.findIndex(x=>x.id===id), j=i+d; if(i<0||j<0||j>=S.items.length) return; [S.items[i],S.items[j]]=[S.items[j],S.items[i]]; renderItems(); update(); }
+function addItem(){ S.items.push(mkItem({type:'hot'})); renderItems(); update(); const ins=document.querySelectorAll('#items .it input[type=text]'); const last=ins[ins.length-2]; if(last) last.focus(); }
+let dragId=null;
+function wireDnD(){
+  document.querySelectorAll('#items .it').forEach(row=>{
+    const g=row.querySelector('.grip'); const id=+row.dataset.id;
+    g.addEventListener('dragstart',e=>{dragId=id;row.classList.add('dragging');e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',String(id));}catch(_){}});
+    g.addEventListener('dragend',()=>{row.classList.remove('dragging');document.querySelectorAll('.it.dragover').forEach(x=>x.classList.remove('dragover'));});
+    row.addEventListener('dragover',e=>{if(dragId===null)return;e.preventDefault();row.classList.add('dragover');});
+    row.addEventListener('dragleave',()=>row.classList.remove('dragover'));
+    row.addEventListener('drop',e=>{e.preventDefault();row.classList.remove('dragover');if(dragId===null||dragId===id)return;
+      const from=S.items.findIndex(x=>x.id===dragId); const [m]=S.items.splice(from,1); const to=S.items.findIndex(x=>x.id===id); S.items.splice(to,0,m); dragId=null; renderItems(); update();});
+  });
+}
+/* house order: menu, plates, cold salads, hot sides, proteins (+gravy/sauces after), bread, butter, flatware; other cold (platters) before flatware */
+function rank(it){
+  const n=(it.name||'').toLowerCase();
+  if(it.type==='menu') return 0; if(it.type==='plates') return 1; if(it.type==='flatware') return 9;
+  if(it.type==='cold'){
+    if(/bread|focaccia|roll|biscuit|loaf|baguette|croissant/.test(n)) return 6;
+    if(/butter/.test(n)) return 7;
+    if(/salad|greens|slaw/.test(n)) return 2;
+    return 8;
+  }
+  if(it.type==='hot') return PROTEIN.test(n)?4:3;
+  return 5;
+}
+function autoOrder(){
+  // group sauces/gravy with the item before them
+  const groups=[]; for(const it of S.items){ if((it.type==='sauce'||it.type==='gravy')&&groups.length) groups[groups.length-1].push(it); else groups.push([it]); }
+  groups.forEach((g,i)=>g._i=i);
+  groups.sort((a,b)=>rank(a[0])-rank(b[0])||a._i-b._i);
+  S.items=groups.flat(); renderItems(); update();
+}
+
+/* ===================== dessert UI ===================== */
+function renderPies(){
+  document.getElementById('pies').innerHTML=S.ds.pies.map((p,i)=>`<div class="pr"><input type="text" value="${esc(p.name)}" placeholder="e.g. Apple pie" oninput="S.ds.pies[${i}].name=this.value;update()"><button class="btn sm" onclick="S.ds.pies.splice(${i},1);renderPies();update()">×</button></div>`).join('')||'<div class="hint">No items yet.</div>';
+}
+function addPie(){ S.ds.pies.push({name:'Pie'}); renderPies(); update(); }
+
+/* ===================== controls ===================== */
+function seg(id,key,cb){ document.querySelectorAll(`#${id} button`).forEach(b=>b.onclick=()=>{ document.querySelectorAll(`#${id} button`).forEach(x=>x.classList.toggle('on',x===b)); cb(b.dataset.v); update(); }); }
+function syncSeg(id,v){ document.querySelectorAll(`#${id} button`).forEach(x=>x.classList.toggle('on',x.dataset.v===String(v))); }
+seg('tlen','tlen',v=>S.tlen=+v);
+seg('lstyle','lstyle',v=>S.lstyle=v);
+seg('chafer','chafer',v=>{S.chafer=v;document.getElementById('roundBox').style.display=v==='round'?'':'none';});
+seg('dsSides','dsSides',v=>S.ds.sides=v);
+const bind=(id,fn,ev='input')=>document.getElementById(id).addEventListener(ev,e=>{fn(e.target);update();});
+bind('evName',t=>S.name=t.value); bind('evDate',t=>S.date=t.value); bind('evGuests',t=>S.guests=+t.value||0);
+bind('tdepth',t=>S.tdepth=+t.value||30); bind('roundDia',t=>S.roundDia=+t.value||18);
+bind('optMenu',t=>S.optMenu=t.checked,'change'); bind('optLabels',t=>S.optLabels=t.checked,'change');
+bind('dsOn',t=>{S.ds.on=t.checked;document.getElementById('dsBox').style.display=t.checked?'':'none';},'change');
+bind('dsBoxes',t=>S.ds.boxes=+t.value||0); bind('dsPlates',t=>S.ds.plates=t.checked,'change'); bind('dsWhip',t=>S.ds.whip=t.checked,'change'); bind('dsCups',t=>S.ds.cups=t.checked,'change');
+
+function syncInputs(){
+  const v=(id,x)=>document.getElementById(id).value=x;
+  v('evName',S.name); v('evDate',S.date); v('evGuests',S.guests); v('tdepth',S.tdepth); v('roundDia',S.roundDia); v('dsBoxes',S.ds.boxes);
+  const c=(id,x)=>document.getElementById(id).checked=x;
+  c('optMenu',S.optMenu); c('optLabels',S.optLabels); c('dsOn',S.ds.on); c('dsPlates',S.ds.plates); c('dsWhip',S.ds.whip); c('dsCups',S.ds.cups);
+  syncSeg('tlen',S.tlen); syncSeg('lstyle',S.lstyle); syncSeg('chafer',S.chafer); syncSeg('dsSides',S.ds.sides);
+  document.getElementById('roundBox').style.display=S.chafer==='round'?'':'none';
+  document.getElementById('dsBox').style.display=S.ds.on?'':'none';
+  renderItems(); renderPies();
+}
+function update(){
+  const ds=isDouble();
+  document.getElementById('lstyleHint').textContent = S.lstyle==='auto' ? `Auto: ${S.guests} guests → ${ds?'double':'single'} sided (over 50 is double).` : '';
+  draw();
+  try{ localStorage.setItem('pns-planogram', JSON.stringify(S)); }catch(_){}
+}
+
+/* ===================== examples ===================== */
+function loadExample(k){
+  if(k==='gerdau'){
+    Object.assign(S,{name:'Gerdau Thanksgiving',date:'2026-11-17',guests:150,tlen:96,tdepth:30,lstyle:'double',chafer:'wire',optMenu:true,optLabels:true});
+    S.items=[mkItem({name:'Menu sign',type:'menu'}),mkItem({name:'Plates',type:'plates'}),
+      mkItem({name:'Winter Greens Salad',count:60,type:'cold'}),mkItem({name:'Green Beans',count:120,type:'hot'}),
+      mkItem({name:'Roasted Yams',count:50,type:'hot'}),mkItem({name:'Whipped Potatoes',count:100,type:'hot'}),
+      mkItem({name:'Bread Dressing',count:120,type:'hot'}),mkItem({name:'Turkey',count:150,type:'hot'}),
+      mkItem({name:'Gravy',type:'gravy'}),mkItem({name:'Ham',count:80,type:'hot'}),
+      mkItem({name:'Focaccia',count:150,type:'cold'}),mkItem({name:'Butter',type:'cold'}),mkItem({name:'Flatware',type:'flatware'})];
+    S.ds={on:true,sides:'double',pies:[{name:'Apple pie'},{name:'Pumpkin pie'},{name:'Pecan pie'}],boxes:9,plates:true,whip:true,cups:true};
+  } else {
+    Object.assign(S,{name:'TeamStrength Lunch',date:'',guests:10,tlen:96,tdepth:30,lstyle:'single',chafer:'round',roundDia:18,optMenu:true,optLabels:true});
+    S.items=[mkItem({name:'Menu sign',type:'menu'}),mkItem({name:'Plates',type:'plates'}),
+      mkItem({name:'Fall Greens Salad',count:10,type:'cold'}),mkItem({name:'Bleu cheese',type:'sauce'}),mkItem({name:'Vinaigrette',type:'sauce'}),
+      mkItem({name:'Veg Medley',count:10,type:'hot'}),mkItem({name:'Risotto Cake',count:10,type:'hot'}),
+      mkItem({name:'Salmon',count:10,type:'hot'}),mkItem({name:'Short Rib',count:10,type:'hot'}),
+      mkItem({name:'Cookie platter',count:12,type:'cold',size:'12x16'}),mkItem({name:'Flatware',type:'flatware'})];
+    S.ds={on:false,sides:'double',pies:[],boxes:0,plates:true,whip:true,cups:true};
+  }
+  syncInputs(); update();
+}
+
+
+/* ===================== BEO import ===================== */
+const HOTW=/\b(potato|potatoes|yam|yams|bean|beans|dressing|stuffing|rice|risotto|pasta|penne|fusilli|ravioli|mac\b|macaroni|polenta|grits|couscous|quinoa|turkey|ham\b|chicken|beef|salmon|rib|ribs|pork|steak|meatloaf|shrimp|fish|grouper|mahi|lamb|roast|roasted|braised|grilled|baked|whipped|mashed|smashed|soup|vegetable|vegetables|medley|broccoli|broccolini|brussels|carrots|squash|cannelloni|rollatini|lasagna|enchilada|taco|fajita|wings|sausage|meatball|meatballs|eggplant|cake)\b/i;
+const COLDW=/\b(salad|greens|slaw|bread|focaccia|rolls?|biscuits?|loaf|baguette|butter|crudit|fruit|cheese|charcuterie|dip|hummus|platter|chips|cookie|cookies|brownie|dessert|desserts|pie|pies|tart|cheesecake|cupcake|macaron|bar\b|bars|parfait|yogurt|bagel|pastries|pastry|croissant|muffin|sandwich|sandwiches|wrap|wraps|boxed)\b/i;
+const DESSW=/\b(pie|pies|tart|cheesecake|cookie|cookies|brownie|cupcake|dessert|torte|cobbler|macaron)\b/i;
+const DIET=/^(V|VEG|GF|DF|NF)(\s*,\s*(V|VEG|GF|DF|NF))*\s*!?$/i;
+const SKIP=/inclusions?|setup with|includes|disposable|serving equipment|chafing dish|tablecloth|napkins|serving utensils|^notes?:|additional services|delivery with setup|\$\d/i;
+
+function classifyBEO(name,desc){
+  const n=name.toLowerCase(), all=(name+' '+desc).toLowerCase();
+  if(DESSW.test(n)) return {type:'cold',dessert:true,sure:true};
+  if(/\bbutter\b/.test(n)) return {type:'cold',sure:true};
+  if(/bread dressing|country dressing|stuffing|cornbread dressing/.test(n)) return {type:'hot',sure:true};
+  if(/gravy|jus\b/.test(n) && !/\b(turkey|chicken|beef|pork|ham)\b/.test(n)) return {type:'gravy',sure:true};
+  if(/sauce|dressing|vinaigrette|aioli|remoulade/.test(n) && !/bread dressing|country dressing|cornbread/.test(n) && !HOTW.test(n.replace(/dressing/,''))) return {type:'sauce',sure:true};
+  const hot=HOTW.test(n), cold=COLDW.test(n);
+  if(hot&&!cold) return {type:'hot',sure:true};
+  if(cold&&!hot) return {type:'cold',sure:true};
+  if(hot&&cold){ // e.g. "Roasted Vegetable Salad" or "Grain salad": salad/platter wins cold but flag it
+    if(/salad|platter|slaw/.test(n)) return {type:'cold',sure:false};
+    return {type:'hot',sure:false};
+  }
+  return {type:'hot',sure:false};
+}
+
+/* lines: [{x, text}] in reading order (x = left position, larger = further right) */
+function parseBEO(lines){
+  const r={name:'',date:'',guests:null,eventNo:'',notes:[],items:[],dessert:[],unsure:[],lineStyle:null,chafer:null,log:[]};
+  const txt=lines.map(l=>l.text);
+  const whole=txt.join('\n');
+  let m;
+  if((m=whole.match(/Party Name:\s*(.+?)(?=\s{2,}|\s+(?:Event Type|Client|Guests):|$)/m))) r.name=m[1].trim();
+  if((m=whole.match(/Date:\s*(\d{1,2})\/(\d{1,2})\/(\d{4})/))) r.date=`${m[3]}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`;
+  if((m=whole.match(/Guests:\s*(\d+)/i))) r.guests=+m[1];
+  if((m=whole.match(/Event #:\s*(\S+)/i))) r.eventNo=m[1];
+  // notes block
+  const ni=txt.findIndex(t=>/^\s*Notes?:/i.test(t));
+  if(ni>=0){ for(let i=ni;i<txt.length;i++){ const t=txt[i].replace(/^\s*Notes?:\s*/i,'').trim(); if(/Puff'?n Stuff Catering, LLC|Page \d+ of/i.test(t)) break; if(t) r.notes.push(t); } }
+  const noteTxt=r.notes.join(' ').toLowerCase();
+  if(/double[- ]sided/.test(noteTxt)) r.lineStyle='double'; else if(/single[- ]sided|one[- ]sided/.test(noteTxt)) r.lineStyle='single';
+  if(/wire rack/.test(whole.toLowerCase())) r.chafer='wire'; else if(/round chafer|7 ?qt/.test(whole.toLowerCase())) r.chafer='round';
+  // menu block
+  const a=txt.findIndex(t=>/MENU\s*&\s*INCLUSIONS/i.test(t));
+  let b=txt.findIndex((t,i)=>i>a&&/ADDITIONAL SERVICES/i.test(t)); if(b<0) b=txt.length;
+  if(a<0){ r.log.push('Could not find the MENU & INCLUSIONS block.'); return r; }
+  let nameX=null; let section=''; let cur=null;
+  const push=()=>{ if(!cur) return; const c=classifyBEO(cur.name,cur.desc.join(' ')); const it={name:cur.name,count:cur.qty,desc:cur.desc.join(' · '),type:c.type,section,sure:c.sure};
+    const sec=section.toLowerCase();
+    if(c.dessert || /pie|dessert|sweet/.test(sec)) r.dessert.push(it); else { r.items.push(it); if(!c.sure) r.unsure.push(it.name);
+      // gravy mentioned in the description of a protein → separate gravy item right after
+      const d=cur.desc.join(' ').toLowerCase(); if(c.type==='hot' && /\bgravy\b/.test(d)){ const g=cur.desc.find(x=>/gravy/i.test(x))||'Gravy'; r.items.push({name:g.replace(/[,.]$/,''),count:'',desc:'',type:'gravy',section,sure:true,auto:true}); } }
+    cur=null; };
+  for(let i=a+1;i<b;i++){
+    const L=lines[i]; const t=L.text.trim(); if(!t) continue;
+    if(/Puff'?n Stuff Catering, LLC|Page \d+ of|SPECIAL EVENT ORDER|Last Revised|^O\d{5,}$/i.test(t)) continue;
+    const q=t.match(/^\((\d+)\)\s+(.+)$/);
+    if(q){ push(); if(SKIP.test(q[2])){ cur=null; continue; } cur={qty:+q[1],name:q[2].trim(),desc:[]}; if(nameX===null) nameX=(L.nameX!=null?L.nameX:L.x); continue; }
+    // header: no qty, sits well right of the name column (centered), or all words capitalized and short, and no item is open
+    // section headers ("Thanksgiving Buffet", "Pie Station") are centered, so they sit well right of the item-name column
+    const isHeader = ((nameX!==null && L.x>nameX+40) || (nameX===null && cur===null && !SKIP.test(t))) && !DIET.test(t);
+    if(isHeader){ push(); section=t; continue; }
+    if(!cur) continue;
+    if(DIET.test(t)) { cur.diet=t.replace('!',''); continue; }
+    if(SKIP.test(t)) continue;
+    if(/!$/.test(t)) { r.notes.push(`${cur.name}: ${t}`); continue; } // kitchen notes like "Cheese on side!"
+    cur.desc.push(t);
+  }
+  push();
+  return r;
+}
+
+function applyBEO(r){
+  const msgs=[];
+  if(r.name) S.name=r.name; if(r.date) S.date=r.date; if(r.guests) S.guests=r.guests;
+  if(r.lineStyle){ S.lstyle=r.lineStyle; msgs.push(`Line style: ${r.lineStyle} sided (from the BEO notes).`); } else { S.lstyle='auto'; msgs.push('No line-style note found; using auto (over 50 guests = double sided).'); }
+  if(r.chafer){ S.chafer=r.chafer; }
+  S.optMenu=true; S.optLabels=true;
+  const items=[mkItem({name:'Menu sign',type:'menu'}),mkItem({name:'Plates',type:'plates'})];
+  for(const it of r.items) items.push(mkItem({name:it.name,count:it.count,type:it.type}));
+  items.push(mkItem({name:'Flatware',type:'flatware'}));
+  S.items=items; autoOrder();
+  if(r.dessert.length){
+    const sides = isDouble()?2:1;
+    const total=r.dessert.reduce((a,x)=>a+(+x.count||0),0);
+    S.ds={on:true,sides:sides===2?'double':'single',pies:r.dessert.map(x=>({name:x.name})),boxes:Math.max(0,total-r.dessert.length*sides),plates:true,whip:true,cups:true};
+    msgs.push(`Dessert station: ${r.dessert.map(x=>`${x.count} ${x.name}`).join(', ')} → 1 of each out per side, ${S.ds.boxes} backup boxes down the center. Whipped cream and fork/spoon cups were added by default.`);
+  } else S.ds.on=false;
+  if(r.unsure.length) msgs.push(`<span class="err">Check hot vs cold on: ${r.unsure.map(esc).join(', ')}.</span>`);
+  if(!r.items.some(x=>/\bbutter\b/i.test(x.name))) msgs.push('No butter line on the BEO. Add one if it ships with the bread.');
+  if(r.items.some(x=>x.auto)) msgs.push('Gravy was listed under a protein, so it was added as its own half pan right after it.');
+  if(r.notes.length) msgs.push('BEO notes: '+r.notes.map(esc).join(' · '));
+  if(r.log.length) msgs.push('<span class="err">'+r.log.map(esc).join(' ')+'</span>');
+  const box=document.getElementById('beoMsg'); box.style.display='';
+  box.innerHTML=`<b>Loaded ${esc(r.name||'BEO')}${r.eventNo?' · '+esc(r.eventNo):''}</b> · ${r.items.length} line items${r.dessert.length?', '+r.dessert.length+' dessert items':''}.<ul>${msgs.map(m=>`<li>${m}</li>`).join('')}</ul>`;
+  syncInputs(); update();
+}
+
+function loadPdfJs(){
+  if(window.pdfjsLib) return Promise.resolve();
+  return new Promise((res,rej)=>{ const sc=document.createElement('script'); sc.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js'; sc.onload=()=>{ pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; res(); }; sc.onerror=()=>rej(new Error('Could not load the PDF reader (needs internet).')); document.head.appendChild(sc); });
+}
+async function readBEO(file){
+  const box=document.getElementById('beoMsg'); box.style.display=''; box.textContent='Reading '+file.name+'…';
+  try{
+    await loadPdfJs();
+    const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
+    const lines=[];
+    for(let p=1;p<=pdf.numPages;p++){
+      const page=await pdf.getPage(p); const tc=await page.getTextContent();
+      const rows=[];
+      for(const it of tc.items){ if(!it.str.trim()) continue; const x=it.transform[4], y=it.transform[5];
+        let row=rows.find(r=>Math.abs(r.y-y)<3); if(!row){ row={y,parts:[]}; rows.push(row); } row.parts.push({x,str:it.str,w:it.width}); }
+      rows.sort((a,b)=>b.y-a.y);
+      for(const row of rows){ row.parts.sort((a,b)=>a.x-b.x); let text='',last=null; for(const pt of row.parts){ if(last!==null && pt.x-last>2) text+=' '; text+=pt.str; last=pt.x+pt.w; }
+        const m=text.match(/^\(\d+\)\s*/); let nameX=row.parts[0].x; if(m){ const p2=row.parts.find(pt=>!/^\(\d+\)\s*$/.test(pt.str)&&pt.x>row.parts[0].x); if(p2) nameX=p2.x; else nameX=row.parts[0].x+row.parts[0].w; }
+        lines.push({x:row.parts[0].x,nameX,text}); }
+    }
+    if(!lines.length) throw new Error('No text found in this PDF (it may be a scan).');
+    applyBEO(parseBEO(lines));
+  }catch(e){ box.innerHTML='<span class="err">'+esc(e.message||String(e))+'</span>'; }
+}
+(function(){
+  const drop=document.getElementById('drop'), inp=document.getElementById('beoFile');
+  inp.addEventListener('change',()=>{ if(inp.files[0]) readBEO(inp.files[0]); inp.value=''; });
+  ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('hot');}));
+  ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('hot');}));
+  drop.addEventListener('drop',e=>{ const f=e.dataTransfer.files&&e.dataTransfer.files[0]; if(f) readBEO(f); });
+})();
+
+/* ===================== init ===================== */
+(function init(){
+  let saved=null; try{ saved=JSON.parse(localStorage.getItem('pns-planogram')||'null'); }catch(_){}
+  if(saved && saved.items){ Object.assign(S,saved); S.ds=Object.assign({on:false,sides:'double',pies:[],boxes:0,plates:true,whip:true,cups:true},saved.ds||{}); S.items=(saved.items||[]).map(i=>{const o=Object.assign({},i); delete o.id; return mkItem(o);}); syncInputs(); update(); }
+  else loadExample('gerdau');
+})();
+</script>
+</body>
+</html>
