@@ -139,11 +139,8 @@ input[type=text],input[type=number],input[type=date],select{width:100%;padding:6
     <label class="chk"><input type="checkbox" id="dsCups" checked> Fork and spoon cups (4" dia each)</label>
   </div>
 
-  <h2>Examples</h2>
-  <div class="btnrow" style="margin-top:0">
-    <button class="btn sm" onclick="loadExample('gerdau')">Gerdau Thanksgiving (150)</button>
-    <button class="btn sm" onclick="loadExample('team')">TeamStrength Lunch (10)</button>
-    <button class="btn sm" onclick="if(confirm('Clear all items?')){S.items=[];renderItems();update();}">Clear items</button>
+  <div class="btnrow" style="margin-top:14px">
+    <button class="btn sm" onclick="if(confirm('Start a blank plan? This clears the current items.')){newPlan();}">New blank plan</button>
   </div>
 </aside>
 
@@ -640,26 +637,11 @@ function update(){
   try{ localStorage.setItem('pns-planogram', JSON.stringify(S)); }catch(_){}
 }
 
-/* ===================== examples ===================== */
-function loadExample(k){
-  if(k==='gerdau'){
-    Object.assign(S,{name:'Gerdau Thanksgiving',date:'2026-11-17',guests:150,tlen:96,tdepth:30,lstyle:'double',chafer:'wire',optMenu:false,optLabels:true});
-    S.items=[mkItem({name:'Plates',type:'plates'}),
-      mkItem({name:'Winter Greens Salad',count:60,type:'cold'}),mkItem({name:'Green Beans',count:120,type:'hot'}),
-      mkItem({name:'Roasted Yams',count:50,type:'hot'}),mkItem({name:'Whipped Potatoes',count:100,type:'hot'}),
-      mkItem({name:'Bread Dressing',count:120,type:'hot'}),mkItem({name:'Turkey',count:150,type:'hot'}),
-      mkItem({name:'Gravy',type:'gravy'}),mkItem({name:'Ham',count:80,type:'hot'}),
-      mkItem({name:'Focaccia',count:150,type:'cold'}),mkItem({name:'Butter',type:'cold'}),mkItem({name:'Flatware',type:'flatware'})];
-    S.ds={on:true,sides:'double',pies:[{name:'Apple pie'},{name:'Pumpkin pie'},{name:'Pecan pie'}],boxes:9,plates:true,whip:true,cups:true};
-  } else {
-    Object.assign(S,{name:'TeamStrength Lunch',date:'',guests:10,tlen:96,tdepth:30,lstyle:'single',chafer:'round',roundDia:18,optMenu:false,optLabels:true});
-    S.items=[mkItem({name:'Plates',type:'plates'}),
-      mkItem({name:'Fall Greens Salad',count:10,type:'cold'}),mkItem({name:'Bleu cheese',type:'sauce'}),mkItem({name:'Vinaigrette',type:'sauce'}),
-      mkItem({name:'Veg Medley',count:10,type:'hot'}),mkItem({name:'Risotto Cake',count:10,type:'hot'}),
-      mkItem({name:'Salmon',count:10,type:'hot'}),mkItem({name:'Short Rib',count:10,type:'hot'}),
-      mkItem({name:'Cookie platter',count:12,type:'cold',size:'12x16'}),mkItem({name:'Flatware',type:'flatware'})];
-    S.ds={on:false,sides:'double',pies:[],boxes:0,plates:true,whip:true,cups:true};
-  }
+/* ===================== new blank plan ===================== */
+function newPlan(){
+  Object.assign(S,{name:'',date:'',guests:50,tlen:96,tdepth:30,lstyle:'auto',chafer:'wire',roundDia:18,optMenu:false,optLabels:true});
+  S.items=[mkItem({name:'Plates',type:'plates'}),mkItem({name:'',type:'hot'}),mkItem({name:'Flatware',type:'flatware'})];
+  S.ds={on:false,sides:'double',pies:[],boxes:0,plates:true,whip:true,cups:true};
   syncInputs(); update();
 }
 
@@ -796,7 +778,7 @@ async function readBEO(file){
 (function init(){
   let saved=null; try{ saved=JSON.parse(localStorage.getItem('pns-planogram')||'null'); }catch(_){}
   if(saved && saved.items){ Object.assign(S,saved); S.ds=Object.assign({on:false,sides:'double',pies:[],boxes:0,plates:true,whip:true,cups:true},saved.ds||{}); S.items=(saved.items||[]).map(i=>{const o=Object.assign({},i); delete o.id; return mkItem(o);}); syncInputs(); update(); }
-  else loadExample('gerdau');
+  else newPlan();
 })();
 </script>
 </body>
