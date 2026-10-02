@@ -750,13 +750,11 @@ function photoForItem(name, sectionTitle, desc){
   const both=(name||"")+" "+st;
   // desserts never fall back to a savory sides photo
   if(DESSERT_NAME.test(name||"") || /dessert|sweet/.test(st)) return null;
-  // any salad-named item (any section) → generic salad buffet
-  if(SALAD_NAME.test(name||"") || /salad/.test(st)) return _menuFb("salad");
+  // (generic stand-in fallback removed: items without their own photo show none)
   // wraps are not sandwiches on bread — never give them the generic sandwich photo
   if(/\bwraps?\b/i.test(name||"")) return null;
-  if(/sandwich|handheld|light fare/i.test(both)) return _menuFb("sandwich");
-  // only genuine sides / accompaniments get the sides-display photo
-  if(/\bside\b|sides|accompaniment|enhancement|family.?style/i.test(both)) return _menuFb("entree");
+  // (generic stand-in fallback removed: items without their own photo show none)
+  // (generic stand-in fallback removed: items without their own photo show none)
   return null;
 }
 // the photo actually used for an item — null when the planner X'd it off
