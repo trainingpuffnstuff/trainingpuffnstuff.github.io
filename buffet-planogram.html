@@ -112,6 +112,7 @@ input[type=text],input[type=number],input[type=date],select{width:100%;padding:6
   <label class="f">Chafer type</label>
   <div class="seg" id="chafer"><button data-v="wire" class="on">Wire rack (rectangular)</button><button data-v="round">Reusable round 7 qt</button></div>
   <div id="roundBox" style="display:none"><label class="f">Round 7 qt chafer diameter (in, estimate)</label><input type="number" id="roundDia" value="18" min="10" max="30" step="0.5"></div>
+  <label class="chk" style="margin-top:8px"><input type="checkbox" id="spaceSaver"> Space saver: turn rectangular chafers sideways where depth allows and pack the line tight</label>
 
   <h2>Menu items</h2>
   <div class="hint">Drag ⠿ to reorder. Sauces and gravy sit right after the item above them. Size override: "L x D" in inches (L runs along the table), or one number for a round vessel.</div>
@@ -177,7 +178,7 @@ const PROTEIN=/\b(turkey|ham|chicken|beef|salmon|short ?ribs?|pork|steak|meatloa
 let uid=1;
 const S={
   name:'',date:'',guests:50,tlen:96,tdepth:30,lstyle:'auto',chafer:'wire',roundDia:18,
-  optMenu:false,optLabels:true,
+  optMenu:false,optLabels:true,spaceSaver:false,
   items:[],
   ds:{on:false,sides:'double',pies:[],boxes:0,plates:true,whip:true,cups:true}
 };
@@ -281,7 +282,7 @@ function slotLen(v,ds){
   const span = ds ? SZ.tent[0] + (u.L? 0.75+u.L:0) : SZ.tent[0] + (u.L? 0.75+u.w:0);
   return Math.max(v.L, span);
 }
-function layoutLine(vs,TL,ds){
+function layoutLine(vs,TL,ds,tight){
   let x=END; const pl=[];
   for(const v of vs){
     const L=slotLen(v,ds);
@@ -294,8 +295,8 @@ function layoutLine(vs,TL,ds){
   // minimal run (before spreading)
   // continuous run if the line were one long table: end margins + every item + 2" gaps
   const run = pl.length? 2*END + pl.reduce((a,p)=>a+p.L,0) + GAP*(pl.length-1) : 0;
-  // spread evenly within each table
-  for(let t=0;t<n;t++){
+  // spread evenly within each table (skip in space-saver: keep the tight packing above)
+  if(!tight) for(let t=0;t<n;t++){
     const g=pl.filter(p=>p.x>=t*TL && p.x<(t+1)*TL);
     if(!g.length) continue;
     const used=g.reduce((a,p)=>a+p.L,0);
@@ -371,7 +372,15 @@ function dimH(x1,x2,y,t,fs=2.2){
 function compute(){
   const TL=+S.tlen, TD=+S.tdepth||30, ds=isDouble();
   const vs=resolve();
-  const L=layoutLine(vs,TL,ds);
+  // space saver: turn rectangular hot pans 90° (long side into the depth) where it still fits
+  let rotated=0;
+  if(S.spaceSaver){
+    const avail = ds ? TD/2 : TD - SINGLE_BACK;   // depth available to one vessel on its side of the line
+    for(const v of vs){
+      if(v.shape==='rect' && v.kind==='hot' && v.L>v.D && v.L<=avail){ [v.L,v.D]=[v.D,v.L]; v.rotated=true; v.reason+='; turned sideways (space saver), long side into the table depth'; rotated++; }
+    }
+  }
+  const L=layoutLine(vs,TL,ds,S.spaceSaver);
   const body=vs.filter(v=>!v.front);
   const deep=body.length?Math.max(...body.map(v=>v.D)):0;
   const lane= ds ? (TD-2*deep)/2 : SINGLE_BACK;
@@ -379,7 +388,7 @@ function compute(){
   // chafer counts
   let full=0,half=0,roundC=0;
   for(const v of vs){ if(v.kind!=='hot') continue; if(v.pan==='full') full+=sides; else if(v.pan==='half') half+=sides; else if(v.pan==='round') roundC+=sides; }
-  return {TL,TD,ds,vs,L,deep,lane,sides,full,half,roundC};
+  return {TL,TD,ds,vs,L,deep,lane,sides,full,half,roundC,rotated};
 }
 
 function draw(){
@@ -468,6 +477,7 @@ function draw(){
   if(dsRes) dsRes.notes.forEach(x=>(x.warn?warns:notes).push(x.t));
 
   const whyRows=C.vs.map(v=>`<li><b>${esc(v.name)}</b>: ${esc(v.reason)}${v.ut&&v.ut!=='none'?`; ${esc(UT[v.ut].n)}${v.utWhy?` (${esc(v.utWhy)})`:''}`:''}${ds&&!v.front?'; mirrored on both sides':''}.</li>`).join('');
+  if(S.spaceSaver){ if(C.rotated) notes.push(`Space saver on: ${C.rotated} rectangular chafer${C.rotated>1?'s':''} turned sideways (long side into the table depth) and the line packed tight instead of spread.`); else notes.push('Space saver on: line packed tight. No chafers could be turned sideways here — the rotated depth would not fit, so none were rotated.'); }
   const lineWhy = S.lstyle==='auto' ? `Line style: auto → ${S.guests} guests is ${ds?'over 50, so double sided':'50 or fewer, so single sided'}.` : `Line style set to ${ds?'double':'single'} sided.`;
   document.getElementById('notes').innerHTML=
     (warns.length?`<h3>Warnings</h3><ul>${warns.map(w=>`<li class="warn">${esc(w)}</li>`).join('')}</ul>`:'')+
@@ -616,7 +626,7 @@ seg('dsSides','dsSides',v=>S.ds.sides=v);
 const bind=(id,fn,ev='input')=>document.getElementById(id).addEventListener(ev,e=>{fn(e.target);update();});
 bind('evName',t=>S.name=t.value); bind('evDate',t=>S.date=t.value); bind('evGuests',t=>S.guests=+t.value||0);
 bind('tdepth',t=>S.tdepth=+t.value||30); bind('roundDia',t=>S.roundDia=+t.value||18);
-bind('optMenu',t=>S.optMenu=t.checked,'change'); bind('optLabels',t=>S.optLabels=t.checked,'change');
+bind('optMenu',t=>S.optMenu=t.checked,'change'); bind('optLabels',t=>S.optLabels=t.checked,'change'); bind('spaceSaver',t=>S.spaceSaver=t.checked,'change');
 bind('dsOn',t=>{S.ds.on=t.checked;document.getElementById('dsBox').style.display=t.checked?'':'none';},'change');
 bind('dsBoxes',t=>S.ds.boxes=+t.value||0); bind('dsPlates',t=>S.ds.plates=t.checked,'change'); bind('dsWhip',t=>S.ds.whip=t.checked,'change'); bind('dsCups',t=>S.ds.cups=t.checked,'change');
 
@@ -624,7 +634,7 @@ function syncInputs(){
   const v=(id,x)=>document.getElementById(id).value=x;
   v('evName',S.name); v('evDate',S.date); v('evGuests',S.guests); v('tdepth',S.tdepth); v('roundDia',S.roundDia); v('dsBoxes',S.ds.boxes);
   const c=(id,x)=>document.getElementById(id).checked=x;
-  c('optMenu',S.optMenu); c('optLabels',S.optLabels); c('dsOn',S.ds.on); c('dsPlates',S.ds.plates); c('dsWhip',S.ds.whip); c('dsCups',S.ds.cups);
+  c('optMenu',S.optMenu); c('optLabels',S.optLabels); c('spaceSaver',S.spaceSaver); c('dsOn',S.ds.on); c('dsPlates',S.ds.plates); c('dsWhip',S.ds.whip); c('dsCups',S.ds.cups);
   syncSeg('tlen',S.tlen); syncSeg('lstyle',S.lstyle); syncSeg('chafer',S.chafer); syncSeg('dsSides',S.ds.sides);
   document.getElementById('roundBox').style.display=S.chafer==='round'?'':'none';
   document.getElementById('dsBox').style.display=S.ds.on?'':'none';
