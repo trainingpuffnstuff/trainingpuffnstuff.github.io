@@ -3,17 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <title>Buffet Line Planogram | Puff 'n Stuff</title>
 <style>
-:root{--wine:#7a1e2d;--gold:#b08d57;--ink:#2b2622;--soft:#8a817a;--line:#e5e0d8;--bg:#faf7f2;--panel:#fffdfa;--hot:#c0392b;--cold:#1f6fb2;--ware:#6b6b6b;--tent:#fff3b0}
+:root{--wine:#202020;--gold:#424242;--ink:#202020;--soft:#6b6b6b;--line:#e8e8e6;--bg:#fefff9;--panel:#ffffff;--serif:"Playfair Display",Georgia,"Times New Roman",serif;--sans:Lato,"Segoe UI",system-ui,sans-serif;--hot:#c0392b;--cold:#1f6fb2;--ware:#6b6b6b;--tent:#fff3b0}
 *{box-sizing:border-box}
-body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--bg);font-size:14px}
+body{margin:0;font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:14px}
 header{background:var(--panel);border-bottom:1px solid var(--line);padding:14px 20px}
-header h1{font-family:Georgia,'Times New Roman',serif;color:var(--wine);margin:0;font-size:1.5rem}
+header h1{font-family:var(--serif);font-weight:500;color:var(--wine);margin:0;font-size:1.5rem}
 header p{margin:3px 0 0;color:var(--soft);font-size:.86rem}
 .wrap{display:grid;grid-template-columns:380px 1fr;gap:16px;padding:16px 20px;align-items:start}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
-.panel h2{font-family:Georgia,serif;color:var(--wine);font-size:1.05rem;margin:14px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+.panel h2{font-family:var(--serif);font-weight:500;color:var(--wine);font-size:1.05rem;margin:14px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--line)}
 .panel h2:first-child{margin-top:0}
 label.f{display:block;font-size:.78rem;color:var(--soft);margin:6px 0 2px}
 input[type=text],input[type=number],input[type=date],select{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-size:.88rem;background:#fff;font-family:inherit}
@@ -25,14 +26,14 @@ input[type=text],input[type=number],input[type=date],select{width:100%;padding:6
 .chk{display:flex;gap:7px;align-items:flex-start;font-size:.84rem;margin:5px 0;cursor:pointer}
 .chk input{margin-top:2px}
 .btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 11px;font-size:.82rem;cursor:pointer;font-family:inherit;color:var(--ink)}
-.btn:hover{background:#f6efe3}
+.btn:hover{background:#f3f3f1}
 .btn.pri{background:var(--wine);color:#fff;border-color:var(--wine)}
 .btn.sm{padding:3px 8px;font-size:.75rem}
 .btnrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 /* item rows */
 #items{display:flex;flex-direction:column;gap:6px}
 .it{border:1px solid var(--line);border-radius:9px;padding:6px 6px 6px 4px;background:#fff;display:grid;grid-template-columns:18px 1fr;gap:4px}
-.it.dragover{border-color:var(--gold);box-shadow:0 -3px 0 var(--gold)}
+.it.dragover{border-color:#202020;box-shadow:0 -3px 0 #202020}
 .it.dragging{opacity:.45}
 .grip{cursor:grab;color:#b9aea2;font-size:15px;line-height:1;text-align:center;padding-top:4px;user-select:none}
 .it .g1{display:grid;grid-template-columns:1fr 64px;gap:5px}
@@ -43,8 +44,8 @@ input[type=text],input[type=number],input[type=date],select{width:100%;padding:6
 .it .mv button{border:0;background:none;color:#aaa;cursor:pointer;font-size:10px;line-height:1;padding:1px}
 .it.t-hot{border-left:4px solid var(--hot)}.it.t-gravy{border-left:4px solid var(--hot)}.it.t-cold{border-left:4px solid var(--cold)}.it.t-sauce{border-left:4px solid var(--cold)}.it.t-ware{border-left:4px solid var(--ware)}
 .drop{border:1.5px dashed #c9b9a6;border-radius:10px;padding:10px 12px;background:#fff;font-size:.84rem;text-align:center}
-.drop.hot{border-color:var(--gold);background:#f6efe3}
-.beomsg{margin-top:8px;border-radius:9px;padding:8px 10px;font-size:.8rem;background:#f6efe3;border:1px solid #e2cfa2}
+.drop.hot{border-color:#202020;background:#f3f3f1}
+.beomsg{margin-top:8px;border-radius:9px;padding:8px 10px;font-size:.8rem;background:#f3f3f1;border:1px solid var(--line)}
 .beomsg ul{margin:4px 0 0;padding-left:16px}.beomsg .err{color:#a8321f}
 .hint{font-size:.72rem;color:var(--soft);margin-top:3px}
 /* dessert */
@@ -53,12 +54,12 @@ input[type=text],input[type=number],input[type=date],select{width:100%;padding:6
 .out{min-width:0}
 .summary{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
 .stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px;min-width:110px}
-.stat b{display:block;font-size:1.15rem;color:var(--wine);font-family:Georgia,serif}
+.stat b{display:block;font-size:1.15rem;color:var(--wine);font-family:var(--serif);font-weight:500}
 .stat span{font-size:.72rem;color:var(--soft)}
 .planbox{background:#fff;border:1px solid var(--line);border-radius:12px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
 .planbox svg{display:block;width:100%;min-width:900px;height:auto}
 .notes{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-top:10px;font-size:.84rem}
-.notes h3{margin:4px 0 6px;font-size:.92rem;color:var(--wine);font-family:Georgia,serif}
+.notes h3{margin:4px 0 6px;font-size:.92rem;color:var(--wine);font-family:var(--serif);font-weight:500}
 .notes ul{margin:0 0 6px;padding-left:18px}.notes li{margin:2px 0}
 .warn{color:#a8321f;font-weight:600}
 .why{font-size:.8rem;color:#4b443e}
@@ -71,7 +72,7 @@ input[type=text],input[type=number],input[type=date],select{width:100%;padding:6
   body{background:#fff;font-size:10px}
   header,.panel,.btnrow,.noprint{display:none!important}
   .wrap{display:block;padding:0}
-  .printhead{display:block;font-family:Georgia,serif;margin-bottom:4px}
+  .printhead{display:block;font-family:var(--serif);font-weight:500;margin-bottom:4px}
   .printhead b{font-size:14px;color:#000}.printhead span{font-size:10px;color:#333;margin-left:8px}
   .summary{gap:6px;margin-bottom:4px}.stat{padding:3px 8px;min-width:0;border-color:#ccc}.stat b{font-size:12px}
   .planbox{border:0;overflow:visible}
@@ -124,7 +125,7 @@ input[type=text],input[type=number],input[type=date],select{width:100%;padding:6
   <label class="chk"><input type="checkbox" id="optMenu" checked> Menu sign at the start of the line</label>
   <label class="chk"><input type="checkbox" id="optLabels" checked> Tent label and utensil in front of each item</label>
 
-  <h2>Dessert station <span style="font-size:.75rem;color:var(--soft);font-family:'Segoe UI',sans-serif">(separate table)</span></h2>
+  <h2>Dessert station <span style="font-size:.75rem;color:var(--soft);font-family:var(--sans)">(separate table)</span></h2>
   <label class="chk"><input type="checkbox" id="dsOn"> Add a dessert station</label>
   <div id="dsBox" style="display:none">
     <label class="f">Sides</label>
@@ -326,7 +327,7 @@ function label(x,y,w,h,t,color){
   while((lines.length*fs*1.1>h-0.8 || lines.some(l=>l.length*fs*0.55>w-0.6)) && fs>0.9){ fs-=0.15; lines=wrapText(t,w-0.8,fs); }
   const y0=y+h/2-(lines.length-1)*fs*1.1/2;
   const ts=lines.map((l,i)=>`<tspan x="${x+w/2}" dy="${i?fs*1.1:0}">${esc(l)}</tspan>`).join('');
-  const base=`y="${y0}" font-size="${fs.toFixed(2)}" text-anchor="middle" dominant-baseline="middle" font-family="Segoe UI,Arial,sans-serif"`;
+  const base=`y="${y0}" font-size="${fs.toFixed(2)}" text-anchor="middle" dominant-baseline="middle" font-family="Lato,Segoe UI,Arial,sans-serif"`;
   return `<g class="lbl"><text x="${x+w/2}" ${base} fill="#fff" stroke="#fff" stroke-width="${(fs*0.3).toFixed(2)}" stroke-linejoin="round">${ts}</text><text x="${x+w/2}" ${base} fill="${color}">${ts}</text></g>`;
 }
 function vessel(v,x,y){ // x,y top-left
@@ -366,7 +367,7 @@ function utPerp(k,xc,y0){
 function dimH(x1,x2,y,t,fs=2.2){
   return `<g stroke="#333" stroke-width="0.18"><line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}"/><line x1="${x1}" y1="${y-1.2}" x2="${x1}" y2="${y+1.2}"/><line x1="${x2}" y1="${y-1.2}" x2="${x2}" y2="${y+1.2}"/></g>`+
     `<path d="M${x1},${y} l1.2,-0.6 v1.2 z M${x2},${y} l-1.2,-0.6 v1.2 z" fill="#333"/>`+
-    `<text x="${(x1+x2)/2}" y="${y-0.8}" font-size="${fs}" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" fill="#222">${esc(t)}</text>`;
+    `<text x="${(x1+x2)/2}" y="${y-0.8}" font-size="${fs}" text-anchor="middle" font-family="Lato,Segoe UI,Arial,sans-serif" fill="#222">${esc(t)}</text>`;
 }
 
 /* ===================== main draw ===================== */
@@ -390,7 +391,7 @@ function draw(){
   const y0=top; const mid=y0+TD/2;
   let s=''; const notes=[]; const warns=[];
   // tables
-  for(let i=0;i<n;i++) s+=`<rect x="${i*TL}" y="${y0}" width="${TL}" height="${TD}" fill="#f4efe4" stroke="#222" stroke-width="0.35"/>`;
+  for(let i=0;i<n;i++) s+=`<rect x="${i*TL}" y="${y0}" width="${TL}" height="${TD}" fill="#f3f3f1" stroke="#222" stroke-width="0.35"/>`;
   if(ds) s+=`<line x1="0" y1="${mid}" x2="${W}" y2="${mid}" stroke="#999" stroke-width="0.15" stroke-dasharray="1 1"/>`;
   // items
   for(const p of L.pl){
@@ -417,25 +418,25 @@ function draw(){
     }
   }
   // guest side labels
-  const sideLbl=(y,t)=>`<text x="${W/2}" y="${y}" font-size="3" font-weight="700" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" fill="#222">${t}</text>`;
+  const sideLbl=(y,t)=>`<text x="${W/2}" y="${y}" font-size="3" font-weight="700" text-anchor="middle" font-family="Lato,Segoe UI,Arial,sans-serif" fill="#222">${t}</text>`;
   if(ds){ s+=sideLbl(y0-3,'SIDE 2 guests · flow left → right'); }
   s+=sideLbl(y0+TD+5,ds?'SIDE 1 guests · flow left → right':'GUESTS · flow left → right');
   // depth dim
-  s+=`<g stroke="#333" stroke-width="0.18"><line x1="-4" y1="${y0}" x2="-4" y2="${y0+TD}"/><line x1="-5.2" y1="${y0}" x2="-2.8" y2="${y0}"/><line x1="-5.2" y1="${y0+TD}" x2="-2.8" y2="${y0+TD}"/></g><text x="-5.5" y="${mid}" font-size="2.2" text-anchor="middle" transform="rotate(-90 -5.5 ${mid})" font-family="Segoe UI,Arial,sans-serif">${TD}"</text>`;
-  if(!ds) s+=`<g stroke="#999" stroke-width="0.15" stroke-dasharray="0.8 0.6"><line x1="0" y1="${y0+TD-SINGLE_BACK}" x2="${W}" y2="${y0+TD-SINGLE_BACK}"/></g><text x="${W+1}" y="${y0+TD-SINGLE_BACK/2}" font-size="1.8" dominant-baseline="middle" font-family="Segoe UI,Arial,sans-serif" fill="#666">6" lane</text>`;
+  s+=`<g stroke="#333" stroke-width="0.18"><line x1="-4" y1="${y0}" x2="-4" y2="${y0+TD}"/><line x1="-5.2" y1="${y0}" x2="-2.8" y2="${y0}"/><line x1="-5.2" y1="${y0+TD}" x2="-2.8" y2="${y0+TD}"/></g><text x="-5.5" y="${mid}" font-size="2.2" text-anchor="middle" transform="rotate(-90 -5.5 ${mid})" font-family="Lato,Segoe UI,Arial,sans-serif">${TD}"</text>`;
+  if(!ds) s+=`<g stroke="#999" stroke-width="0.15" stroke-dasharray="0.8 0.6"><line x1="0" y1="${y0+TD-SINGLE_BACK}" x2="${W}" y2="${y0+TD-SINGLE_BACK}"/></g><text x="${W+1}" y="${y0+TD-SINGLE_BACK/2}" font-size="1.8" dominant-baseline="middle" font-family="Lato,Segoe UI,Arial,sans-serif" fill="#666">6" lane</text>`;
   // dimension lines
   let yd=y0+TD+11;
   for(let i=0;i<n;i++) s+=dimH(i*TL,(i+1)*TL,yd,`${TL}" (${TL/12} ft) table`);
   yd+=7; s+=dimH(0,W,yd,`${n} × ${TL/12} ft tables = ${W/12} ft`,2.5);
   // item length / utensil row (rotated text)
   yd+=4;
-  s+=`<text x="-1" y="${yd}" font-size="1.7" text-anchor="end" font-family="Segoe UI,Arial,sans-serif" fill="#555"><tspan x="-1">length</tspan><tspan x="-1" dy="2">· utensil</tspan></text>`;
+  s+=`<text x="-1" y="${yd}" font-size="1.7" text-anchor="end" font-family="Lato,Segoe UI,Arial,sans-serif" fill="#555"><tspan x="-1">length</tspan><tspan x="-1" dy="2">· utensil</tspan></text>`;
   let maxRow=0;
   for(const p of L.pl){
     const v=p.v; const u=UT[v.ut]||UT.none;
     const txt=`${v.shape==='round'?v.L+'" dia':v.L+'"'} · ${u.n}`;
     maxRow=Math.max(maxRow,txt.length*1.9*0.55);
-    s+=`<text x="${p.x+p.L/2}" y="${yd}" font-size="1.9" text-anchor="end" transform="rotate(-90 ${p.x+p.L/2} ${yd})" font-family="Segoe UI,Arial,sans-serif" fill="#333">${esc(txt)}</text>`;
+    s+=`<text x="${p.x+p.L/2}" y="${yd}" font-size="1.9" text-anchor="end" transform="rotate(-90 ${p.x+p.L/2} ${yd})" font-family="Lato,Segoe UI,Arial,sans-serif" fill="#333">${esc(txt)}</text>`;
   }
   let yEnd=yd+maxRow+4;
   // dessert station
@@ -503,7 +504,7 @@ function drawDessert(TL,TD,y0){
   for(const p of D.pies){ const isPie=/pie/i.test(p.name)||p.pie; edge.push({n:p.name||'Pie',sz:p.size||SZ.pie,shape:'round',kind:'cold',server:isPie,gap:1}); }
   if(D.whip) edge.push({n:'Whipped cream',sz:SZ.whip,shape:'round',kind:'cold',gap:2});
   if(D.cups){ edge.push({n:'Forks',sz:SZ.cup,shape:'round',kind:'ware',gap:1}); edge.push({n:'Spoons',sz:SZ.cup,shape:'round',kind:'ware',gap:1}); }
-  s+=`<rect x="0" y="${y0}" width="${TL}" height="${TD}" fill="#f4efe4" stroke="#222" stroke-width="0.35"/>`;
+  s+=`<rect x="0" y="${y0}" width="${TL}" height="${TD}" fill="#f3f3f1" stroke="#222" stroke-width="0.35"/>`;
   const deep=edge.length?Math.max(...edge.map(e=>e.sz)):0;
   function row(yc,flip){
     let x=END;
@@ -529,8 +530,8 @@ function drawDessert(TL,TD,y0){
   }
   const st=(t,warn)=>notes.push({t,warn});
   const sideTxt=ds?'SIDE 1 guests ↑ (bottom) · SIDE 2 guests ↓ (top)':'GUESTS ↑ (bottom edge)';
-  s+=`<text x="${TL/2}" y="${y0-3}" font-size="3" font-weight="700" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif">DESSERT STATION · ${TL/12} ft x ${TD}" table · ${ds?'double':'single'} sided</text>`;
-  s+=`<text x="${TL/2}" y="${y0+TD+4}" font-size="2.2" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" fill="#444">${sideTxt}</text>`;
+  s+=`<text x="${TL/2}" y="${y0-3}" font-size="3" font-weight="700" text-anchor="middle" font-family="Lato,Segoe UI,Arial,sans-serif">DESSERT STATION · ${TL/12} ft x ${TD}" table · ${ds?'double':'single'} sided</text>`;
+  s+=`<text x="${TL/2}" y="${y0+TD+4}" font-size="2.2" text-anchor="middle" font-family="Lato,Segoe UI,Arial,sans-serif" fill="#444">${sideTxt}</text>`;
   s+=dimH(0,TL,y0+TD+9,`${TL}" table`);
   // checks
   if(ds){
