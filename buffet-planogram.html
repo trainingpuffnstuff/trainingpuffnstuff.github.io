@@ -122,7 +122,7 @@ input[type=text],input[type=number],input[type=date],select{width:100%;padding:6
   </div>
 
   <h2>Labels &amp; signs</h2>
-  <label class="chk"><input type="checkbox" id="optMenu" checked> Menu sign at the start of the line</label>
+  <label class="chk"><input type="checkbox" id="optMenu"> Menu sign at the start of the line <span style="color:var(--soft)">(off by default)</span></label>
   <label class="chk"><input type="checkbox" id="optLabels" checked> Tent label and utensil in front of each item</label>
 
   <h2>Dessert station <span style="font-size:.75rem;color:var(--soft);font-family:var(--sans)">(separate table)</span></h2>
@@ -180,7 +180,7 @@ const PROTEIN=/\b(turkey|ham|chicken|beef|salmon|short ?ribs?|pork|steak|meatloa
 let uid=1;
 const S={
   name:'',date:'',guests:50,tlen:96,tdepth:30,lstyle:'auto',chafer:'wire',roundDia:18,
-  optMenu:true,optLabels:true,
+  optMenu:false,optLabels:true,
   items:[],
   ds:{on:false,sides:'double',pies:[],boxes:0,plates:true,whip:true,cups:true}
 };
@@ -643,8 +643,8 @@ function update(){
 /* ===================== examples ===================== */
 function loadExample(k){
   if(k==='gerdau'){
-    Object.assign(S,{name:'Gerdau Thanksgiving',date:'2026-11-17',guests:150,tlen:96,tdepth:30,lstyle:'double',chafer:'wire',optMenu:true,optLabels:true});
-    S.items=[mkItem({name:'Menu sign',type:'menu'}),mkItem({name:'Plates',type:'plates'}),
+    Object.assign(S,{name:'Gerdau Thanksgiving',date:'2026-11-17',guests:150,tlen:96,tdepth:30,lstyle:'double',chafer:'wire',optMenu:false,optLabels:true});
+    S.items=[mkItem({name:'Plates',type:'plates'}),
       mkItem({name:'Winter Greens Salad',count:60,type:'cold'}),mkItem({name:'Green Beans',count:120,type:'hot'}),
       mkItem({name:'Roasted Yams',count:50,type:'hot'}),mkItem({name:'Whipped Potatoes',count:100,type:'hot'}),
       mkItem({name:'Bread Dressing',count:120,type:'hot'}),mkItem({name:'Turkey',count:150,type:'hot'}),
@@ -652,8 +652,8 @@ function loadExample(k){
       mkItem({name:'Focaccia',count:150,type:'cold'}),mkItem({name:'Butter',type:'cold'}),mkItem({name:'Flatware',type:'flatware'})];
     S.ds={on:true,sides:'double',pies:[{name:'Apple pie'},{name:'Pumpkin pie'},{name:'Pecan pie'}],boxes:9,plates:true,whip:true,cups:true};
   } else {
-    Object.assign(S,{name:'TeamStrength Lunch',date:'',guests:10,tlen:96,tdepth:30,lstyle:'single',chafer:'round',roundDia:18,optMenu:true,optLabels:true});
-    S.items=[mkItem({name:'Menu sign',type:'menu'}),mkItem({name:'Plates',type:'plates'}),
+    Object.assign(S,{name:'TeamStrength Lunch',date:'',guests:10,tlen:96,tdepth:30,lstyle:'single',chafer:'round',roundDia:18,optMenu:false,optLabels:true});
+    S.items=[mkItem({name:'Plates',type:'plates'}),
       mkItem({name:'Fall Greens Salad',count:10,type:'cold'}),mkItem({name:'Bleu cheese',type:'sauce'}),mkItem({name:'Vinaigrette',type:'sauce'}),
       mkItem({name:'Veg Medley',count:10,type:'hot'}),mkItem({name:'Risotto Cake',count:10,type:'hot'}),
       mkItem({name:'Salmon',count:10,type:'hot'}),mkItem({name:'Short Rib',count:10,type:'hot'}),
@@ -739,8 +739,8 @@ function applyBEO(r){
   if(r.name) S.name=r.name; if(r.date) S.date=r.date; if(r.guests) S.guests=r.guests;
   if(r.lineStyle){ S.lstyle=r.lineStyle; msgs.push(`Line style: ${r.lineStyle} sided (from the BEO notes).`); } else { S.lstyle='auto'; msgs.push('No line-style note found; using auto (over 50 guests = double sided).'); }
   if(r.chafer){ S.chafer=r.chafer; }
-  S.optMenu=true; S.optLabels=true;
-  const items=[mkItem({name:'Menu sign',type:'menu'}),mkItem({name:'Plates',type:'plates'})];
+  S.optMenu=false; S.optLabels=true;
+  const items=[mkItem({name:'Plates',type:'plates'})];
   for(const it of r.items) items.push(mkItem({name:it.name,count:it.count,type:it.type}));
   items.push(mkItem({name:'Flatware',type:'flatware'}));
   S.items=items; autoOrder();
