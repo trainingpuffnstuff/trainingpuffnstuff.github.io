@@ -113,6 +113,21 @@ button.add{margin:8px 12px 12px;border:1px dashed #c9bfae;background:none;border
 #previewbar button{background:var(--wine);color:#fff;border:0;border-radius:6px;padding:8px 14px;font:inherit;font-weight:700;cursor:pointer}
 #previewbar button#back{background:transparent;border:1px solid rgba(255,255,255,.4)}
 #previewbar .tip{opacity:.75;font-size:12.5px}
+.offbtn{background:transparent;color:var(--cream);border:1px solid rgba(255,255,255,.35)!important;border-radius:6px;padding:6px 12px;cursor:pointer;font:inherit}
+#previewbar .offbtn{background:transparent;font-weight:400}
+#offpanel{position:fixed;inset:0;background:rgba(38,36,33,.45);z-index:20;display:flex;align-items:center;justify-content:center;padding:16px}
+#offpanel[hidden]{display:none}
+.offcard{background:var(--paper);border-radius:12px;max-width:520px;width:100%;padding:24px 26px;position:relative;box-shadow:0 10px 40px rgba(0,0,0,.25);line-height:1.5}
+.offcard h2{font-family:"Cormorant",serif;font-weight:600;font-size:26px;margin:0 0 6px}
+.offcard ol{padding-left:20px;margin:12px 0}
+.offcard li{margin-bottom:10px}
+.offcard .k{color:var(--soft);font-size:12.5px}
+.offx{position:absolute;right:12px;top:8px;border:0;background:none;font-size:24px;color:var(--soft);cursor:pointer}
+.offbtns{display:flex;gap:10px;align-items:center;margin-top:14px}
+.offgo{background:var(--wine);color:#fff;border-radius:8px;padding:10px 16px;text-decoration:none;font-weight:700}
+#offcopy{border:1px solid var(--rule);background:#fff;border-radius:8px;padding:9px 14px;cursor:pointer;font:inherit}
+#offcopied{color:var(--ok);font-size:12.5px}
+@media print{#offpanel{display:none!important}}
 .previewing #app{display:none}
 .previewing #previewbar{display:flex}
 #out{display:none}
@@ -189,7 +204,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
 </head>
 <body>
 <div id="app">
-  <header><h1>Proposal Builder</h1><span class="sub">SEO in, branded proposal out. Nothing leaves your computer.</span><span class="sp"></span><span class="sub" id="fname"></span><button id="restart" title="Start over with another SEO">Start over</button></header>
+  <header><h1>Proposal Builder</h1><span class="sub">SEO in, branded proposal out. Nothing leaves your computer.</span><span class="sp"></span><span class="sub" id="fname"></span><button class="offbtn" data-off="1" title="Report a problem so the tool can be fixed">Something look off?</button><button id="restart" title="Start over with another SEO">Start over</button></header>
   <main>
     <section id="intro">
       <div id="drop">
@@ -220,9 +235,23 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     </section>
   </main>
 </div>
-<div id="previewbar"><button id="back">← Back to edit</button><button id="print">Print / Save as PDF</button><span id="pcount"></span><span class="tip">In the print dialog: Destination "Save as PDF", Margins "None", Background graphics on.</span></div>
+<div id="previewbar"><button id="back">← Back to edit</button><button id="print">Print / Save as PDF</button><span id="pcount"></span><span class="tip">In the print dialog: Destination "Save as PDF", Margins "None", Background graphics on.</span><span class="sp" style="flex:1"></span><button class="offbtn" data-off="1" title="Report a problem so the tool can be fixed">Something look off?</button></div>
+<div id="offpanel" hidden>
+  <div class="offcard" role="dialog" aria-labelledby="offh">
+    <button class="offx" data-offclose="1" aria-label="Close">×</button>
+    <h2 id="offh">Something look off?</h2>
+    <p>Thanks for flagging it. Every report helps fix the tool for everyone.</p>
+    <ol>
+      <li><b>Take a screenshot</b> of what looks wrong.<br><span class="k">Windows:</span> Windows key + Shift + S &nbsp;•&nbsp; <span class="k">Mac:</span> Cmd + Shift + 4</li>
+      <li><b>Email Rosie</b> with the button below. It fills in the event details for you.</li>
+      <li><b>Attach the screenshot and the SEO PDF</b>, and add a line on what's wrong and what it should say.</li>
+    </ol>
+    <p class="muted">You can keep going in the meantime: anything on the menu can be fixed by hand in the editor before you print.</p>
+    <div class="offbtns"><a id="offmail" class="offgo" href="#">Email Rosie</a><button id="offcopy" type="button">Copy details</button><span id="offcopied"></span></div>
+  </div>
+</div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-26"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -1521,6 +1550,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
 
   // ---------- load SEO ----------
   async function run(file) {
+    window.__PB_FILE = file.name;
     $("#status").textContent = "Reading " + file.name + "…";
     try {
       const buf = await file.arrayBuffer();
@@ -1560,6 +1590,49 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     $("#restart").addEventListener("click", () => { if (confirmRestart()) location.reload(); });
   });
   function confirmRestart() { return true; }
+
+  // ---------- "Something look off?" ----------
+  const REPORT_TO = CFG.reportTo || "rosie@puffnstuff.com";
+  function reportDetails() {
+    const P = PARSED, M = MODEL;
+    const where = document.body.classList.contains("previewing") ? "Preview (built proposal)" : document.body.classList.contains("loaded") ? "Editing screen" : "Upload screen";
+    const ua = navigator.userAgent;
+    const browser = /Edg\//.test(ua) ? "Edge" : /Chrome\//.test(ua) ? "Chrome" : /Safari\//.test(ua) ? "Safari" : /Firefox\//.test(ua) ? "Firefox" : "Other";
+    return [
+      "Event #: " + (P ? P.meta.event_no || "" : "(no SEO loaded)"),
+      "Event: " + (P ? (P.meta.party || P.meta.client || "") : ""),
+      "SEO file: " + (window.__PB_FILE || ""),
+      "Look: " + (M ? RENDER.STYLES[M.style].label : ""),
+      "Where: " + where,
+      "Browser: " + browser + " (" + (navigator.platform || "") + ")",
+      "Tool version: " + (CFG.version || ""),
+      "",
+      "What looks wrong:",
+      "",
+      "What it should say or do:",
+      "",
+      "(Screenshot and SEO PDF attached)",
+    ].join("\n");
+  }
+  function openReport() {
+    const d = reportDetails();
+    const subj = "Proposal Builder: something looks off" + (PARSED && PARSED.meta.event_no ? " (" + PARSED.meta.event_no + ")" : "");
+    $("#offmail").href = "mailto:" + REPORT_TO + "?subject=" + encodeURIComponent(subj) + "&body=" + encodeURIComponent(d);
+    $("#offcopied").textContent = "";
+    $("#offpanel").hidden = false;
+  }
+  function fallbackCopy(t) { const ta = document.createElement("textarea"); ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch (x) {} ta.remove(); }
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("[data-off]")) { openReport(); return; }
+    if (e.target.closest("[data-offclose]") || e.target.id === "offpanel") { $("#offpanel").hidden = true; return; }
+    if (e.target.id === "offcopy") {
+      const d = reportDetails();
+      const done = () => { $("#offcopied").textContent = "Copied. Paste it into an email or Teams message."; };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(d).then(done, () => { fallbackCopy(d); done(); });
+      else { fallbackCopy(d); done(); }
+    }
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && $("#offpanel") && !$("#offpanel").hidden) $("#offpanel").hidden = true; });
   window.PB = { run, build, get model() { return MODEL; }, set model(v) { MODEL = v; }, buildModel, drawEditor, get parsed() { return PARSED; } };
 })();
 
