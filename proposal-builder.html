@@ -426,6 +426,11 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
         item.groups.push(group); inInclusion = null; continue;
       }
       if (k === "name" && /^\*/.test(t)) { if (sec) sec.notes.push(t.replace(/^\*+|\*+$/g, "").trim()); continue; }
+      // size / headcount lines on drop-off orders ("15 Guests", "Serves up to 20", "Feeds 10-12") are not dishes
+      if ((k === "name" || k === "text" || k === "header") && /^(\(?\s*)?((serves|feeds)\s+(up\s+to\s+)?)?\d+(\s*[-\u2013]\s*\d+)?\s*(guests?|people|persons?|pax|ppl)?\s*\)?$/i.test(t) && /\d/.test(t) && /guest|people|person|pax|ppl|serves|feeds/i.test(t)) {
+        if (sec) sec.notes.push(t); else if (!sec) { newSection("Menu"); sec.notes.push(t); }
+        continue;
+      }
       if (k === "name") {
         if (inInclusion) { inInclusion.text = clean(inInclusion.text + " " + t); continue; }
         // a bold name inside an open choice group: a sub-option if it shares a word with the parent
