@@ -278,7 +278,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-26.1636"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-26.1642"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -1106,11 +1106,15 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     const blocks = menuBlocks(model);
     const featured = {};
     for (const s of model.sections) for (const it of s.items) if (it.photo && it.photo.on && it.photo.slug && !it.hidden && !s.hidden) featured[it.id] = { slug: it.photo.slug, focus: it.photo.focus || [50, 50], name: it.name };
-    const pages = [];
     const probe = document.createElement("div");
     probe.className = "page"; probe.style.position = "absolute"; probe.style.left = "-20in"; probe.style.top = "0";
     container.appendChild(probe);
     const colEl = (w) => { const d = document.createElement("div"); d.className = "mcol"; d.style.width = w + "in"; probe.appendChild(d); return d; };
+    // fill = share of each column's height to use. 1 packs every column full; the menu is then
+    // re-laid at the lowest fill that still needs the same number of pages, so the dishes spread
+    // evenly across those pages instead of crowding the first and leaving the last nearly empty.
+    const layout = (fill) => {
+    const pages = [];
     let i = 0, pageNo = 0;
     while (i < blocks.length) {
       const firstPage = pageNo === 0;
@@ -1120,8 +1124,8 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       const remainingFeat = blocks.slice(i).flatMap((b) => b.ids).filter((id) => featured[id]);
       for (let P = Math.min(2, remainingFeat.length); P >= 0; P--) {
         probe.innerHTML = "";
-        const leftCap = PAGE_BOTTOM - PAGE_TOP - headH;
-        const rightCap = PAGE_BOTTOM - PAGE_TOP - P * (PHOTO_H + PHOTO_GAP);
+        const leftCap = (PAGE_BOTTOM - PAGE_TOP - headH) * fill;
+        const rightCap = (PAGE_BOTTOM - PAGE_TOP - P * (PHOTO_H + PHOTO_GAP)) * fill;
         const L = colEl(3.25), R = colEl(3.15);
         let k = i, col = L, cap = leftCap;
         const placed = [[], []];
@@ -1144,6 +1148,17 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       }
       pages.push(best);
       i = best.next; pageNo++;
+    }
+    return pages;
+    };
+    let pages = layout(1);
+    if (pages.length > 1) {
+      let lo = 0.5, hi = 1, bestPages = pages;
+      for (let t = 0; t < 7; t++) {
+        const mid = (lo + hi) / 2, tryPages = layout(mid);
+        if (tryPages.length <= pages.length) { hi = mid; bestPages = tryPages; } else lo = mid;
+      }
+      pages = bestPages;
     }
     container.removeChild(probe);
     // emit pages
