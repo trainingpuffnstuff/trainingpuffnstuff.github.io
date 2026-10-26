@@ -12,6 +12,17 @@ const SALAD_NAME = /\bsalad\b|caprese|crudite/i;
 
 // ---- menu photo catalog (curated pro shots, hosted at img/menu/) ----
 const MENU_PHOTOS = [
+  {slug:"herb-de-provence-chicken-plated",name:"Herb de Provence Chicken",aliases:["Herb de Provence Chicken","Herbs de Provence Chicken","Provence Chicken"]},
+  {slug:"breakfast-sandwich-collection",name:"Breakfast Sandwich Collection",aliases:["Breakfast Sandwich Collection"]},
+  {slug:"nicoise-tuna-sandwich",name:"Nicoise Inspired Tuna Salad Sandwich",aliases:["Nicoise Inspired Tuna Salad Sandwich","Niçoise Inspired Tuna Salad Sandwich","Nicoise Tuna Sandwich","Tuna Nicoise Sandwich"]},
+  {slug:"green-goddess-sandwich",name:"Green Goddess Crunch Sandwich",aliases:["Green Goddess Crunch Sandwich","Green Goddess Sandwich"]},
+  {slug:"maple-pecan-pie-slice",name:"Maple Bourbon Pecan Pie",aliases:["Maple Bourbon Pecan Pie","Maple Pecan Pie","Bourbon Pecan Pie","Pecan Pie"]},
+  {slug:"pressed-cuban",name:"Pressed Cuban",aliases:["Pressed Cuban","Cuban Sandwich"]},
+  {slug:"crab-dip",name:"Crab Dip",aliases:["Crab Dip"]},
+  {slug:"double-chocolate-brownie",name:"Our Double Chocolate Brownie",aliases:["Our Double Chocolate Brownie","Double Chocolate Brownie"]},
+  {slug:"grazers",name:"Grazers",aliases:["Grazers"]},
+  {slug:"italian-antipasti",name:"Italian Antipasti",aliases:["Italian Antipasti"]},
+  {slug:"pasta-bowls",name:"Pasta Bowls",aliases:["Pasta Bowls","Pasta Bowl"]},
   {slug:"petite-macarons",name:"Petite Macarons",aliases:["Petite Macarons","Macarons"]},
   {slug:"grown-up-macaron",name:"Grown Up Macarons",aliases:["Grown Up Macarons","Grown Up Macaron","Grown-Up Macarons"]},
   {slug:"okey-dokey-artichokey",name:"Okey Dokey Artichokey",alts:["okey-dokey-artichokey-2"],aliases:["Okey Dokey Artichokey","Spinach Artichoke Dip","Artichoke Dip"]},
@@ -223,7 +234,7 @@ const MENU_PHOTOS = [
 const _menuFb = role => (MENU_PHOTOS.find(p=>p.fallback===role)||{}).slug || null;
 function menuNorm(s){ return " "+String(s||"").toLowerCase().replace(/[^a-z0-9]+/g," ").replace(/\s+/g," ").trim()+" "; }
 // best photo for a menu item: longest alias phrase that appears (whole-word) in the item, else a section fallback
-const MENU_NO_PHOTO=["caviar on housemade potato chip","greek salad with shrimp","beef tenderloin toast","wild mushroom ravioli","short rib cube","pan roasted salmon","nicoise inspired tuna salad sandwich","beef tenderloin crostini","roasted lamb","lamb roast","our double chocolate brownie","double chocolate brownie","ny strip steak","new york strip steak","new york strip","quinoa brown rice blend","quinoa and brown rice blend","herb de provence chicken","herbs de provence chicken"];
+const MENU_NO_PHOTO=["caviar on housemade potato chip","greek salad with shrimp","beef tenderloin toast","wild mushroom ravioli","short rib cube","pan roasted salmon","beef tenderloin crostini","roasted lamb","lamb roast","ny strip steak","new york strip steak","new york strip","quinoa brown rice blend","quinoa and brown rice blend"];
 function photoForItem(name, sectionTitle, desc){
   const it=menuNorm(name);
   // items where the closest photo would misrepresent the dish (e.g. missing the protein) — show none
