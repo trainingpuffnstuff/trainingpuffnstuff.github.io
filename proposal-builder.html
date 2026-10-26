@@ -14,11 +14,11 @@
 @font-face{font-family:"Lato";font-weight:400;src:url("proposal-builder/fonts/lato-latin-400-normal.woff2") format("woff2")}
 @font-face{font-family:"Lato";font-weight:400;font-style:italic;src:url("proposal-builder/fonts/lato-latin-400-italic.woff2") format("woff2")}
 @font-face{font-family:"Lato";font-weight:700;src:url("proposal-builder/fonts/lato-latin-700-normal.woff2") format("woff2")}
-@font-face{font-family:"Script";font-weight:400;src:url("proposal-builder/fonts/herr-von-muellerhoff-latin-400-normal.woff2") format("woff2")}
-/* proposal page colors (match the Canva templates) */
-:root{--cream:#FBF9F3;--paper:#fff;--ink:#262421;--soft:#6E6A64;--wine:#7A2E3C;--rule:#E3DDD2;--box:#F4F1EA}
+@font-face{font-family:"Script";font-weight:400;src:url("proposal-builder/fonts/the-signature.woff2") format("woff2"),url("proposal-builder/fonts/herr-von-muellerhoff-latin-400-normal.woff2") format("woff2")}
+/* proposal page colors: black and light gray like Puff's other menus (Morgan, Oct 26) */
+:root{--cream:#FFFFFF;--paper:#fff;--ink:#202020;--soft:#6b6b69;--wine:#202020;--rule:#E8E8E6;--box:#F4F4F2}
 /* tool UI colors: PnS Brand Guidelines, Aug 2025 (monochrome) */
-:root{--vc:#FEFFF9;--cf:#FFFFFF;--ps:#E8E8E6;--sc:#424242;--mr:#202020;--mute:#7a7a78}
+:root{--vc:#FFFFFF;--cf:#FFFFFF;--ps:#E8E8E6;--sc:#424242;--mr:#202020;--mute:#7a7a78}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--vc);color:var(--mr);font-family:"Lato",system-ui,sans-serif;font-size:14px;font-weight:400}
 .caps-l{font-size:11px;letter-spacing:.16em;text-transform:uppercase}
@@ -273,7 +273,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-26"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-26b"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -958,7 +958,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       <div class="serif" style="font-size:19pt;font-weight:500;line-height:1.2">Enjoy your event.<br>We handle the details.</div>
       <p class="lead" style="margin-top:.16in">From planning to service and cleanup, our team manages every aspect, so your event runs smoothly from start to finish.</p>
       <p class="lead" style="margin-top:.28in">${esc(m.introText)}</p></div>
-      <svg class="stamp" style="right:.85in;bottom:.75in" width="1.2in" height="1.2in" viewBox="0 0 120 120"><defs><path id="c1" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0"/></defs><text font-family="Lato" font-weight="700" font-size="11.5" letter-spacing="2.2" fill="#7A2E3C"><textPath href="#c1">PUFF ‘N STUFF • PUFF ‘N STUFF •</textPath></text></svg></div>`;
+      <svg class="stamp" style="right:.85in;bottom:.75in" width="1.2in" height="1.2in" viewBox="0 0 120 120"><defs><path id="c1" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0"/></defs><text font-family="Lato" font-weight="700" font-size="11.5" letter-spacing="2.2" fill="#202020"><textPath href="#c1">PUFF ‘N STUFF • PUFF ‘N STUFF •</textPath></text></svg></div>`;
   }
   function aboutPage(m, S) {
     const a = S.img.about.map((f) => m.assetBase + "template/" + f);
@@ -1027,9 +1027,10 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   }
   function plannerPage(m, S) {
     const p = m.planner, d = m.director;
-    const head = p.headshot ? `<div class="pbox" style="left:4.4in;top:1.95in;width:3.2in;height:4.7in"><img src="${p.headshot}" style="object-position:50% 25%"></div>` : "";
+    // headshot kept modest: a 2.5 x 3.1in portrait at the top of the right column
+    const head = p.headshot ? `<div class="pbox" style="left:4.4in;top:1.95in;width:2.5in;height:3.1in"><img src="${p.headshot}" style="object-position:50% 22%"></div>` : "";
     const left = p.headshot ? `<div class="pbox" style="left:.9in;top:1.95in;width:3.2in;height:3.4in"><img src="${m.assetBase}template/${S.img.planner}"></div>` : `<div class="pbox" style="left:.9in;top:1.95in;width:6.7in;height:3.4in"><img src="${m.assetBase}template/${S.img.planner}"></div>`;
-    const infoTop = p.headshot ? 6.85 : 5.75;
+    const infoTop = p.headshot ? 5.35 : 5.75;
     return `<div class="page">
       <img src="${m.assetBase}logo.png" style="position:absolute;left:50%;transform:translateX(-50%);top:.6in;height:.36in">
       ${left}${head}
