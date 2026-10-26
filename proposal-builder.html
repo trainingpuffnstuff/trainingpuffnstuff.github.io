@@ -278,7 +278,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-26.1621"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-26.1636"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -968,7 +968,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       <div class="card cover">
         <img src="${m.assetBase}logo.png" class="cvlogo">
         <div class="serif" style="font-size:${tsize}pt;line-height:1.02">${esc(c.title)}</div>
-        <div class="script ink" style="font-size:${ssize}pt;line-height:1.02;white-space:nowrap">${esc(c.script)}</div>
+        <div class="script ink cvscript" data-size="${ssize}" style="font-size:${ssize}pt;line-height:1.02;white-space:nowrap">${esc(c.script)}</div>
         ${mid}
         <div class="caps" style="margin-top:.42in">Event details</div>
         <div style="display:flex;gap:.4in;margin-top:.08in;justify-content:center">${line(m.dateText)}${line(m.timesText)}</div>
@@ -1169,7 +1169,19 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     const S = STYLES[model.style];
     container.innerHTML = "";
     const menu = paginateMenu(container, model);
-    container.innerHTML = coverPage(model, S) + introPage(model) + aboutPage(model, S) + menu + (model.bar && model.bar.show ? barPage(model, S) : "") + detailsPage(model, S) + servicePage(model, S) + plannerPage(model, S) + investPage(model, S) + closingPage(model, S);
+    container.innerHTML = coverPage(model, S) + introPage(model) + aboutPage(model, S) + menu + (model.bar && model.bar.show ? barPage(model, S) : "") + detailsPage(model, S) + (model.serviceShow !== false ? servicePage(model, S) : "") + plannerPage(model, S) + investPage(model, S) + closingPage(model, S);
+    // long script lines: shrink to fit the cover card, and below 50pt wrap onto two balanced lines instead
+    container.querySelectorAll(".cvscript").forEach((el) => {
+      const box = el.parentElement, maxW = box.clientWidth * 0.9;
+      let size = +el.dataset.size;
+      while (el.scrollWidth > maxW && size > 50) { size -= 2; el.style.fontSize = size + "pt"; }
+      if (el.scrollWidth > maxW) {
+        size = 54; el.style.fontSize = size + "pt"; el.style.whiteSpace = "normal"; el.style.textWrap = "balance"; el.style.lineHeight = "1.12";
+        el.style.maxWidth = maxW + "px"; el.style.marginLeft = "auto"; el.style.marginRight = "auto";
+        const lh = () => el.getBoundingClientRect().height / (parseFloat(getComputedStyle(el).lineHeight) || 1);
+        while (lh() > 2.2 && size > 36) { size -= 2; el.style.fontSize = size + "pt"; }
+      }
+    });
     // The Signature has no accented letters or en dash: "Entrée" -> "Entree" in script lines only
     container.querySelectorAll(".script").forEach(el => {
       if (el.children.length) return;
@@ -1396,7 +1408,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
         colC_title: "Service Style", colC: svcStyle,
         note: rentals.length ? "Rental and linen pricing is estimated until final selections are confirmed." : "Tables, linens, and decor accents are confirmed with you and the venue during final details.",
       },
-      team, dayOf,
+      team, dayOf, serviceShow: team.length > 0,
       planner: { name: rep, phone: m.rep_phone, email: REP_EMAILS[rep] || "", headshot: headshot(rep), bio: `${repFirst} is part of our ${m.market || "Puff 'n Stuff"} planning team and will be your partner from this proposal through your event, crafting the ideal menu with the proper staff and flow for your celebration.` },
       director: dir ? Object.assign({ headshot: headshot(dir.name) }, dir) : null,
       investment: { rows, total: get("Grand Total"), deposit: deposit && deposit !== "0.00" ? deposit : "", balance: get("Balance Due") },
@@ -1502,7 +1514,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       ${field("Column 1 (one per line)", "details.colA", D.colA.join("\n"), { area: true, rows: 5 })}${field("Column 2 (one per line)", "details.colB", D.colB.join("\n"), { area: true, rows: 5 })}${field("Column 3 (one per line)", "details.colC", D.colC.join("\n"), { area: true, rows: 5 })}
       ${field("Venue name", "venue.name", M.venue.name)}${field("Venue address", "venue.address", M.venue.address, { wide: true })}
       ${field("Note", "details.note", D.note, { wide: true })}</div>`;
-    $("#ed-team").innerHTML = `<h2>Team &amp; planner</h2><div class="grid">
+    $("#ed-team").innerHTML = `<h2>Team &amp; planner <label class="inline"><input type="checkbox" data-path="serviceShow"${M.serviceShow ? " checked" : ""}> Include the service page</label></h2>${M.team.length ? "" : `<p class="muted">No staff on the SEO, so the service page is off. Turn it on to show the event timeline anyway.</p>`}<div class="grid">
       ${M.team.map((c, i) => field(c.title, `team.${i}.text`, c.text, { area: true, rows: 2, hint: c.counts.join(", ") })).join("")}
       ${field("Planner name", "planner.name", M.planner.name)}${field("Planner phone", "planner.phone", M.planner.phone)}${field("Planner email", "planner.email", M.planner.email)}
       ${field("Planner line", "planner.bio", M.planner.bio, { area: true, wide: true, rows: 2 })}</div>
@@ -1566,7 +1578,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   // keep the planner's edits when switching style (menu, bar, details, team, planner)
   function carryEdits(from, to) {
     if (from.cover.title) to.cover.title = from.cover.title;
-    to.sections = from.sections; to.bar = from.bar; to.details = Object.assign({}, from.details, { colB_title: to.details.colB_title }); to.team = from.team; to.planner = from.planner; to.venue = from.venue; to.dateText = from.dateText; to.timesText = from.timesText; to.venueLine = from.venueLine; to.guestsLine = from.guestsLine; to.introText = from.introText;
+    to.sections = from.sections; to.bar = from.bar; to.details = Object.assign({}, from.details, { colB_title: to.details.colB_title }); to.team = from.team; to.serviceShow = from.serviceShow; to.planner = from.planner; to.venue = from.venue; to.dateText = from.dateText; to.timesText = from.timesText; to.venueLine = from.venueLine; to.guestsLine = from.guestsLine; to.introText = from.introText;
   }
   // drag and drop between sections
   let dragId = null;
