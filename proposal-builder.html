@@ -281,7 +281,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-26.1706"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-26.1710"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -1087,10 +1087,10 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       <div style="position:absolute;left:4.4in;top:${infoTop}in;width:3.2in">
         <p class="lead" style="font-size:9.2pt">${esc(p.bio)}</p>
         <div class="serif" style="font-size:17pt;font-weight:600;margin-top:.24in">${esc(p.name)}</div>
-        <div class="caps" style="color:var(--wine);font-size:6.8pt">Special Event Planner</div>
+        <div class="caps" style="color:var(--wine);font-size:6.8pt">${esc(p.title || "Sales Event Planner")}</div>
         <div style="font-size:8.4pt;color:var(--soft);line-height:1.6;margin-top:.1in">${p.phone ? "C: " + esc(p.phone) + "<br>" : ""}${p.email ? "E: " + esc(p.email) : ""}</div>
       </div>
-      ${d && d.name && d.name !== p.name ? `<div class="dirstrip">${d.headshot ? `<div class="pbox round" style="position:relative;width:.72in;height:.72in;flex:none"><img src="${d.headshot}" style="object-position:50% 25%"></div>` : ""}<div><div class="serif" style="font-size:13pt;font-weight:600">${esc(d.name)}</div><div class="caps" style="font-size:6.4pt;color:var(--wine)">Director of Sales – ${esc(d.market)}</div><div style="font-size:8.2pt;color:var(--soft);margin-top:.03in">${esc(d.phone)} &nbsp;•&nbsp; ${esc(d.email)}</div></div></div>` : ""}
+      ${d && d.name && d.name !== p.name ? `<div class="dirstrip">${d.headshot ? `<div class="pbox round" style="position:relative;width:.72in;height:.72in;flex:none"><img src="${d.headshot}" style="object-position:50% 25%"></div>` : ""}<div><div class="serif" style="font-size:13pt;font-weight:600">${esc(d.name)}</div><div class="caps" style="font-size:6.4pt;color:var(--wine)">${esc(d.title || "Director of Sales")}</div><div style="font-size:8.2pt;color:var(--soft);margin-top:.03in">${esc(d.phone)} &nbsp;•&nbsp; ${esc(d.email)}</div></div></div>` : ""}
       ${footer()}</div>`;
   }
   function investPage(m, S) {
@@ -1285,6 +1285,15 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   };
   // planners whose SEOs don't print a market address yet (Miami has no office address on the SEO)
   const REP_MARKET = { "Rebecca Tousman": "Miami" };
+  // titles as listed on puffnstuff.com/about/meet-the-team (Oct 26, 2026)
+  const TITLES = {
+    "Heidi Brice": "Director of Sales, Orlando", "Lauren Balden": "Director of Sales, Tampa", "Amy Kensinger": "Assistant Director of Sales, Tampa",
+    "Rosie Gizelt": "Manager, E-Commerce & Strategic Growth",
+    "Ashley Joiner": "Sales Event Planner, Orlando", "Brittany Davis": "Sales Event Planner, Orlando", "Emily Justice": "Sales Event Planner, Orlando", "Laurel Ehnot": "Sales Event Planner, Orlando",
+    "Domenic Crisafulli": "Sales Event Planner, Tampa", "Sandy Rule": "Sales Event Planner, Tampa", "Alexa Hastings": "Sales Event Planner, Tampa", "Heather Gustafson": "Sales Event Planner, Tampa",
+    "Rebecca Tousman": "Sales Event Planner, Miami",
+    "Jessica Wedinger": "Special Event Coordinator, Orlando", "Sydney Richardson": "Special Event Coordinator, Orlando", "Paloma Roca-Rey": "Special Event Coordinator, Tampa",
+  };
   const HEADSHOTS = ["heather-gustafson", "lauren-balden", "rosie-gizelt", "sandy-rule", "laurel-ehnot", "alexa-hastings", "domenic-crisafulli", "amy-kensinger", "ashley-joiner", "brittany-davis", "emily-justice", "heidi-brice", "rebecca-tousman"];
   const slugOf = (name) => String(name || "").toLowerCase().replace(/[^a-z]+/g, "-").replace(/^-|-$/g, "");
   const headshot = (name) => HEADSHOTS.includes(slugOf(name)) ? ASSETS + "planners/" + slugOf(name) + ".jpg" : "";
@@ -1488,8 +1497,8 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
         note: rentals.length ? "Rental and linen pricing is estimated until final selections are confirmed." : "Tables, linens, and decor accents are confirmed with you and the venue during final details.",
       },
       team, dayOf, serviceShow: team.length > 0,
-      planner: { name: rep, phone: m.rep_phone, email: REP_EMAILS[rep] || "", headshot: headshot(rep), bio: `${repFirst} is part of our ${m.market || "Puff 'n Stuff"} planning team and will be your partner from this proposal through your event, crafting the ideal menu with the proper staff and flow for your celebration.` },
-      director: dir ? Object.assign({ headshot: headshot(dir.name) }, dir) : null,
+      planner: { name: rep, title: TITLES[rep] || "Sales Event Planner", phone: m.rep_phone, email: REP_EMAILS[rep] || "", headshot: headshot(rep), bio: `${repFirst} is part of our ${m.market || "Puff 'n Stuff"} planning team and will be your partner from this proposal through your event, crafting the ideal menu with the proper staff and flow for your celebration.` },
+      director: dir ? Object.assign({ headshot: headshot(dir.name), title: TITLES[dir.name] || "Director of Sales" }, dir) : null,
       investment: { rows, total: get("Grand Total"), deposit: deposit && deposit !== "0.00" ? deposit : "", balance: get("Balance Due") },
       terms: ["A booking retainer of $1,000 or 15% of the estimated event cost, whichever is greater, secures your date.", "50% of the remaining balance is due 60 days prior to your event.", "Final guest count is confirmed 14 days prior; the remaining balance is due 10 days prior."].concat(rentals.length ? ["Rental and linen pricing is estimated until selections are confirmed."] : []),
       steps,
@@ -1595,7 +1604,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       ${field("Note", "details.note", D.note, { wide: true })}</div>`;
     $("#ed-team").innerHTML = `<h2>Team &amp; planner <label class="inline"><input type="checkbox" data-path="serviceShow"${M.serviceShow ? " checked" : ""}> Include the service page</label></h2>${M.team.length ? "" : `<p class="muted">No staff on the SEO, so the service page is off. Turn it on to show the event timeline anyway.</p>`}<div class="grid">
       ${M.team.map((c, i) => field(c.title, `team.${i}.text`, c.text, { area: true, rows: 2, hint: c.counts.join(", ") })).join("")}
-      ${field("Planner name", "planner.name", M.planner.name)}${field("Planner phone", "planner.phone", M.planner.phone)}${field("Planner email", "planner.email", M.planner.email)}
+      ${field("Planner name", "planner.name", M.planner.name)}${field("Planner title", "planner.title", M.planner.title)}${field("Planner phone", "planner.phone", M.planner.phone)}${field("Planner email", "planner.email", M.planner.email)}
       ${field("Planner line", "planner.bio", M.planner.bio, { area: true, wide: true, rows: 2 })}</div>
       <p class="muted">${M.planner.headshot ? "Headshot found for " + esc(M.planner.name) + "." : "No headshot on file for " + esc(M.planner.name || "this planner") + "; the page uses an event photo instead."} ${M.director ? "Director of Sales: " + esc(M.director.name) + " (" + esc(M.director.market) + ")." : ""}</p>`;
     const I = M.investment;
