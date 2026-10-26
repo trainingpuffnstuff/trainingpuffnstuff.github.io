@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proposal Builder: How to Use It</title>
+<style>
+@font-face{font-family:"Cormorant";font-weight:400;src:url("proposal-builder/fonts/cormorant-garamond-latin-400-normal.woff2") format("woff2")}
+@font-face{font-family:"Cormorant";font-weight:500;src:url("proposal-builder/fonts/cormorant-garamond-latin-500-normal.woff2") format("woff2")}
+@font-face{font-family:"Lato";font-weight:300;src:url("proposal-builder/fonts/lato-latin-300-normal.woff2") format("woff2")}
+@font-face{font-family:"Lato";font-weight:400;src:url("proposal-builder/fonts/lato-latin-400-normal.woff2") format("woff2")}
+@font-face{font-family:"Lato";font-weight:700;src:url("proposal-builder/fonts/lato-latin-700-normal.woff2") format("woff2")}
+@font-face{font-family:"Script";font-weight:400;src:url("proposal-builder/fonts/the-signature.woff2") format("woff2")}
+:root{--ink:#202020;--soft:#424242;--mute:#7a7a78;--rule:#E8E8E6;--box:#F4F4F2}
+*{box-sizing:border-box}
+html,body{margin:0;background:#fff;color:var(--ink)}
+body{-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:"Lato",system-ui,sans-serif;font-weight:400;font-size:15px;line-height:1.55}
+.top{background:var(--ink);color:#fff;padding:16px 32px;display:flex;align-items:center;gap:18px}
+.top img{height:30px;filter:invert(1)}
+.top span{font-family:"Cormorant",serif;font-size:24px;border-left:1px solid #555;padding-left:18px}
+main{max-width:860px;margin:0 auto;padding:36px 24px 48px}
+.script{font-family:"Script",cursive;font-size:38px;line-height:1;margin:0 0 4px}
+h1{font-family:"Cormorant",serif;font-weight:400;font-size:40px;line-height:1.1;margin:0 0 10px}
+.lead{color:var(--soft);font-weight:300;font-size:16px;max-width:640px;margin:0 0 26px}
+h2{font-family:"Lato",sans-serif;font-weight:700;font-size:12px;letter-spacing:.16em;text-transform:uppercase;margin:30px 0 10px}
+ol.steps{list-style:none;padding:0;margin:0;border-top:1px solid var(--rule)}
+ol.steps li{display:grid;grid-template-columns:44px 1fr;gap:8px;padding:14px 0;border-bottom:1px solid var(--rule)}
+ol.steps .n{font-family:"Cormorant",serif;font-size:30px;line-height:1}
+ol.steps b{display:block;font-weight:700;margin-bottom:2px}
+.box{background:var(--box);padding:16px 20px;margin:0}
+.box p{margin:0 0 6px}.box p:last-child{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td{padding:8px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+td:first-child{font-weight:700;white-space:nowrap;width:1%}
+ul{margin:0;padding-left:18px}ul li{margin:4px 0}
+a{color:var(--ink)}
+.btn{display:inline-block;background:var(--ink);color:#fff;text-decoration:none;font-weight:700;font-size:12px;letter-spacing:.16em;text-transform:uppercase;padding:12px 20px;margin-top:8px}
+.foot{color:var(--mute);font-size:13px;margin-top:28px}
+@media (max-width:600px){.top{padding:14px 16px}main{padding:26px 16px 40px}h1{font-size:32px}td:first-child{white-space:normal}}
+@media print{.top{background:none;color:var(--ink);padding:0 0 6px}.top img{filter:none;height:24px}.top span{font-size:20px}.btn{display:none}main{padding:6px 0;max-width:none}body{font-size:11px;line-height:1.4}.script{font-size:26px}h1{font-size:28px;margin-bottom:4px}.lead{font-size:12px;margin-bottom:6px}h2{margin:14px 0 6px;font-size:10px}ol.steps li{padding:5px 0;grid-template-columns:30px 1fr}ol.steps .n{font-size:22px}.box{padding:9px 14px}table{font-size:11px}td{padding:5px 8px}.foot{margin-top:12px}}
+@page{size:letter;margin:.5in}
+</style>
+</head>
+<body>
+<div class="top"><img src="proposal-builder/logo.png" alt="Puff 'n Stuff"><span>Proposal Builder</span></div>
+<main>
+  <p class="script">Let's build a proposal</p>
+  <h1>How to use the Proposal Builder</h1>
+  <p class="lead">It turns a Caterease Special Event Order into a branded client proposal in a few minutes. It runs in your browser, so the SEO never leaves your computer.</p>
+  <a class="btn" href="proposal-builder.html">Open the Proposal Builder</a>
+
+  <h2>Before you start</h2>
+  <div class="box">
+    <p>In Caterease, print the event with the <b>Special Event Order</b> custom print and save it as a PDF.</p>
+    <p>Chrome or Edge gives the cleanest PDF. Safari and Firefox work too.</p>
+  </div>
+
+  <h2>Steps</h2>
+  <ol class="steps">
+    <li><span class="n">1</span><div><b>Drop in the SEO</b>Drag the PDF onto the page, or click Choose the SEO PDF.</div></li>
+    <li><span class="n">2</span><div><b>Pick a look</b>Wedding, Corporate or Social. The tool picks one from the event, and you can switch at any time without losing your edits.</div></li>
+    <li><span class="n">3</span><div><b>Clear "Needs attention"</b>Items with a dark bar should be fixed before sending. The rest are things to double check. Click an item to jump to that part of the menu.</div></li>
+    <li><span class="n">4</span><div><b>Review the details and menu</b>Every field can be edited. Drag dishes by the ☰ handle, or use the arrows or Move to. Click a dish photo to turn it on or off.</div></li>
+    <li><span class="n">5</span><div><b>Build the proposal</b>Click Build Proposal and look through every page.</div></li>
+    <li><span class="n">6</span><div><b>Save as PDF</b>Click Print / Save as PDF. The bar at the top shows the settings for your browser. The file is named after the event.</div></li>
+  </ol>
+
+  <h2>Good to know</h2>
+  <table>
+    <tr><td>Prices</td><td>Every number comes straight from the SEO. If a price is wrong, fix it in Caterease, print a new SEO and start over.</td></tr>
+    <tr><td>Upcharges</td><td>Upgrade prices on the SEO ("additional $8.00 per person") stay off the proposal. They're listed under Needs attention so you have them.</td></tr>
+    <tr><td>Choices</td><td>"Select 2" shows under the section heading. Dishes joined by OR on the SEO print as "Choose one".</td></tr>
+    <tr><td>Photos</td><td>Photos come from the Menu Photo Lookbook. A dish without a good match prints without a photo. A possible match stays off until you turn it on.</td></tr>
+    <tr><td>Hiding things</td><td>Check "Leave off proposal" to hide a dish, or "Leave section off" to hide a whole section. "Included (not a choice)" is for things like bread service.</td></tr>
+    <tr><td>Nothing is saved</td><td>Closing the tab clears your work. Save the PDF before you close it.</td></tr>
+  </table>
+
+  <h2>Something look off?</h2>
+  <div class="box">
+    <p>This is the first version and it's still being tuned. If anything reads wrong, take a screenshot and click <b>Something look off?</b> at the top of the tool. It opens an email to Rosie with the event details filled in. Attach the screenshot and say what should change.</p>
+  </div>
+  <p class="foot">Puff 'n Stuff Catering • Proposal Builder</p>
+</main>
+</body>
+</html>
