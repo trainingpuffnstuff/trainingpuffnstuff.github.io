@@ -428,7 +428,11 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       if (k === "name" && /^\*/.test(t)) { if (sec) sec.notes.push(t.replace(/^\*+|\*+$/g, "").trim()); continue; }
       // size / headcount lines on drop-off orders ("15 Guests", "Serves up to 20", "Feeds 10-12") are not dishes
       if ((k === "name" || k === "text" || k === "header") && /^(\(?\s*)?((serves|feeds)\s+(up\s+to\s+)?)?\d+(\s*[-\u2013]\s*\d+)?\s*(guests?|people|persons?|pax|ppl)?\s*\)?$/i.test(t) && /\d/.test(t) && /guest|people|person|pax|ppl|serves|feeds/i.test(t)) {
-        if (sec) sec.notes.push(t); else if (!sec) { newSection("Menu"); sec.notes.push(t); }
+        // it belongs to the platter above it: print it as that dish's serving size
+        if (item && !group) {
+          const serves = /serves|feeds/i.test(t) ? t.replace(/^\(|\)$/g, "").trim() : "Serves " + t.replace(/^\(|\)$/g, "").trim().toLowerCase();
+          item.desc.push({ label: "", text: serves.charAt(0).toUpperCase() + serves.slice(1) });
+        } else { if (!sec) newSection("Menu"); sec.notes.push(t); }
         continue;
       }
       if (k === "name") {
