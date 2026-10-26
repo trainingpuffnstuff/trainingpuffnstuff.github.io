@@ -1147,6 +1147,11 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     container.innerHTML = "";
     const menu = paginateMenu(container, model);
     container.innerHTML = coverPage(model, S) + introPage(model) + aboutPage(model, S) + menu + (model.bar && model.bar.show ? barPage(model, S) : "") + detailsPage(model, S) + servicePage(model, S) + plannerPage(model, S) + investPage(model, S) + closingPage(model, S);
+    // The Signature has no accented letters or en dash: "Entrée" -> "Entree" in script lines only
+    container.querySelectorAll(".script").forEach(el => {
+      if (el.children.length) return;
+      el.textContent = el.textContent.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[–—]/g, "-");
+    });
     return container.querySelectorAll(".page").length;
   }
 
