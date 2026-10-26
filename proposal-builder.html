@@ -281,7 +281,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-26.1653"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-26.1706"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -884,6 +884,23 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       closingHead: "What<br>Happens<br>Next",
       closingScript: "You focus on your guests, we’ll handle the rest.",
     },
+    holiday: {
+      label: "Holiday",
+      img: { cover: "hol_bg_cover.jpg", invest: "hol_bg_invest.jpg", about: ["hol_about_1.jpg", "hol_about_2.jpg", "hol_about_3.jpg"], barCol: "hol_bar_column.jpg", barCocktail: "hol_bar_cocktail.jpg", rentals: "hol_rentals_banner.jpg", venue: "hol_venue_banner.jpg", team: ["corp_team_1.jpg", "corp_team_2.jpg", "corp_team_3.jpg", "corp_team_4.jpg"], planner: "hol_planner_photo.jpg", closing: "hol_journey_plate.jpg", closingRow: ["hol_journey_1.jpg", "hol_journey_2.jpg", "hol_journey_3.jpg", "hol_journey_4.jpg"], fill: ["hol_menu_1.jpg", "hol_menu_2.jpg", "hol_menu_3.jpg", "hol_menu_4.jpg", "hol_menu_5.jpg", "hol_menu_6.jpg"] },
+      aboutScript: "Passionately perfecting the season’s celebrations.",
+      aboutHead: "40+ Years of Making the Season Bright",
+      aboutBody: "For over four decades, Puff 'n Stuff has gathered Florida around the holiday table. From seasonal menus built on the flavors of the season to a service team that lets you be a guest at your own party, we handle every detail so you can enjoy the people you're celebrating with.",
+      thanksHead: "Thank you for considering us for your holiday celebration.",
+      thanksBody: "We look forward to bringing warmth, flavor and a little sparkle to your gathering.",
+      menuHead: "Your Holiday Menu",
+      menuLead: "Seasonal selections for your celebration, presented with the full range of choices available to you.",
+      barScript: "Cheers to the Season",
+      teamHead: "Your Holiday Service Team",
+      plannerLead: "The holidays are busy enough. I am here to make sure every culinary detail is handled so you can relax and enjoy the celebration with your guests.",
+      investLead: "Your holiday investment includes our commitment to excellence, from seasonal ingredients to the professional execution of our service team.",
+      closingHead: "What<br>Happens<br>Next",
+      closingScript: "You enjoy the season, we’ll handle the rest.",
+    },
   };
 
   const GROUP_ORDER_HORS = ["Garden", "Land", "Air", "Sea"];
@@ -1315,6 +1332,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   function suggestStyle(p) {
     const s = [p.meta.party, p.meta.event_type, p.meta.event_info, p.meta.client].join(" ");
     if (/wedding|rehearsal|bridal/i.test(s)) return "wedding";
+    if (/holiday|christmas|hanukkah|thanksgiving|new year|yule|festive|winter party|ugly sweater/i.test(s)) return "holiday";
     if (/\b(llc|inc|corp|company|group|insurance|bank|partners|physician|associates|holiday party|open house|conference|summit|appreciation|team|employee|office|accountant|homes by|realty|law|medical|university hosp)\b/i.test(s) && !/sorority|fraternity|reunion|birthday|anniversary|bar mitzvah|bat mitzvah|quince|shower|graduation/i.test(s)) return "corporate";
     return "social";
   }
@@ -1371,6 +1389,13 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       let ev = party.replace(m.client || "\u0000", "").replace(/^[\s\-–:]+|[\s\-–:]+$/g, "").trim();
       cover.script = ev ? fixCaps(ev) : "Celebration";
       cover.tagline = "An Executive Culinary Experience";
+    } else if (style === "holiday") {
+      // a company's party leads with the company; a family's with the host's name
+      const corpish = /\b(llc|inc|corp|company|group|partners|associates|realty|bank|insurance|homes by|law|medical|hospital|university|church|school)\b/i.test(m.client || "") || !/,/.test(m.client || "");
+      cover.title = corpish ? (m.client || party) : firstLast(m.client) || party;
+      let ev = party.replace(m.client || "\u0000", "").replace(/^[\s\-–:]+|[\s\-–:]+$/g, "").trim();
+      cover.script = ev ? fixCaps(ev) : "Holiday Celebration";
+      cover.tagline = "Celebrating the Season";
     } else {
       cover.title = firstLast(m.client) || party;
       let ev = party.replace(m.client || "\u0000", "").replace(/^[\s\-–:]+|[\s\-–:]+$/g, "").trim();
