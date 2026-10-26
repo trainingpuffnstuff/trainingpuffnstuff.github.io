@@ -12,6 +12,7 @@ const SALAD_NAME = /\bsalad\b|caprese|crudite/i;
 
 // ---- menu photo catalog (curated pro shots, hosted at img/menu/) ----
 const MENU_PHOTOS = [
+  {slug:"key-lime-shooter",name:"Key Lime Shooter",aliases:["Key Lime Shooter","Key Lime Dessert Shooter","Key Lime Pie Shooter"]},
   {slug:"classic-caesar",name:"Classic Caesar",aliases:["Classic Caesar"]},
   {slug:"individual-assorted-yogurts",name:"Individual Assorted Yogurts",aliases:["Individual Assorted Yogurts","Assorted Yogurts","Individual Yogurts"]},
   {slug:"garden-salad",name:"Garden Salad",aliases:["Garden Salad"]},
@@ -156,7 +157,7 @@ const MENU_PHOTOS = [
   {slug:"turkey-reuben",name:"Roast Turkey Reuben",aliases:["Roast Turkey Reuben","Turkey Reuben","Reuben"]},
   {slug:"seared-scallops",name:"Seared Jumbo Scallops",aliases:["Seared Jumbo Scallops","Jumbo Scallops","Seared Scallops","Seared Scallop"]},
   {slug:"bacon-scallop",name:"Bacon Scallop",aliases:["Bacon Wrapped Scallop","Bacon Braised Scallop","Bacon Jam Scallop","Maple Bacon Scallop","Scallops Bacon","Scallop and Bacon","Scallop with Bacon","Bacon Scallop"]},
-  {slug:"dessert-shooter",name:"Black Forest Shooter",aliases:["Black Forest Shooter","Black Forest Cake Shooter","Chocolate Cherry Shooter","Black Forest","Dessert Shooter","Dessert Shooters"]},
+  {slug:"dessert-shooter",name:"Black Forest Shooter",alts:["key-lime-shooter"],aliases:["Black Forest Shooter","Black Forest Cake Shooter","Chocolate Cherry Shooter","Black Forest","Dessert Shooter","Dessert Shooters"]},
   {slug:"petite-potato",name:"Petite Twice-Baked Potato",aliases:["Petite Twice Baked Potato","Mini Twice Baked Potatoes","Twice Baked Potatoes","Twice Baked Potato","Petite Potato","Stuffed Petite Potato","Loaded Petite Potato","Duchess Potato","Mini Baked Potato"]},
   {slug:"bagel-bar",name:"Bagel Bar",aliases:["Bagel Bar","Bagel Display","Bagel Station","Assorted Bagels","Bagels & Spreads","Bagels and Spreads"]},
   {slug:"crab-cake-benedict",name:"Crab Cake Benedict",aliases:["Crab Cake Benedict","Crab Cake Eggs Benedict","Crab Benedict"]},
