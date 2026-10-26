@@ -12,6 +12,16 @@ const SALAD_NAME = /\bsalad\b|caprese|crudite/i;
 
 // ---- menu photo catalog (curated pro shots, hosted at img/menu/) ----
 const MENU_PHOTOS = [
+  {slug:"classic-caesar",name:"Classic Caesar",aliases:["Classic Caesar"]},
+  {slug:"individual-assorted-yogurts",name:"Individual Assorted Yogurts",aliases:["Individual Assorted Yogurts","Assorted Yogurts","Individual Yogurts"]},
+  {slug:"garden-salad",name:"Garden Salad",aliases:["Garden Salad"]},
+  {slug:"red-wine-braised-short-rib",name:"Red Wine Braised Short Rib",aliases:["Red Wine Braised Short Rib"]},
+  {slug:"buffalo-chicken-club-wrap",name:"Buffalo Chicken Club Wrap",aliases:["Buffalo Chicken Club Wrap","Buffalo Chicken Wrap"]},
+  {slug:"chicken-caesar-wrap",name:"Chicken Caesar Wrap",aliases:["Chicken Caesar Wrap"]},
+  {slug:"italian-sandwich",name:"Italian Sandwich",aliases:["Italian Sandwich","Italian Sub"]},
+  {slug:"grilled-chicken-salad-sandwich",name:"Grilled Chicken Salad",aliases:["Grilled Chicken Salad"]},
+  {slug:"balsamic-roasted-eggplant",name:"Balsamic Roasted Eggplant",aliases:["Balsamic Roasted Eggplant"]},
+  {slug:"roasted-sweet-potato-red-pepper",name:"Roasted Sweet Potato & Red Pepper",aliases:["Roasted Sweet Potato & Red Pepper","Roasted Sweet Potato and Red Pepper"]},
   {slug:"herb-de-provence-chicken-plated",name:"Herb de Provence Chicken",aliases:["Herb de Provence Chicken","Herbs de Provence Chicken","Provence Chicken"]},
   {slug:"breakfast-sandwich-collection",name:"Breakfast Sandwich Collection",aliases:["Breakfast Sandwich Collection"]},
   {slug:"nicoise-tuna-sandwich",name:"Nicoise Inspired Tuna Salad Sandwich",aliases:["Nicoise Inspired Tuna Salad Sandwich","Niçoise Inspired Tuna Salad Sandwich","Nicoise Tuna Sandwich","Tuna Nicoise Sandwich"]},
