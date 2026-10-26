@@ -281,7 +281,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-26.1716"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-26.1719"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -886,7 +886,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     },
     holiday: {
       label: "Holiday",
-      img: { cover: "hol_bg_cover.jpg", invest: "hol_bg_invest.jpg", about: ["hol_about_1.jpg", "hol_about_2.jpg", "hol_about_3.jpg"], barCol: "hol_bar_column.jpg", barCocktail: "hol_bar_cocktail.jpg", rentals: "corp_rentals_banner.jpg", venue: "corp_venue_banner.jpg", team: ["corp_team_1.jpg", "corp_team_2.jpg", "corp_team_3.jpg", "corp_team_4.jpg"], planner: "hol_planner_photo.jpg", closing: "hol_journey_plate.jpg", closingRow: ["corp_journey_1.jpg", "corp_journey_2.jpg", "corp_journey_3.jpg", "corp_journey_4.jpg"], fill: ["hol_menu_1.jpg", "hol_menu_2.jpg", "hol_menu_3.jpg", "hol_menu_4.jpg", "hol_menu_5.jpg", "hol_menu_6.jpg", "hol_menu_7.jpg", "corp_menu_potato.jpg", "corp_menu_col_1.jpg", "corp_menu_col_2.jpg", "corp_menu_col_3.jpg", "corp_menu_flatbread.jpg", "corp_menu_scallop.jpg"] },
+      img: { thumb: "hol_thumb.jpg", cover: "hol_bg_cover.jpg", invest: "hol_bg_invest.jpg", about: ["hol_about_1.jpg", "hol_about_2.jpg", "hol_about_3.jpg"], barCol: "hol_bar_column.jpg", barCocktail: "hol_bar_cocktail.jpg", rentals: "corp_rentals_banner.jpg", venue: "corp_venue_banner.jpg", team: ["corp_team_1.jpg", "corp_team_2.jpg", "corp_team_3.jpg", "corp_team_4.jpg"], planner: "hol_planner_photo.jpg", closing: "hol_journey_plate.jpg", closingRow: ["corp_journey_1.jpg", "corp_journey_2.jpg", "corp_journey_3.jpg", "corp_journey_4.jpg"], fill: ["hol_menu_1.jpg", "hol_menu_2.jpg", "hol_menu_3.jpg", "hol_menu_4.jpg", "hol_menu_5.jpg", "hol_menu_6.jpg", "hol_menu_7.jpg", "corp_menu_potato.jpg", "corp_menu_col_1.jpg", "corp_menu_col_2.jpg", "corp_menu_col_3.jpg", "corp_menu_flatbread.jpg", "corp_menu_scallop.jpg"] },
       aboutScript: "Passionately perfecting the season’s celebrations.",
       aboutHead: "40+ Years of Making the Season Bright",
       aboutBody: "For over four decades, Puff 'n Stuff has gathered Florida around the holiday table. From seasonal menus built on the flavors of the season to a service team that lets you be a guest at your own party, we handle every detail so you can enjoy the people you're celebrating with.",
@@ -1628,7 +1628,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   function drawEditor() {
     const M = MODEL;
     const S = RENDER.STYLES;
-    $("#styles").innerHTML = Object.keys(S).map((k) => `<button class="style ${M.style === k ? "on" : ""}" data-style="${k}"><img src="${ASSETS}template/${S[k].img.cover}"><span>${S[k].label}</span></button>`).join("");
+    $("#styles").innerHTML = Object.keys(S).map((k) => `<button class="style ${M.style === k ? "on" : ""}" data-style="${k}"><img src="${ASSETS}template/${S[k].img.thumb || S[k].img.cover}"><span>${S[k].label}</span></button>`).join("");
     const coverExtra = M.style === "wedding" ? field("Prepared for", "cover.preparedFor", M.cover.preparedFor) : M.style === "social" ? field("Created especially for", "cover.createdFor", M.cover.createdFor, { ph: "e.g. The Sisters of Sigma Delta Tau" }) : field("Tagline", "cover.tagline", M.cover.tagline);
     $("#ed-event").innerHTML = `<h2>Cover &amp; event</h2><div class="grid">
       ${field("Name on cover", "cover.title", M.cover.title)}${field("Script line", "cover.script", M.cover.script)}${coverExtra}
