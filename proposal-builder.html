@@ -281,7 +281,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-26.1710"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-26.1716"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -886,7 +886,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     },
     holiday: {
       label: "Holiday",
-      img: { cover: "hol_bg_cover.jpg", invest: "hol_bg_invest.jpg", about: ["hol_about_1.jpg", "hol_about_2.jpg", "hol_about_3.jpg"], barCol: "hol_bar_column.jpg", barCocktail: "hol_bar_cocktail.jpg", rentals: "hol_rentals_banner.jpg", venue: "hol_venue_banner.jpg", team: ["corp_team_1.jpg", "corp_team_2.jpg", "corp_team_3.jpg", "corp_team_4.jpg"], planner: "hol_planner_photo.jpg", closing: "hol_journey_plate.jpg", closingRow: ["hol_journey_1.jpg", "hol_journey_2.jpg", "hol_journey_3.jpg", "hol_journey_4.jpg"], fill: ["hol_menu_1.jpg", "hol_menu_2.jpg", "hol_menu_3.jpg", "hol_menu_4.jpg", "hol_menu_5.jpg", "hol_menu_6.jpg"] },
+      img: { cover: "hol_bg_cover.jpg", invest: "hol_bg_invest.jpg", about: ["hol_about_1.jpg", "hol_about_2.jpg", "hol_about_3.jpg"], barCol: "hol_bar_column.jpg", barCocktail: "hol_bar_cocktail.jpg", rentals: "corp_rentals_banner.jpg", venue: "corp_venue_banner.jpg", team: ["corp_team_1.jpg", "corp_team_2.jpg", "corp_team_3.jpg", "corp_team_4.jpg"], planner: "hol_planner_photo.jpg", closing: "hol_journey_plate.jpg", closingRow: ["corp_journey_1.jpg", "corp_journey_2.jpg", "corp_journey_3.jpg", "corp_journey_4.jpg"], fill: ["hol_menu_1.jpg", "hol_menu_2.jpg", "hol_menu_3.jpg", "hol_menu_4.jpg", "hol_menu_5.jpg", "hol_menu_6.jpg", "hol_menu_7.jpg", "corp_menu_potato.jpg", "corp_menu_col_1.jpg", "corp_menu_col_2.jpg", "corp_menu_col_3.jpg", "corp_menu_flatbread.jpg", "corp_menu_scallop.jpg"] },
       aboutScript: "Passionately perfecting the season’s celebrations.",
       aboutHead: "40+ Years of Making the Season Bright",
       aboutBody: "For over four decades, Puff 'n Stuff has gathered Florida around the holiday table. From seasonal menus built on the flavors of the season to a service team that lets you be a guest at your own party, we handle every detail so you can enjoy the people you're celebrating with.",
@@ -902,6 +902,55 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       closingScript: "You enjoy the season, we’ll handle the rest.",
     },
   };
+
+  // Which template files are the same photograph: crops of one shot, or the same shot as a Lookbook
+  // dish photo (matched by image features, Oct 26). Anything not listed is its own photo.
+  const PHOTO_ID = {
+    "hol_bg_cover.jpg": "ham", "hol_menu_3.jpg": "ham", "hol_rentals_banner.jpg": "ham",
+    "hol_bg_invest.jpg": "turkey", "hol_menu_6.jpg": "turkey",
+    "hol_about_1.jpg": "apple-cranberry-tart", "hol_menu_2.jpg": "apple-cranberry-tart", "hol_journey_3.jpg": "apple-cranberry-tart",
+    "hol_about_2.jpg": "hors-portrait", "hol_menu_5.jpg": "hors-portrait",
+    "hol_about_3.jpg": "florida-inspired-caesar-salad-2", "hol_journey_4.jpg": "florida-inspired-caesar-salad-2",
+    "hol_bar_column.jpg": "seasonal-bruschetta-fall-winter",
+    "hol_bar_cocktail.jpg": "cranberry-cocktail", "hol_menu_4.jpg": "cranberry-cocktail", "hol_journey_1.jpg": "cranberry-cocktail",
+    "hol_planner_photo.jpg": "hors-overhead", "hol_menu_7.jpg": "hors-overhead",
+    "hol_journey_plate.jpg": "grazing-wreath", "hol_menu_1.jpg": "grazing-wreath", "hol_venue_banner.jpg": "grazing-wreath", "hol_journey_2.jpg": "grazing-wreath",
+    "corp_menu_flatbread.jpg": "flatbread", "social_menu_1.jpg": "flatbread",
+    "corp_menu_scallop.jpg": "tofu-scallop", "social_menu_3.jpg": "tofu-scallop",
+    "corp_about_3.jpg": "pork-loin", "social_about_3.jpg": "pork-loin",
+    "planner_cocktail.jpg": "vintage-revival", "social_planner_photo.jpg": "vintage-revival",
+    "social_journey_1.jpg": "seasonal-bruschetta", "social_journey_2.jpg": "berries-greens-salad-2", "social_journey_3.jpg": "taco-station",
+    "social_venue_banner.jpg": "85c-short-rib",
+  };
+  const photoId = (f) => PHOTO_ID[f] || f;
+  // Give this proposal a copy of the look's photos where no photograph appears twice: the dish photos
+  // on the menu come first, then each fixed slot keeps its photo unless it's already shown, in which
+  // case it takes an unused spare. What's left over fills the empty photo spots on the menu pages.
+  function resolvePhotos(model) {
+    const base = STYLES[model.style];
+    const S = Object.assign({}, base, { img: JSON.parse(JSON.stringify(base.img)) });
+    const used = new Set();
+    for (const s of model.sections) if (!s.hidden) for (const it of s.items) if (!it.hidden && it.photo && it.photo.on && it.photo.slug) used.add(it.photo.slug.replace(/-\d+$/, "")), used.add(it.photo.slug);
+    const spares = (base.img.fill || []).slice();
+    const take = (f) => {
+      if (!used.has(photoId(f)) && !used.has(photoId(f).replace(/-\d+$/, ""))) { used.add(photoId(f)); return f; }
+      const k = spares.findIndex((x) => !used.has(photoId(x)) && !used.has(photoId(x).replace(/-\d+$/, "")));
+      if (k < 0) return f;
+      const alt = spares.splice(k, 1)[0]; used.add(photoId(alt)); return alt;
+    };
+    const I = S.img;
+    I.cover = take(I.cover);
+    I.about = I.about.map(take);
+    if (model.bar && model.bar.show) { I.barCol = take(I.barCol); I.barCocktail = take(I.barCocktail); }
+    I.rentals = take(I.rentals);
+    if (model.serviceShow !== false) { I.venue = take(I.venue); I.team = I.team.map((f) => { used.add(photoId(f)); return f; }); }
+    I.planner = take(I.planner);
+    I.invest = take(I.invest);
+    I.closing = take(I.closing);
+    I.closingRow = I.closingRow.map(take);
+    I.fill = spares.filter((x) => !used.has(photoId(x)) && !used.has(photoId(x).replace(/-\d+$/, "")));
+    return S;
+  }
 
   const GROUP_ORDER_HORS = ["Garden", "Land", "Air", "Sea"];
   const GROUP_ORDER_ENTREE = ["Land", "Air", "Sea", "Garden"];
@@ -1081,7 +1130,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     return `<div class="page">
       <img src="${m.assetBase}logo.png" style="position:absolute;left:50%;transform:translateX(-50%);top:.6in;height:.36in">
       ${left}${head}
-      <h1 class="display" style="position:absolute;left:.9in;top:5.6in;width:3.3in;font-size:40pt">Your Special Event Planner</h1>
+      <h1 class="display" style="position:absolute;left:.9in;top:5.6in;width:3.3in;font-size:40pt">Your Sales Event Planner</h1>
       <p class="lead" style="position:absolute;left:.9in;top:7.1in;width:3.2in">${esc(S.plannerLead)}</p>
       <div class="script" style="position:absolute;left:1.4in;top:8.05in;font-size:33pt;transform:rotate(-6deg)">${esc(p.name)}</div>
       <div style="position:absolute;left:4.4in;top:${infoTop}in;width:3.2in">
@@ -1138,11 +1187,11 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   const PAGE_TOP = 0.95, PAGE_BOTTOM = 9.95, TEXT_W = 3.55, PHOTO_X = 4.75, PHOTO_W = 2.85, PHOTO_SLOTS = 3, PHOTO_GAP = 0.42;
   const PHOTO_H = (PAGE_BOTTOM - PAGE_TOP - (PHOTO_SLOTS - 1) * PHOTO_GAP - 0.2) / PHOTO_SLOTS;
   const HEAD_H = 2.45;
-  function paginateMenu(container, model) {
-    const S = STYLES[model.style];
+  function paginateMenu(container, model, S) {
     const blocks = menuBlocks(model);
     const featured = {};
-    for (const s of model.sections) for (const it of s.items) if (it.photo && it.photo.on && it.photo.slug && !it.hidden && !s.hidden) featured[it.id] = { slug: it.photo.slug, focus: it.photo.focus || [50, 50], name: it.name };
+    const seenSlug = new Set();
+    for (const s of model.sections) for (const it of s.items) if (it.photo && it.photo.on && it.photo.slug && !it.hidden && !s.hidden && !seenSlug.has(it.photo.slug)) { seenSlug.add(it.photo.slug); featured[it.id] = { slug: it.photo.slug, focus: it.photo.focus || [50, 50], name: it.name }; }
     const probe = document.createElement("div");
     probe.className = "page"; probe.style.position = "absolute"; probe.style.left = "-20in"; probe.style.top = "0";
     container.appendChild(probe);
@@ -1201,13 +1250,8 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       const feats = ids.filter((id) => featured[id]).slice(0, PHOTO_SLOTS);
       const slots = PHOTO_SLOTS;
       const pics = feats.map((id) => ({ src: photoUrl(model, featured[id].slug), focus: featured[id].focus, cap: featured[id].name }));
-      const used = new Set();
-      while (pics.length < slots && fills.length) {
-        const f = fills[fi % fills.length]; fi++;
-        if (used.has(f) && used.size >= fills.length) break;
-        if (used.has(f)) continue;
-        used.add(f); pics.push({ src: model.assetBase + "template/" + f, focus: [50, 50], cap: "" });
-      }
+      // each spare photo is used once in the whole proposal; when they run out the spot stays empty
+      while (pics.length < slots && fi < fills.length) { const f = fills[fi++]; pics.push({ src: model.assetBase + "template/" + f, focus: [50, 50], cap: "" }); }
       const photos = pics.map((ph, j) => {
         const top = PAGE_TOP + j * (PHOTO_H + PHOTO_GAP);
         return `<div class="pbox" style="left:${PHOTO_X}in;top:${top.toFixed(2)}in;width:${PHOTO_W}in;height:${PHOTO_H.toFixed(2)}in"><img src="${ph.src}" style="object-position:${ph.focus[0]}% ${ph.focus[1]}%"></div>${ph.cap ? `<div class="pcap" style="position:absolute;left:${PHOTO_X}in;top:${(top + PHOTO_H + 0.05).toFixed(2)}in;width:${PHOTO_W}in">Pictured: ${esc(ph.cap)}</div>` : ""}`;
@@ -1222,9 +1266,9 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   }
 
   function render(container, model) {
-    const S = STYLES[model.style];
+    const S = resolvePhotos(model);
     container.innerHTML = "";
-    const menu = paginateMenu(container, model);
+    const menu = paginateMenu(container, model, S);
     container.innerHTML = coverPage(model, S) + introPage(model) + aboutPage(model, S) + menu + (model.bar && model.bar.show ? barPage(model, S) : "") + detailsPage(model, S) + (model.serviceShow !== false ? servicePage(model, S) : "") + plannerPage(model, S) + investPage(model, S) + closingPage(model, S);
     // long script lines: shrink to fit the cover card, and below 50pt wrap onto two balanced lines instead
     container.querySelectorAll(".cvscript").forEach((el) => {
@@ -1257,7 +1301,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     return container.querySelectorAll(".page").length;
   }
 
-  root.RENDER = { render, STYLES, guessGroup, menuBlocks };
+  root.RENDER = { render, STYLES, guessGroup, menuBlocks, photoId };
   if (typeof module !== "undefined") module.exports = root.RENDER;
 })(typeof window !== "undefined" ? window : globalThis);
 
@@ -1498,7 +1542,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       },
       team, dayOf, serviceShow: team.length > 0,
       planner: { name: rep, title: TITLES[rep] || "Sales Event Planner", phone: m.rep_phone, email: REP_EMAILS[rep] || "", headshot: headshot(rep), bio: `${repFirst} is part of our ${m.market || "Puff 'n Stuff"} planning team and will be your partner from this proposal through your event, crafting the ideal menu with the proper staff and flow for your celebration.` },
-      director: dir ? Object.assign({ headshot: headshot(dir.name), title: TITLES[dir.name] || "Director of Sales" }, dir) : null,
+      director: dir ? Object.assign({ headshot: headshot(dir.name), title: m.market === "Miami" ? "Director of Sales" : TITLES[dir.name] || "Director of Sales" }, dir) : null,
       investment: { rows, total: get("Grand Total"), deposit: deposit && deposit !== "0.00" ? deposit : "", balance: get("Balance Due") },
       terms: ["A booking retainer of $1,000 or 15% of the estimated event cost, whichever is greater, secures your date.", "50% of the remaining balance is due 60 days prior to your event.", "Final guest count is confirmed 14 days prior; the remaining balance is due 10 days prior."].concat(rentals.length ? ["Rental and linen pricing is estimated until selections are confirmed."] : []),
       steps,
