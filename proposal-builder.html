@@ -159,6 +159,8 @@ button.add:hover{border-color:var(--mr);color:var(--mr)}
 .previewing #out .page{margin:0 auto 28px;box-shadow:0 2px 14px rgba(0,0,0,.18)}
 
 /* ---------- proposal pages ---------- */
+.page p,.page .ds,.page .lead,.page li,.page .note{text-wrap:pretty}
+.page h1,.page h2,.page .display{text-wrap:balance}
 .page{position:relative;width:8.5in;height:11in;overflow:hidden;background:var(--cream);font-family:"Lato",sans-serif;font-size:9.6pt;line-height:1.45;color:var(--ink);-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .page img{display:block}
 .page .serif{font-family:"Cormorant",serif;font-weight:400}
@@ -188,6 +190,7 @@ button.add:hover{border-color:var(--mr);color:var(--mr)}
 .nums{list-style:none;padding:0;margin:0;color:var(--soft);font-size:9.4pt;line-height:1.75}
 .nums li:before{content:"\2022\00a0\00a0 "}
 .blist{list-style:none;padding:0;margin:.06in 0 0;color:var(--soft);font-size:9.2pt;line-height:1.7}
+.blist li+li{margin-top:.07in}
 .bargrid{position:absolute;left:.9in;top:2.95in;width:5.35in;display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--rule);background:var(--paper)}
 .bc{padding:.26in .28in}.br{border-right:1px solid var(--rule)}.bb{border-bottom:1px solid var(--rule)}
 .bh{font-family:"Cormorant",serif;font-size:15pt;font-weight:600}
@@ -278,7 +281,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-26.1642"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-26.1653"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -832,7 +835,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   const STYLES = {
     wedding: {
       label: "Wedding",
-      img: { cover: "bg_cover.jpg", invest: "bg_invest.jpg", about: ["about_ceremony.jpg", "about_chairs.jpg", "about_table.jpg"], barCol: "bar_column.jpg", barCocktail: "bar_cocktail.jpg", rentals: "rentals_banner.jpg", venue: "venue_banner.jpg", team: ["team_1.jpg", "team_2.jpg", "team_3.jpg", "team_4.jpg"], planner: "planner_cocktail.jpg", closing: "journey_plate.jpg", closingRow: ["journey_1.jpg", "journey_2.jpg", "journey_3.jpg", "journey_4.jpg"], fill: ["menu_plate.jpg", "starter_salad.jpg", "charcuterie.jpg", "menu_table.jpg"] },
+      img: { cover: "bg_cover.jpg", invest: "bg_invest.jpg", about: ["about_ceremony.jpg", "about_chairs.jpg", "about_table.jpg"], barCol: "bar_column.jpg", barCocktail: "bar_cocktail.jpg", rentals: "rentals_banner.jpg", venue: "venue_banner.jpg", team: ["team_1.jpg", "team_2.jpg", "team_3.jpg", "team_4.jpg"], planner: "planner_cocktail.jpg", closing: "journey_plate.jpg", closingRow: ["journey_1.jpg", "journey_2.jpg", "journey_3.jpg", "journey_4.jpg"], fill: ["menu_plate.jpg", "starter_salad.jpg", "charcuterie.jpg", "menu_table.jpg", "grazing_bread.jpg"] },
       aboutScript: "Passionately perfecting your “I Do.”",
       aboutHead: "40+ Years of Crafting Your Perfect Day",
       aboutBody: "For over four decades, Puff 'n Stuff has been Florida's premier wedding caterer. We believe your wedding is a milestone that deserves flawless execution. From our award-winning chefs to our professional service team, we are dedicated to making your vision a reality.",
@@ -849,7 +852,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     },
     corporate: {
       label: "Corporate",
-      img: { cover: "corp_bg_cover.jpg", invest: "corp_bg_invest.jpg", about: ["corp_about_1.jpg", "corp_about_2.jpg", "corp_about_3.jpg"], barCol: "corp_bar_column.jpg", barCocktail: "corp_bar_cocktail.jpg", rentals: "corp_rentals_banner.jpg", venue: "corp_venue_banner.jpg", team: ["corp_team_1.jpg", "corp_team_2.jpg", "corp_team_3.jpg", "corp_team_4.jpg"], planner: "corp_planner_floral.jpg", closing: "corp_journey_plate.jpg", closingRow: ["corp_journey_1.jpg", "corp_journey_2.jpg", "corp_journey_3.jpg", "corp_journey_4.jpg"], fill: ["corp_menu_flatbread.jpg", "corp_menu_potato.jpg", "corp_menu_scallop.jpg", "corp_menu_col_1.jpg"] },
+      img: { cover: "corp_bg_cover.jpg", invest: "corp_bg_invest.jpg", about: ["corp_about_1.jpg", "corp_about_2.jpg", "corp_about_3.jpg"], barCol: "corp_bar_column.jpg", barCocktail: "corp_bar_cocktail.jpg", rentals: "corp_rentals_banner.jpg", venue: "corp_venue_banner.jpg", team: ["corp_team_1.jpg", "corp_team_2.jpg", "corp_team_3.jpg", "corp_team_4.jpg"], planner: "corp_planner_floral.jpg", closing: "corp_journey_plate.jpg", closingRow: ["corp_journey_1.jpg", "corp_journey_2.jpg", "corp_journey_3.jpg", "corp_journey_4.jpg"], fill: ["corp_menu_flatbread.jpg", "corp_menu_potato.jpg", "corp_menu_scallop.jpg", "corp_menu_col_1.jpg", "corp_menu_col_2.jpg", "corp_menu_col_3.jpg"] },
       aboutScript: "Passionately perfecting life’s celebrations.",
       aboutHead: "40+ Years of Corporate Excellence",
       aboutBody: "For over four decades, Puff 'n Stuff has delivered professionally executed events across Florida, backed by proven systems, trained staff, and consistent quality.",
@@ -922,7 +925,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       const caps = [s.package, s.select].filter(Boolean).join(" • ");
       const head = `<div class="sechead"><div class="script">${esc(s.title)}</div>${caps ? `<div class="caps">${esc(caps)}</div>` : ""}</div>`;
       let first = true;
-      const push = (html, itemIds) => { blocks.push({ html: (first ? head : "") + html, ids: itemIds || [] }); first = false; };
+      const push = (html, itemIds) => { blocks.push({ html: (first ? head : "") + html, ids: itemIds || [], sec: s.id, start: first }); first = false; };
       if (included.length) {
         push(`<div class="incl"><div class="inclhead">Included</div>${included.map((it) => `<div class="ds"><b>${esc(it.name)}</b>${it.desc && it.desc[0] ? ", " + esc(it.desc.map((d) => d.text).join(", ")).toLowerCase() : ""}</div>`).join("")}</div>`);
       }
@@ -1025,9 +1028,13 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       <div class="pbox" style="left:0;top:0;width:8.5in;height:3.4in"><img src="${m.assetBase}template/${S.img.rentals}"></div>
       <h1 class="display" style="position:absolute;left:0;right:0;top:3.95in;text-align:center;font-size:44pt">${m.style === "wedding" ? "Rentals &amp; Event Details" : "Event Details"}</h1>
       <hr class="rule" style="position:absolute;left:1.5in;right:1.5in;top:5.2in">
-      <div style="position:absolute;left:1.3in;top:5.5in;width:5.9in;display:grid;grid-template-columns:1fr 1fr 1fr;gap:.3in">${col(d.colA_title, d.colA)}${col(d.colB_title, d.colB)}${col(d.colC_title, d.colC)}</div>
-      <div style="position:absolute;left:1.3in;top:8.45in;width:3.3in"><div class="serif" style="font-size:14.5pt;font-weight:600">Your Venue</div><div style="color:var(--soft);font-size:9.2pt;line-height:1.6;margin-top:.06in">${esc(m.venue.name)}${m.venue.address ? "<br>" + esc(m.venue.address) : ""}</div></div>
-      ${d.note ? `<div class="note" style="position:absolute;left:5.1in;top:8.5in;width:2.1in">${esc(d.note)}</div>` : ""}
+      <div class="detbox" style="position:absolute;left:1.3in;top:5.5in;width:5.9in;height:4.2in;overflow:hidden">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.3in">${col(d.colA_title, d.colA)}${col(d.colB_title, d.colB)}${col(d.colC_title, d.colC)}</div>
+        <div style="display:grid;grid-template-columns:3.3in 1fr;gap:.5in;align-items:end;margin-top:.4in">
+          <div><div class="serif" style="font-size:14.5pt;font-weight:600">Your Venue</div><div style="color:var(--soft);font-size:9.2pt;line-height:1.6;margin-top:.06in">${esc(m.venue.name)}${m.venue.address ? "<br>" + esc(m.venue.address) : ""}</div></div>
+          ${d.note ? `<div class="note">${esc(d.note)}</div>` : "<div></div>"}
+        </div>
+      </div>
       ${footer()}</div>`;
   }
   function servicePage(m, S) {
@@ -1097,10 +1104,23 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       <div class="closerow">${S.img.closingRow.map((f) => `<div class="pbox" style="position:relative;height:1.95in"><img src="${m.assetBase}template/${f}"></div>`).join("")}</div></div>`;
   }
 
+  // no lone word on a last line: tie each text's last word to the one before it
+  function tieLast(root) {
+    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes = []; while (tw.nextNode()) nodes.push(tw.currentNode);
+    for (const t of nodes) {
+      const v = t.nodeValue;
+      if (!/\S+\s+\S+\s+\S+/.test(v)) continue; // three words or more
+      t.nodeValue = v.replace(/\s+(\S{1,14})(\s*)$/, "\u00A0$1$2");
+    }
+  }
   // ---------- menu pagination (DOM) ----------
-  // Lays blocks into two text columns per page. The right column carries up to
-  // two dish photos at its top when items on that page have a featured photo.
-  const PAGE_TOP = 0.95, PAGE_BOTTOM = 9.95, PHOTO_H = 2.05, PHOTO_GAP = 0.42;
+  // Menu text runs down the left column only. The right column is a stack of photos: the
+  // featured dishes on that page first (with a "Pictured" caption), then the look's own food
+  // photos to fill the rest. A section that won't fit in what's left of a page starts on the next.
+  const PAGE_TOP = 0.95, PAGE_BOTTOM = 9.95, TEXT_W = 3.55, PHOTO_X = 4.75, PHOTO_W = 2.85, PHOTO_SLOTS = 3, PHOTO_GAP = 0.42;
+  const PHOTO_H = (PAGE_BOTTOM - PAGE_TOP - (PHOTO_SLOTS - 1) * PHOTO_GAP - 0.2) / PHOTO_SLOTS;
+  const HEAD_H = 2.45;
   function paginateMenu(container, model) {
     const S = STYLES[model.style];
     const blocks = menuBlocks(model);
@@ -1109,72 +1129,76 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     const probe = document.createElement("div");
     probe.className = "page"; probe.style.position = "absolute"; probe.style.left = "-20in"; probe.style.top = "0";
     container.appendChild(probe);
-    const colEl = (w) => { const d = document.createElement("div"); d.className = "mcol"; d.style.width = w + "in"; probe.appendChild(d); return d; };
-    // fill = share of each column's height to use. 1 packs every column full; the menu is then
-    // re-laid at the lowest fill that still needs the same number of pages, so the dishes spread
-    // evenly across those pages instead of crowding the first and leaving the last nearly empty.
+    const col = document.createElement("div"); col.className = "mcol"; col.style.width = TEXT_W + "in"; probe.appendChild(col);
+    // measure every block once, and each section's total height
+    const hts = blocks.map((b) => { col.innerHTML = `<div class="mblock">${b.html}</div>`; return col.scrollHeight / 96; });
+    const secH = {};
+    blocks.forEach((b, k) => { if (b.sec) secH[b.sec] = (secH[b.sec] || 0) + hts[k]; });
+    const mk = (k) => { const d = document.createElement("div"); d.className = "mblock"; d.innerHTML = blocks[k].html; tieLast(d); return d; };
     const layout = (fill) => {
-    const pages = [];
-    let i = 0, pageNo = 0;
-    while (i < blocks.length) {
-      const firstPage = pageNo === 0;
-      const headH = firstPage ? 2.45 : 0;
-      let best = null;
-      // remaining featured items, in flow order
-      const remainingFeat = blocks.slice(i).flatMap((b) => b.ids).filter((id) => featured[id]);
-      for (let P = Math.min(2, remainingFeat.length); P >= 0; P--) {
-        probe.innerHTML = "";
-        const leftCap = (PAGE_BOTTOM - PAGE_TOP - headH) * fill;
-        const rightCap = (PAGE_BOTTOM - PAGE_TOP - P * (PHOTO_H + PHOTO_GAP)) * fill;
-        const L = colEl(3.25), R = colEl(3.15);
-        let k = i, col = L, cap = leftCap;
-        const placed = [[], []];
+      const pages = [];
+      let i = 0;
+      while (i < blocks.length) {
+        const cap = (PAGE_BOTTOM - PAGE_TOP - (pages.length === 0 ? HEAD_H : 0)) * fill;
+        const fullCap = PAGE_BOTTOM - PAGE_TOP;
+        col.innerHTML = "";
+        let k = i;
         while (k < blocks.length) {
-          const el = document.createElement("div"); el.className = "mblock"; el.innerHTML = blocks[k].html; col.appendChild(el);
-          if (col.scrollHeight / 96 > cap + 0.01) {
-            col.removeChild(el);
-            if (col === L) { col = R; cap = rightCap; continue; }
-            break;
+          const b = blocks[k];
+          // a section starting here that won't finish on this page goes to the next page,
+          // as long as it fits on a page of its own and this page already has something on it
+          if (b.start && k > i && b.sec && secH[b.sec] <= fullCap * 0.98) {
+            const extra = [];
+            for (let e = k; e < blocks.length && blocks[e].sec === b.sec; e++) { const d = mk(e); col.appendChild(d); extra.push(d); }
+            const over = col.scrollHeight / 96 > cap + 0.01;
+            extra.forEach((d) => col.removeChild(d));
+            if (over) break;
           }
-          placed[col === L ? 0 : 1].push(k);
+          const d = mk(k); col.appendChild(d);
+          if (col.scrollHeight / 96 > cap + 0.01) { col.removeChild(d); break; }
           k++;
         }
-        if (k === i) { // a single block taller than a column: place it anyway
-          placed[0].push(k); k++;
-        }
-        const ids = placed[0].concat(placed[1]).flatMap((x) => blocks[x].ids);
-        const feats = ids.filter((id) => featured[id]).slice(0, P);
-        if (feats.length >= P || P === 0) { best = { placed, next: k, feats, P: feats.length }; break; }
+        if (k === i) k = i + 1; // one block taller than the page: place it anyway
+        pages.push({ from: i, to: k });
+        i = k;
       }
-      pages.push(best);
-      i = best.next; pageNo++;
-    }
-    return pages;
+      return pages;
     };
+    const splits = (pp) => pp.filter((pg) => pg.to < blocks.length && blocks[pg.to - 1].sec && blocks[pg.to - 1].sec === blocks[pg.to].sec).length;
     let pages = layout(1);
     if (pages.length > 1) {
-      let lo = 0.5, hi = 1, bestPages = pages;
+      let lo = 0.55, hi = 1, best = pages;
       for (let t = 0; t < 7; t++) {
-        const mid = (lo + hi) / 2, tryPages = layout(mid);
-        if (tryPages.length <= pages.length) { hi = mid; bestPages = tryPages; } else lo = mid;
+        const mid = (lo + hi) / 2, tp = layout(mid);
+        // spread out only while it costs no extra page and splits no more sections across pages
+        if (tp.length <= pages.length && splits(tp) <= splits(pages)) { hi = mid; best = tp; } else lo = mid;
       }
-      pages = bestPages;
+      pages = best;
     }
     container.removeChild(probe);
-    // emit pages
+    // photos: featured dishes in flow order, then the look's photos, without repeating on a page
+    const fills = (S.img.fill || []).slice();
+    let fi = 0;
     const html = pages.map((pg, n) => {
-      const L = pg.placed[0].map((k) => `<div class="mblock">${blocks[k].html}</div>`).join("");
-      const R = pg.placed[1].map((k) => `<div class="mblock">${blocks[k].html}</div>`).join("");
-      const photos = pg.feats.map((id, j) => {
-        const f = featured[id];
+      const ids = blocks.slice(pg.from, pg.to).flatMap((b) => b.ids);
+      const feats = ids.filter((id) => featured[id]).slice(0, PHOTO_SLOTS);
+      const slots = PHOTO_SLOTS;
+      const pics = feats.map((id) => ({ src: photoUrl(model, featured[id].slug), focus: featured[id].focus, cap: featured[id].name }));
+      const used = new Set();
+      while (pics.length < slots && fills.length) {
+        const f = fills[fi % fills.length]; fi++;
+        if (used.has(f) && used.size >= fills.length) break;
+        if (used.has(f)) continue;
+        used.add(f); pics.push({ src: model.assetBase + "template/" + f, focus: [50, 50], cap: "" });
+      }
+      const photos = pics.map((ph, j) => {
         const top = PAGE_TOP + j * (PHOTO_H + PHOTO_GAP);
-        return `<div class="pbox" style="left:4.45in;top:${top}in;width:3.15in;height:${PHOTO_H}in"><img src="${photoUrl(model, f.slug)}" style="object-position:${f.focus[0]}% ${f.focus[1]}%"></div><div class="pcap" style="position:absolute;left:4.45in;top:${(top + PHOTO_H + 0.05).toFixed(2)}in">Pictured: ${esc(f.name)}</div>`;
+        return `<div class="pbox" style="left:${PHOTO_X}in;top:${top.toFixed(2)}in;width:${PHOTO_W}in;height:${PHOTO_H.toFixed(2)}in"><img src="${ph.src}" style="object-position:${ph.focus[0]}% ${ph.focus[1]}%"></div>${ph.cap ? `<div class="pcap" style="position:absolute;left:${PHOTO_X}in;top:${(top + PHOTO_H + 0.05).toFixed(2)}in;width:${PHOTO_W}in">Pictured: ${esc(ph.cap)}</div>` : ""}`;
       }).join("");
-      const head = n === 0 ? `<div style="position:absolute;left:.9in;top:${PAGE_TOP}in;width:3.3in"><h1 class="display" style="font-size:38pt">${esc(S.menuHead)}</h1><p class="lead" style="margin-top:.14in;font-size:9.2pt">${esc(model.menuLead || S.menuLead)}</p></div>` : "";
-      const rTop = PAGE_TOP + pg.P * (PHOTO_H + PHOTO_GAP);
+      const head = n === 0 ? `<div style="position:absolute;left:.9in;top:${PAGE_TOP}in;width:${TEXT_W}in"><h1 class="display" style="font-size:38pt">${esc(S.menuHead)}</h1><p class="lead" style="margin-top:.14in;font-size:9.2pt">${esc(model.menuLead || S.menuLead)}</p></div>` : "";
+      const L = blocks.slice(pg.from, pg.to).map((b) => `<div class="mblock">${b.html}</div>`).join("");
       return `<div class="page">${head}${photos}
-        <div class="mcol" style="left:.9in;top:${PAGE_TOP + (n === 0 ? 2.45 : 0)}in;width:3.25in">${L}</div>
-        <div class="mcol" style="left:4.45in;top:${rTop}in;width:3.15in">${R}</div>
+        <div class="mcol" style="left:.9in;top:${PAGE_TOP + (n === 0 ? HEAD_H : 0)}in;width:${TEXT_W}in">${L}</div>
         ${footer()}</div>`;
     }).join("");
     return html;
@@ -1195,6 +1219,17 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
         el.style.maxWidth = maxW + "px"; el.style.marginLeft = "auto"; el.style.marginRight = "auto";
         const lh = () => el.getBoundingClientRect().height / (parseFloat(getComputedStyle(el).lineHeight) || 1);
         while (lh() > 2.2 && size > 36) { size -= 2; el.style.fontSize = size + "pt"; }
+      }
+    });
+    tieLast(container);
+    // event details: when the columns run long, tighten the type so the venue still fits on the page
+    container.querySelectorAll(".detbox").forEach((box) => {
+      let fs = 9.2, gap = 0.4;
+      const inner = () => Array.from(box.children).reduce((h, c) => h + c.getBoundingClientRect().height, 0) + gap * 96;
+      while (inner() > box.clientHeight && fs > 7) {
+        fs -= 0.4; gap = Math.max(0.2, gap - 0.05);
+        box.querySelectorAll(".blist, .blist li").forEach((x) => { x.style.fontSize = fs + "pt"; x.style.lineHeight = "1.45"; });
+        box.children[1].style.marginTop = gap + "in";
       }
     });
     // The Signature has no accented letters or en dash: "Entrée" -> "Entree" in script lines only
@@ -1293,7 +1328,11 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
         part = cleanPhrase(part);
         if (!part || /_|TBD|provided by|set up on|setup on/i.test(part)) continue;
         part = part.charAt(0).toUpperCase() + part.slice(1).toLowerCase().replace(/\bpns\b/g, "PnS");
-        if (!out.some((o) => o.toLowerCase() === part.toLowerCase())) out.push(part);
+        // skip a phrase that mostly repeats one already listed (SEOs repeat the same inclusions per section)
+        const ws = (t) => new Set(t.toLowerCase().replace(/[^a-z ]/g, " ").split(/\s+/).filter((w) => w.length > 3));
+        const pw = ws(part);
+        const dup = out.some((o) => { const ow = ws(o); let c = 0; pw.forEach((w) => { if (ow.has(w)) c++; }); return c >= Math.min(pw.size, ow.size) * 0.5; });
+        if (!dup) out.push(part);
       }
     }
     return out;
@@ -1383,7 +1422,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     const info = (m.event_info || "").split(/\s+-\s+/).map((x) => x.trim()).filter(Boolean);
     const svcStyle = [];
     if (info.some((x) => /full service/i.test(x))) svcStyle.push("Full service");
-    for (const x of info) if (!/full service/i.test(x) && !/^(HOD|dinner|lunch|brunch|breakfast)$/i.test(x)) svcStyle.push(x.replace(/^HOD$/, "Hors d'oeuvres"));
+    for (let x of info) { x = x.replace(/^[\s\-–]+|[\s\-–]+$/g, ""); if (x && !/full service/i.test(x) && !/^(HOD|dinner|lunch|brunch|breakfast)$/i.test(x)) svcStyle.push(x.replace(/^HOD$/, "Hors d'oeuvres")); }
     if (p.bar.type) svcStyle.push(p.bar.type);
     const rentals = rentalLines(p.rentals);
     const rep = m.rep_name || "";
