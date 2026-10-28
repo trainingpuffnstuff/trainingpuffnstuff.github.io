@@ -131,6 +131,9 @@ button.add:hover{border-color:var(--mr);color:var(--mr)}
 /* ---------- preview ---------- */
 #previewbar{display:none;position:sticky;top:0;z-index:5;background:var(--mr);color:var(--vc);padding:12px 32px;align-items:center;gap:14px}
 #previewbar button#print{background:var(--vc);color:var(--mr);border:1px solid var(--vc);border-radius:2px;padding:9px 16px;font:inherit;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;cursor:pointer}
+#previewbar button#download{background:var(--vc);color:var(--mr);border:1px solid var(--vc);border-radius:2px;padding:9px 16px;font:inherit;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;cursor:pointer}
+#previewbar button#print.ghost{background:transparent;color:var(--vc);border:1px solid rgba(254,255,249,.4)}
+#previewbar button:disabled{opacity:.7;cursor:wait}
 #previewbar button#back{background:transparent;color:var(--vc);border:1px solid rgba(254,255,249,.4);border-radius:2px;padding:9px 14px;font:inherit;font-size:11px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
 #previewbar .tip{color:#bdbdbb;font-size:12px;font-weight:300}
 #pcount{font-size:12px;color:#d8d8d5}
@@ -244,7 +247,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       <div class="howto">
         <div><b>1. Drop the SEO</b>The menu, bar, staff, timeline and investment are read straight from it, and dish photos are matched from the Menu Photo Lookbook.</div>
         <div><b>2. Pick a look and review</b>Wedding, Corporate or Social. Fix anything flagged, drag dishes between sections, turn photos on or off.</div>
-        <div><b>3. Build and save</b>Preview the pages, then click Print / Save as PDF. The bar at the top shows the settings for your browser.</div>
+        <div><b>3. Build and save</b>Preview the pages, then click Download PDF. The file is named after the event.</div>
       </div>
       <div id="status"></div>
     </section>
@@ -264,7 +267,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     </section>
   </main>
 </div>
-<div id="previewbar"><button id="back">← Back to edit</button><button id="print">Print / Save as PDF</button><span id="pcount"></span><span class="tip">In the print dialog: Destination "Save as PDF", Margins "None", Background graphics on.</span><span class="sp" style="flex:1"></span><button class="offbtn" data-off="1" title="Report a problem so the tool can be fixed">Something look off?</button></div>
+<div id="previewbar"><button id="back">← Back to edit</button><button id="download">Download PDF</button><button id="print" class="ghost">Print</button><span id="pcount"></span><span class="tip">In the print dialog: Destination "Save as PDF", Margins "None", Background graphics on.</span><span class="sp" style="flex:1"></span><button class="offbtn" data-off="1" title="Report a problem so the tool can be fixed">Something look off?</button></div>
 <div id="offpanel" hidden>
   <div class="offcard" role="dialog" aria-labelledby="offh">
     <button class="offx" data-offclose="1" aria-label="Close">×</button>
@@ -281,7 +284,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-27.0753"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-28.1951"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -1819,6 +1822,45 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     app.addEventListener("dragstart", onDragStart); app.addEventListener("dragover", onDragOver); app.addEventListener("drop", onDrop); app.addEventListener("dragend", onDragEnd);
     $("#build").addEventListener("click", build);
     $("#back").addEventListener("click", () => { document.body.classList.remove("previewing"); $("#out").innerHTML = ""; });
+    // ---------- download PDF (no print dialog) ----------
+    // The print window can hang on "Loading preview" when the default printer is an office printer
+    // that isn't reachable. This builds the PDF in the page instead: each proposal page is drawn to
+    // an image at about 190 dpi and placed on a letter-size PDF page.
+    const libs = [
+      ["htmlToImage", "https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"],
+      ["jspdf", "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"],
+    ];
+    const loadScript = (src) => new Promise((ok, bad) => { const t = document.createElement("script"); t.src = src; t.onload = ok; t.onerror = () => bad(new Error("Couldn't load " + src)); document.head.appendChild(t); });
+    const fileName = () => {
+      const c = MODEL.cover;
+      const nm = [c.title, c.script].filter(Boolean).join(" ").replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim();
+      return (nm || "Puff n Stuff") + " - Proposal";
+    };
+    $("#download").addEventListener("click", async () => {
+      const btn = $("#download"), label = btn.textContent;
+      btn.disabled = true;
+      try {
+        for (const [g, src] of libs) if (!window[g]) await loadScript(src);
+        await document.fonts.ready;
+        const pages = $$("#out .page");
+        const fontEmbedCSS = await htmlToImage.getFontEmbedCSS(pages[0]);
+        const pdf = new jspdf.jsPDF({ unit: "in", format: "letter", orientation: "portrait", compress: true });
+        for (let i = 0; i < pages.length; i++) {
+          btn.textContent = `Making PDF ${i + 1} of ${pages.length}…`;
+          const url = await htmlToImage.toJpeg(pages[i], { quality: 0.9, pixelRatio: 2, backgroundColor: "#ffffff", fontEmbedCSS, style: { margin: "0", boxShadow: "none", transform: "none" } });
+          if (i) pdf.addPage("letter", "portrait");
+          pdf.addImage(url, "JPEG", 0, 0, 8.5, 11, undefined, "FAST");
+        }
+        pdf.setProperties({ title: fileName(), creator: "Puff 'n Stuff Proposal Builder" });
+        pdf.save(fileName() + ".pdf");
+        window.__PB_DOWNLOADED = true;
+      } catch (err) {
+        console.error(err);
+        alertBox("The PDF couldn't be made here (" + (err && err.message ? err.message : err) + "). Use Print instead and pick Save as PDF as the destination.");
+      } finally { btn.textContent = label; btn.disabled = false; }
+    });
+    const alertBox = (t) => { const d = document.createElement("div"); d.id = "newver"; d.textContent = t; d.onclick = () => d.remove(); document.body.appendChild(d); setTimeout(() => d.remove(), 12000); };
+
     $("#print").addEventListener("click", () => {
       // the browser names the saved PDF after the page title: "Gromoll Pirate Wedding Celebration - Proposal"
       const c = MODEL.cover, old = document.title;
@@ -1832,10 +1874,10 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     const ua = navigator.userAgent;
     const br = /Edg\//.test(ua) ? "edge" : /Firefox\//.test(ua) ? "firefox" : /Chrome\//.test(ua) ? "chrome" : /Safari\//.test(ua) ? "safari" : "chrome";
     const TIPS = {
-      chrome: 'In the print window: Destination "Save as PDF". Under More settings, Margins "None".',
-      edge: 'In the print window: Printer "Save as PDF". Under More settings, Margins "None".',
-      firefox: 'In the print window: Destination "Save to PDF". Under More settings, Margins "None" and check "Print backgrounds".',
-      safari: 'In the print window: click Show Details, check "Print backgrounds", uncheck "Print headers and footers", then PDF > Save as PDF. Chrome or Edge gives the cleanest result.',
+      chrome: 'Or print: Destination "Save as PDF", Margins "None". If the print window sticks on "Loading preview", change Destination to Save as PDF.',
+      edge: 'Or print: Printer "Save as PDF", Margins "None". If the print window sticks on "Loading preview", change Printer to Save as PDF.',
+      firefox: 'Or print: Destination "Save to PDF", Margins "None", check "Print backgrounds".',
+      safari: 'Or print: Show Details, check "Print backgrounds", uncheck "Print headers and footers", then PDF > Save as PDF.',
     };
     $("#previewbar .tip").textContent = TIPS[br];
     $("#restart").addEventListener("click", () => { if (confirmRestart()) location.reload(); });
