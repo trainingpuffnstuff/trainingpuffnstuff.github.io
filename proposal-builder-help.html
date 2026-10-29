@@ -35,9 +35,10 @@ td:first-child{font-weight:700;white-space:nowrap;width:1%}
 ul{margin:0;padding-left:18px}ul li{margin:4px 0}
 a{color:var(--ink)}
 .btn{display:inline-block;background:var(--ink);color:#fff;text-decoration:none;font-weight:700;font-size:12px;letter-spacing:.16em;text-transform:uppercase;padding:12px 20px;margin-top:8px}
+.video{margin:0 0 6px}.video video{display:block;width:100%;height:auto;background:#000}.video p{color:var(--mute);font-size:13px;margin:6px 0 0}
 .foot{color:var(--mute);font-size:13px;margin-top:28px}
 @media (max-width:600px){.top{padding:14px 16px}main{padding:26px 16px 40px}h1{font-size:32px}td:first-child{white-space:normal}}
-@media print{.top{background:none;color:var(--ink);padding:0 0 6px}.top img{filter:none;height:24px}.top span{font-size:20px}.btn{display:none}main{padding:6px 0;max-width:none}body{font-size:11px;line-height:1.4}.script{font-size:26px}h1{font-size:28px;margin-bottom:4px}.lead{font-size:12px;margin-bottom:6px}h2{margin:14px 0 6px;font-size:10px}ol.steps li{padding:5px 0;grid-template-columns:30px 1fr}ol.steps .n{font-size:22px}.box{padding:9px 14px}table{font-size:11px}td{padding:5px 8px}.foot{margin-top:12px}}
+@media print{.video{display:none}.top{background:none;color:var(--ink);padding:0 0 6px}.top img{filter:none;height:24px}.top span{font-size:20px}.btn{display:none}main{padding:6px 0;max-width:none}body{font-size:11px;line-height:1.4}.script{font-size:26px}h1{font-size:28px;margin-bottom:4px}.lead{font-size:12px;margin-bottom:6px}h2{margin:14px 0 6px;font-size:10px}ol.steps li{padding:5px 0;grid-template-columns:30px 1fr}ol.steps .n{font-size:22px}.box{padding:9px 14px}table{font-size:11px}td{padding:5px 8px}.foot{margin-top:12px}}
 @page{size:letter;margin:.5in}
 </style>
 </head>
@@ -49,6 +50,15 @@ a{color:var(--ink)}
   <p class="lead">It turns a Caterease Special Event Order into a branded client proposal in a few minutes. It runs in your browser, so the SEO never leaves your computer.</p>
   <a class="btn" href="proposal-builder.html">Open the Proposal Builder</a>
 
+  <h2>Watch the walkthrough</h2>
+  <div class="video">
+    <video controls preload="metadata" playsinline poster="proposal-builder-training.jpg">
+      <source src="proposal-builder-training.mp4" type="video/mp4">
+      <a href="proposal-builder-training.mp4">Download the walkthrough video</a>
+    </video>
+    <p>2 minutes, with sound.</p>
+  </div>
+
   <h2>Before you start</h2>
   <div class="box">
     <p>In Caterease, print the event with the <b>Special Event Order</b> custom print and save it as a PDF.</p>
@@ -58,7 +68,7 @@ a{color:var(--ink)}
   <h2>Steps</h2>
   <ol class="steps">
     <li><span class="n">1</span><div><b>Drop in the SEO</b>Drag the PDF onto the page, or click Choose the SEO PDF.</div></li>
-    <li><span class="n">2</span><div><b>Pick a look</b>Wedding, Corporate or Social. The tool picks one from the event, and you can switch at any time without losing your edits.</div></li>
+    <li><span class="n">2</span><div><b>Pick a look</b>Wedding, Corporate, Social or Holiday. The tool picks one from the event, and you can switch at any time without losing your edits.</div></li>
     <li><span class="n">3</span><div><b>Clear "Needs attention"</b>Items with a dark bar should be fixed before sending. The rest are things to double check. Click an item to jump to that part of the menu.</div></li>
     <li><span class="n">4</span><div><b>Review the details and menu</b>Every field can be edited. Drag dishes by the ☰ handle, or use the arrows or Move to. Click a dish photo to turn it on or off.</div></li>
     <li><span class="n">5</span><div><b>Build the proposal</b>Click Build Proposal and look through every page.</div></li>
