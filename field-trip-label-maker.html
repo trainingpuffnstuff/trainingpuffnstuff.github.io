@@ -1479,21 +1479,6 @@ const ICON_GEOM = (() => {
   TT.push({ type: "poly", pts: quad(84, 52, 90, 50, 92, 44), stroke: "fader", w: 1.4 });
   TT.push(dot(18, 54, 1.6), dot(84, 30, 1.4), dot(80, 70, 1.5), dot(24, 76, 1.3), dot(90, 62, 1.1));
 
-  // Protein Prototype: DNA double helix, two full turns, with base pairs.
-  const PP = [];
-  const amp = 22, top = 8, bot = 92, turns = 1.5;
-  const sx = (y, sign) => 50 + sign * amp * Math.sin(((y - top) / (bot - top)) * Math.PI * 2 * turns);
-  const helix = sign => { const pts = []; for (let y = top; y <= bot; y += 1.5) pts.push([sx(y, sign), y]); return pts; };
-  for (let y = top + 3; y <= bot - 3; y += 7) {
-    const a = sx(y, 1), b = sx(y, -1);
-    if (Math.abs(a - b) > 7) {
-      PP.push(line(a, y, b, y, "fader", 1.6));
-      PP.push(dot(a, y, 1.5), dot(b, y, 1.5));
-    }
-  }
-  PP.push({ type: "poly", pts: helix(1), stroke: "faded", w: 2.4 }, { type: "poly", pts: helix(-1), stroke: "faded", w: 2.4 });
-  PP.push(dot(12, 22, 1.3), dot(88, 30, 1.2), dot(14, 74, 1.2), dot(86, 80, 1.3));
-
   // Lab Experiment: three test tubes in a rack, each with a different
   // level of liquid and a few bubbles.
   const LE = [];
@@ -1515,6 +1500,16 @@ const ICON_GEOM = (() => {
     LE.push(ring(cx - 2, level + 10, 1.6), ring(cx + 2.5, level + 17, 1.1), ring(cx + 1, level - 6, 1.0));
   });
   LE.push(dot(8, 26, 1.3), dot(93, 28, 1.2), dot(6, 66, 1.1));
+
+
+  // Protein Prototype: ball-and-stick molecule
+  const circlePts = (cx, cy, r, n = 24) => ellipse(cx, cy, r, r, n);
+  const PP = [];
+  const atoms = [[50, 50, 9], [26, 32, 6.5], [74, 32, 6.5], [30, 74, 6.5], [70, 74, 6.5], [50, 18, 5], [50, 84, 5]];
+  [[1], [2], [3], [4], [5], [6]].forEach(([i]) => PP.push(line(50, 50, atoms[i][0], atoms[i][1], "faded", 2.2)));
+  PP.push(line(26, 32, 50, 18, "fader", 1.6), line(74, 32, 50, 18, "fader", 1.6), line(30, 74, 50, 84, "fader", 1.6), line(70, 74, 50, 84, "fader", 1.6));
+  atoms.forEach(([x, y, r], i) => PP.push({ type: "poly", pts: circlePts(x, y, r), closed: true, fill: i === 0 ? "fader" : "lighter", stroke: "faded", w: 1.8 }));
+  PP.push(dot(12, 56, 1.3), dot(88, 60, 1.2), dot(14, 14, 1.1), dot(86, 86, 1.1));
 
   return { TT, PP, LE };
 })();
