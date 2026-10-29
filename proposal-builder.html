@@ -315,7 +315,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-28.2044"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-28.2051"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -956,6 +956,9 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     "social_journey_1.jpg": "seasonal-bruschetta", "social_journey_2.jpg": "berries-greens-salad-2", "social_journey_3.jpg": "taco-station",
     "social_venue_banner.jpg": "85c-short-rib",
   };
+  Object.assign(PHOTO_ID, { "event_019.jpg": "social_team_2.jpg", "event_029.jpg": "orange-twist-cocktail", "event_044.jpg": "tuna-crudo" });
+  // approved event photos from the combined reception deck (Oct 28): setups, stations, displays, staff at work
+  const EVENTS = "003 005 007 012 013 016 018 019 022 026 028 029 032 035 036 042 044 045 049 052 054 056 062 069 071 077 081 084 094 100 104 109 113 116 118 120 122 125 127".split(" ").map((n) => "event_" + n + ".jpg");
   const photoId = (f) => PHOTO_ID[f] || f;
   // Give this proposal a copy of the look's photos where no photograph appears twice: the dish photos
   // on the menu come first, then each fixed slot keeps its photo unless it's already shown, in which
@@ -998,6 +1001,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     const own = new Set(base.img.fill || []);
     I.fill = spares.filter((x) => own.has(x) && free(x));
     I.fillOther = spares.filter((x) => !own.has(x) && free(x));
+    I.events = EVENTS.filter(free);
     S.used = used;
     return S;
   }
@@ -1306,8 +1310,8 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     }
     container.removeChild(probe);
     // photos: featured dishes in flow order, then the look's photos, without repeating on a page
-    const fills = (S.img.fill || []).slice(), others = (S.img.fillOther || []).slice();
-    let fi = 0, oi = 0;
+    const fills = (S.img.fill || []).slice(), others = (S.img.fillOther || []).slice(), events = (S.img.events || []).slice();
+    let fi = 0, oi = 0, ei = 0;
     // after the template spares, other Lookbook photos from the same kind of course, uncaptioned
     const used = S.used || new Set();
     const lookSpares = (model.sparePhotos || []).filter((p) => !used.has(p.slug) && !used.has(p.slug.replace(/-\d+$/, "")));
@@ -1318,10 +1322,11 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       const slots = PHOTO_SLOTS;
       const pics = feats.map((id) => ({ src: featured[id].src || photoUrl(model, featured[id].slug), focus: featured[id].focus, cap: featured[id].name }));
       // each spare photo is used once in the whole proposal; when they run out the spot stays empty
-      // order: the look's own photos, Lookbook photos from the same course, other looks' photos, any Lookbook photo
+      // order: the look's own photos, event photos, Lookbook photos from the same course, other looks' photos, any Lookbook photo
       const tpl = (f) => pics.push({ src: model.assetBase + "template/" + f, focus: [50, 50], cap: "" });
       const lb = (k) => { const p = lookSpares.splice(k, 1)[0]; used.add(p.slug); pics.push({ src: photoUrl(model, p.slug), focus: [50, 50], cap: "" }); };
       while (pics.length < slots && fi < fills.length) tpl(fills[fi++]);
+      while (pics.length < slots && ei < events.length) tpl(events[ei++]);
       const cats = new Set(blocks.slice(pg.from, pg.to).map((b) => secCat[b.sec]).filter((c) => c && c !== "other"));
       while (pics.length < slots) { const k = lookSpares.findIndex((p) => cats.has(p.cat)); if (k < 0) break; lb(k); }
       while (pics.length < slots && oi < others.length) tpl(others[oi++]);
@@ -1375,7 +1380,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     return container.querySelectorAll(".page").length;
   }
 
-  root.RENDER = { render, STYLES, guessGroup, menuBlocks, photoId, resolvePhotos, courseOf };
+  root.RENDER = { render, STYLES, guessGroup, menuBlocks, photoId, resolvePhotos, courseOf, EVENTS };
   if (typeof module !== "undefined") module.exports = root.RENDER;
 })(typeof window !== "undefined" ? window : globalThis);
 
@@ -1726,7 +1731,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     let looks = [];
     if (PICK && PICK.intro != null) {
       const I = RENDER.STYLES[MODEL.style].img;
-      const files = [...new Set([].concat(I.fill || [], I.about || [], I.closingRow || [], [I.closing, I.planner, I.barCocktail]).filter(Boolean))];
+      const files = [...new Set([].concat(I.fill || [], I.about || [], I.closingRow || [], [I.closing, I.planner, I.barCocktail], RENDER.EVENTS || []).filter(Boolean))];
       looks = files.map((f) => ({ src: ASSETS + "template/" + f, id: RENDER.photoId(f), name: "" }));
     }
     const cell = (x) => `<button class="pkc" data-src="${esc(x.src)}" data-id="${esc(x.id)}" title="${esc(x.name)}"><img src="${esc(x.src)}" loading="lazy" onerror="this.closest('.pkc').remove()">${x.name ? `<span>${esc(x.name)}</span>` : ""}</button>`;
