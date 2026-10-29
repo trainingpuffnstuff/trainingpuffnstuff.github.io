@@ -152,6 +152,31 @@ button.add:hover{border-color:var(--mr);color:var(--mr)}
 #offcopied{color:var(--sc);font-size:12.5px}
 @media print{#offpanel{display:none!important}}
 .helplink{text-decoration:none;display:inline-flex;align-items:center}
+
+.tcol{display:flex;flex-direction:column;gap:4px;align-items:center}
+.tchg{background:none;border:0;padding:0;font:inherit;font-size:10.5px;letter-spacing:.06em;color:var(--sc);text-decoration:underline;cursor:pointer}
+.p2{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+.p2>span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--sc);margin-right:4px}
+.p2ph{position:relative;width:74px;height:74px;padding:0;border:1px solid var(--ps);background:#efefec;cursor:pointer;overflow:hidden;border-radius:2px}
+.p2ph img{width:100%;height:100%;object-fit:cover;display:block}
+.p2ph em{position:absolute;left:0;right:0;bottom:0;font-style:normal;font-size:9px;letter-spacing:.12em;text-transform:uppercase;background:rgba(32,32,32,.8);color:#fff;text-align:center;padding:2px 0}
+#picker{position:fixed;inset:0;z-index:70;background:rgba(32,32,32,.45);display:flex;align-items:center;justify-content:center;padding:16px}
+#picker[hidden]{display:none}
+.pkbox{background:#fff;width:min(920px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column;border-radius:3px;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+.pktop{display:flex;justify-content:space-between;align-items:center;padding:16px 20px 8px}
+.pktop h3{font-family:"Cormorant",serif;font-weight:500;font-size:24px;margin:0}
+#pk-close{background:none;border:0;font-size:26px;cursor:pointer;color:var(--sc)}
+.pkbar{display:flex;gap:10px;padding:0 20px;flex-wrap:wrap}
+#pk-q{flex:1;min-width:200px;padding:9px 11px;border:1px solid var(--ps);font:inherit;font-size:14px}
+.pkup,#pk-none{display:inline-flex;align-items:center;padding:8px 14px;border:1px solid var(--mr);font-size:11px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;background:#fff;color:var(--mr);font-family:inherit}
+.pkup{background:var(--mr);color:#fff}
+.pknote{font-size:12px;color:var(--mute);margin:8px 20px 4px}
+#pk-grid{overflow:auto;padding:10px 20px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.pkh{grid-column:1/-1;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--sc);margin-top:6px}
+.pkc{padding:0;border:1px solid var(--ps);background:#fff;cursor:pointer;text-align:left;font:inherit}
+.pkc:hover{border-color:var(--mr)}
+.pkc img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.pkc span{display:block;font-size:11px;padding:5px 6px;color:var(--sc);line-height:1.3}
 #newver{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;background:var(--mr);color:#fff;font-size:13px;padding:12px 18px;border-radius:3px;box-shadow:0 4px 18px rgba(0,0,0,.18);max-width:calc(100% - 32px)}
 #newver a{color:#fff;font-weight:700}
 @media print{#newver{display:none!important}}
@@ -268,6 +293,12 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </main>
 </div>
 <div id="previewbar"><button id="back">← Back to edit</button><button id="download">Download PDF</button><button id="print" class="ghost">Print</button><span id="pcount"></span><span class="tip">In the print dialog: Destination "Save as PDF", Margins "None", Background graphics on.</span><span class="sp" style="flex:1"></span><button class="offbtn" data-off="1" title="Report a problem so the tool can be fixed">Something look off?</button></div>
+<div id="picker" hidden><div class="pkbox">
+  <div class="pktop"><h3 id="pk-title">Choose a photo</h3><button id="pk-close" title="Close">×</button></div>
+  <div class="pkbar"><input id="pk-q" placeholder="Search the Lookbook (e.g. short rib, crostini)"><label class="pkup">Upload a photo<input id="pk-file" type="file" accept="image/*" hidden></label><button id="pk-none">No photo</button></div>
+  <p class="pknote">Uploaded photos stay on your computer and are only used in this proposal. Send good ones to Rosie to add to the Lookbook.</p>
+  <div id="pk-grid"></div>
+</div></div>
 <div id="offpanel" hidden>
   <div class="offcard" role="dialog" aria-labelledby="offh">
     <button class="offx" data-offclose="1" aria-label="Close">×</button>
@@ -284,7 +315,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-28.1951"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-28.2005"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -934,6 +965,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     const S = Object.assign({}, base, { img: JSON.parse(JSON.stringify(base.img)) });
     const used = new Set();
     for (const s of model.sections) if (!s.hidden) for (const it of s.items) if (!it.hidden && it.photo && it.photo.on && it.photo.slug) used.add(it.photo.slug.replace(/-\d+$/, "")), used.add(it.photo.slug);
+    for (const pk of model.introPhotos || []) if (pk && pk.id) used.add(pk.id);
     const spares = (base.img.fill || []).slice();
     const take = (f) => {
       if (!used.has(photoId(f)) && !used.has(photoId(f).replace(/-\d+$/, ""))) { used.add(photoId(f)); return f; }
@@ -942,6 +974,16 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       const alt = spares.splice(k, 1)[0]; used.add(photoId(alt)); return alt;
     };
     const I = S.img;
+    // page 2: the planner's picks, otherwise the first unused spares
+    const picks = model.introPhotos || [];
+    I.intro = [0, 1, 2].map((k) => {
+      const pk = picks[k];
+      if (pk && pk.src) { if (pk.id) used.add(pk.id); return { src: pk.src, id: pk.id || "", picked: true }; }
+      const j = spares.findIndex((x) => !used.has(photoId(x)) && !used.has(photoId(x).replace(/-\d+$/, "")));
+      if (j < 0) return null;
+      const f = spares.splice(j, 1)[0]; used.add(photoId(f));
+      return { src: model.assetBase + "template/" + f, id: photoId(f), picked: false };
+    });
     I.cover = take(I.cover);
     I.about = I.about.map(take);
     if (model.bar && model.bar.show) { I.barCol = take(I.barCol); I.barCocktail = take(I.barCocktail); }
@@ -1048,8 +1090,11 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
         <div style="margin-top:.2in">${line(m.guestsLine)}</div>
       </div></div>`;
   }
-  function introPage(m) {
-    return `<div class="page"><div style="position:absolute;left:.9in;top:2.1in;width:3.2in">
+  function introPage(m, S) {
+    const ph = (S && S.img.intro) || [];
+    const box = (p, st) => p ? `<div class="pbox" style="${st}"><img src="${p.src}"></div>` : "";
+    const pics = box(ph[0], "left:4.55in;top:.95in;width:3.05in;height:2.45in") + box(ph[1], "left:4.55in;top:3.6in;width:3.05in;height:2.45in") + box(ph[2], "left:4.55in;top:6.25in;width:3.05in;height:2.45in");
+    return `<div class="page">${pics}<div style="position:absolute;left:.9in;top:2.1in;width:3.2in">
       <div class="serif" style="font-size:19pt;font-weight:500;line-height:1.2">Enjoy your event.<br>We handle the details.</div>
       <p class="lead" style="margin-top:.16in">From planning to service and cleanup, our team manages every aspect, so your event runs smoothly from start to finish.</p>
       <p class="lead" style="margin-top:.28in">${esc(m.introText)}</p></div>
@@ -1194,7 +1239,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     const blocks = menuBlocks(model);
     const featured = {};
     const seenSlug = new Set();
-    for (const s of model.sections) for (const it of s.items) if (it.photo && it.photo.on && it.photo.slug && !it.hidden && !s.hidden && !seenSlug.has(it.photo.slug)) { seenSlug.add(it.photo.slug); featured[it.id] = { slug: it.photo.slug, focus: it.photo.focus || [50, 50], name: it.name }; }
+    for (const s of model.sections) for (const it of s.items) if (it.photo && it.photo.on && (it.photo.slug || it.photo.src) && !it.hidden && !s.hidden && !seenSlug.has(it.photo.slug || it.id)) { seenSlug.add(it.photo.slug || it.id); featured[it.id] = { slug: it.photo.slug, src: it.photo.src || "", focus: it.photo.focus || [50, 50], name: it.name }; }
     const probe = document.createElement("div");
     probe.className = "page"; probe.style.position = "absolute"; probe.style.left = "-20in"; probe.style.top = "0";
     container.appendChild(probe);
@@ -1252,7 +1297,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       const ids = blocks.slice(pg.from, pg.to).flatMap((b) => b.ids);
       const feats = ids.filter((id) => featured[id]).slice(0, PHOTO_SLOTS);
       const slots = PHOTO_SLOTS;
-      const pics = feats.map((id) => ({ src: photoUrl(model, featured[id].slug), focus: featured[id].focus, cap: featured[id].name }));
+      const pics = feats.map((id) => ({ src: featured[id].src || photoUrl(model, featured[id].slug), focus: featured[id].focus, cap: featured[id].name }));
       // each spare photo is used once in the whole proposal; when they run out the spot stays empty
       while (pics.length < slots && fi < fills.length) { const f = fills[fi++]; pics.push({ src: model.assetBase + "template/" + f, focus: [50, 50], cap: "" }); }
       const photos = pics.map((ph, j) => {
@@ -1272,7 +1317,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     const S = resolvePhotos(model);
     container.innerHTML = "";
     const menu = paginateMenu(container, model, S);
-    container.innerHTML = coverPage(model, S) + introPage(model) + aboutPage(model, S) + menu + (model.bar && model.bar.show ? barPage(model, S) : "") + detailsPage(model, S) + (model.serviceShow !== false ? servicePage(model, S) : "") + plannerPage(model, S) + investPage(model, S) + closingPage(model, S);
+    container.innerHTML = coverPage(model, S) + introPage(model, S) + aboutPage(model, S) + menu + (model.bar && model.bar.show ? barPage(model, S) : "") + detailsPage(model, S) + (model.serviceShow !== false ? servicePage(model, S) : "") + plannerPage(model, S) + investPage(model, S) + closingPage(model, S);
     // long script lines: shrink to fit the cover card, and below 50pt wrap onto two balanced lines instead
     container.querySelectorAll(".cvscript").forEach((el) => {
       const box = el.parentElement, maxW = box.clientWidth * 0.9;
@@ -1304,7 +1349,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     return container.querySelectorAll(".page").length;
   }
 
-  root.RENDER = { render, STYLES, guessGroup, menuBlocks, photoId };
+  root.RENDER = { render, STYLES, guessGroup, menuBlocks, photoId, resolvePhotos };
   if (typeof module !== "undefined") module.exports = root.RENDER;
 })(typeof window !== "undefined" ? window : globalThis);
 
@@ -1598,7 +1643,9 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
 
   function itemRow(s, it) {
     const ph = it.photo;
-    const thumb = ph.slug ? `<button class="thumb ${ph.on ? "on" : ""} st-${ph.status}" data-act="photo" data-item="${it.id}" title="${ph.on ? "Photo on (click to turn off)" : "Photo off (click to turn on)"}${ph.reason ? " • " + esc(ph.reason) : ""}"><img src="${LOOKBOOK + ph.slug}.jpg" loading="lazy"><span>${ph.on ? "on" : ph.status === "review" ? "check" : "off"}</span></button>` : `<div class="thumb none" title="No Lookbook photo"><span>no photo</span></div>`;
+    const has = ph.slug || ph.src;
+    const t0 = has ? `<button class="thumb ${ph.on ? "on" : ""} st-${ph.status}" data-act="photo" data-item="${it.id}" title="${ph.on ? "Photo on (click to turn off)" : "Photo off (click to turn on)"}${ph.reason ? " • " + esc(ph.reason) : ""}"><img src="${ph.src || LOOKBOOK + ph.slug + ".jpg"}" loading="lazy"><span>${ph.on ? "on" : ph.status === "review" ? "check" : "off"}</span></button>` : `<div class="thumb none" title="No Lookbook photo"><span>no photo</span></div>`;
+    const thumb = `<div class="tcol">${t0}<button class="tchg" data-act="pick" data-item="${it.id}">${has ? "Change" : "Add photo"}</button></div>`;
     const descTxt = it.desc.map((d) => (d.label ? d.label + ": " : "") + d.text).join("\n");
     const grp = s.grouping ? `<select data-item="${it.id}" data-f="group">${["Garden", "Land", "Air", "Sea"].map((g) => `<option${it.group === g ? " selected" : ""}>${g}</option>`).join("")}</select>` : "";
     const groupsTxt = it.groups.map((g) => [g.label + (g.tags ? " | " + g.tags : "")].concat(g.options.map((o) => "- " + (o.label ? o.label + ": " : "") + o.text + (o.tags ? " | " + o.tags : ""))).join("\n")).join("\n\n");
@@ -1628,6 +1675,66 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       <button class="add" data-act="additem" data-sec="${s.id}">+ Add a dish</button>
     </div>`;
   }
+  // ---------- photo picker: Lookbook search, look photos (page 2), or upload ----------
+  let PICK = null;
+  function openPicker(target) {
+    PICK = target;
+    const it = target.item ? findItem(target.item).it : null;
+    const q = it ? it.name : "";
+    $("#pk-title").textContent = it ? `Photo for ${it.name}` : `Page 2 photo ${target.intro + 1}`;
+    $("#pk-q").value = q;
+    $("#pk-none").hidden = !it;
+    $("#picker").hidden = false;
+    drawPicker();
+    setTimeout(() => $("#pk-q").select(), 30);
+  }
+  function closePicker() { $("#picker").hidden = true; PICK = null; $("#pk-file").value = ""; }
+  function drawPicker() {
+    const q = $("#pk-q").value.toLowerCase().replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter((w) => w.length > 2);
+    const score = (n) => { const t = n.toLowerCase(); return q.reduce((a, w) => a + (t.includes(w) ? 1 : 0), 0); };
+    let list = (CAT && CAT.photos || []).map((p) => ({ src: LOOKBOOK + p.slug + ".jpg", id: p.slug, name: p.name, sc: score(p.name + " " + (p.aliases || []).join(" ")) }));
+    if (q.length) list = list.filter((x) => x.sc > 0).sort((a, b) => b.sc - a.sc || a.name.localeCompare(b.name));
+    else list.sort((a, b) => a.name.localeCompare(b.name));
+    let looks = [];
+    if (PICK && PICK.intro != null) {
+      const I = RENDER.STYLES[MODEL.style].img;
+      const files = [...new Set([].concat(I.fill || [], I.about || [], I.closingRow || [], [I.closing, I.planner, I.barCocktail]).filter(Boolean))];
+      looks = files.map((f) => ({ src: ASSETS + "template/" + f, id: RENDER.photoId(f), name: "" }));
+    }
+    const cell = (x) => `<button class="pkc" data-src="${esc(x.src)}" data-id="${esc(x.id)}" title="${esc(x.name)}"><img src="${esc(x.src)}" loading="lazy" onerror="this.closest('.pkc').remove()">${x.name ? `<span>${esc(x.name)}</span>` : ""}</button>`;
+    $("#pk-grid").innerHTML = (looks.length ? `<div class="pkh">Photos from this look</div>${looks.map(cell).join("")}<div class="pkh">Lookbook</div>` : "") + (list.length ? list.slice(0, 120).map(cell).join("") : `<p class="muted">No Lookbook photos match. Try another word, or upload a photo.</p>`);
+  }
+  function applyPick(p) {
+    if (!PICK) return;
+    if (PICK.item) {
+      const f = findItem(PICK.item);
+      f.it.photo = p ? Object.assign({ slug: "", src: "", status: "own", reason: "", focus: null, on: true }, p) : Object.assign(f.it.photo, { on: false, slug: "", src: "", status: "none" });
+    } else {
+      MODEL.introPhotos = (MODEL.introPhotos || [null, null, null]).slice();
+      MODEL.introPhotos[PICK.intro] = p ? { src: p.src || LOOKBOOK + p.slug + ".jpg", id: p.slug || p.id || "" } : null;
+    }
+    closePicker(); drawEditor();
+  }
+  // shrink an uploaded photo to at most 1600px on the long side so the proposal stays a sensible size
+  function readUpload(file) {
+    return new Promise((ok, bad) => {
+      const fr = new FileReader();
+      fr.onerror = () => bad(fr.error);
+      fr.onload = () => {
+        const im = new Image();
+        im.onerror = () => bad(new Error("That file isn't an image this browser can open."));
+        im.onload = () => {
+          const k = Math.min(1, 1600 / Math.max(im.naturalWidth, im.naturalHeight));
+          const c = document.createElement("canvas"); c.width = Math.round(im.naturalWidth * k); c.height = Math.round(im.naturalHeight * k);
+          const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
+          ok(c.toDataURL("image/jpeg", 0.86));
+        };
+        im.src = fr.result;
+      };
+      fr.readAsDataURL(file);
+    });
+  }
+
   function drawEditor() {
     const M = MODEL;
     const S = RENDER.STYLES;
@@ -1636,8 +1743,9 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     $("#ed-event").innerHTML = `<h2>Cover &amp; event</h2><div class="grid">
       ${field("Name on cover", "cover.title", M.cover.title)}${field("Script line", "cover.script", M.cover.script)}${coverExtra}
       ${field("Date", "dateText", M.dateText)}${field("Times", "timesText", M.timesText)}${field("Venue line", "venueLine", M.venueLine)}${field("Guests line", "guestsLine", M.guestsLine)}
-      ${field("Intro paragraph", "introText", M.introText, { area: true, wide: true, rows: 3 })}</div>`;
-    $("#ed-menu").innerHTML = `<h2>Menu <small>Drag dishes to reorder or move them between sections. Click a photo to turn it on or off.</small></h2>${M.sections.map(sectionCard).join("")}<button class="add" data-act="addsec">+ Add a section</button>`;
+      ${field("Intro paragraph", "introText", M.introText, { area: true, wide: true, rows: 3 })}</div>
+      <div class="p2"><span>Page 2 photos</span>${RENDER.resolvePhotos(M).img.intro.map((p, k) => `<button class="p2ph" data-act="pick" data-intro="${k}" title="Change this photo">${p ? `<img src="${p.src}">` : ""}<em>Change</em></button>`).join("")}${(M.introPhotos || []).some(Boolean) ? `<button class="tchg" data-act="introauto">Back to the look's photos</button>` : ""}</div>`;
+    $("#ed-menu").innerHTML = `<h2>Menu <small>Drag dishes to reorder or move them between sections. Click a photo to turn it on or off, or Change to pick another or upload your own.</small></h2>${M.sections.map(sectionCard).join("")}<button class="add" data-act="addsec">+ Add a section</button>`;
     const B = M.bar;
     $("#ed-bar").innerHTML = `<h2>Bar <label class="inline"><input type="checkbox" data-path="bar.show"${B.show ? " checked" : ""}> Include the bar page</label></h2>${B.show ? `<div class="grid">
       ${field("Headline", "bar.headline", B.headline, { wide: true })}
@@ -1704,6 +1812,8 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     if (b.dataset.style) { const keep = MODEL; MODEL = buildModel(PARSED, b.dataset.style); carryEdits(keep, MODEL); drawEditor(); return; }
     if (b.dataset.goto) { const el = $(`.scard[data-sec="${b.dataset.goto}"]`); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
     const act = b.dataset.act;
+    if (act === "pick") { openPicker(b.dataset.item ? { item: b.dataset.item } : { intro: +b.dataset.intro }); return; }
+    if (act === "introauto") { MODEL.introPhotos = null; drawEditor(); return; }
     if (act === "photo") { const f = findItem(b.dataset.item); f.it.photo.on = !f.it.photo.on; b.classList.toggle("on", f.it.photo.on); b.querySelector("span").textContent = f.it.photo.on ? "on" : f.it.photo.status === "review" ? "check" : "off"; ensureFocus(f.it); return; }
     if (act === "up" || act === "down") { const f = findItem(b.dataset.item); const j = act === "up" ? f.i - 1 : f.i + 1; if (j < 0 || j >= f.s.items.length) return; const t = f.s.items[f.i]; f.s.items[f.i] = f.s.items[j]; f.s.items[j] = t; drawEditor(); return; }
     if (act === "additem") { const s = MODEL.sections.find((x) => x.id === b.dataset.sec); s.items.push({ id: "n" + ++uid, name: "New dish", tags: "", desc: [], groups: [], included: false, hidden: false, group: "Garden", photo: { slug: "", status: "none", on: false } }); drawEditor(); return; }
@@ -1713,7 +1823,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   // keep the planner's edits when switching style (menu, bar, details, team, planner)
   function carryEdits(from, to) {
     if (from.cover.title) to.cover.title = from.cover.title;
-    to.sections = from.sections; to.bar = from.bar; to.details = Object.assign({}, from.details, { colB_title: to.details.colB_title }); to.team = from.team; to.serviceShow = from.serviceShow; to.planner = from.planner; to.venue = from.venue; to.dateText = from.dateText; to.timesText = from.timesText; to.venueLine = from.venueLine; to.guestsLine = from.guestsLine; to.introText = from.introText;
+    to.sections = from.sections; to.bar = from.bar; to.details = Object.assign({}, from.details, { colB_title: to.details.colB_title }); to.team = from.team; to.serviceShow = from.serviceShow; to.introPhotos = from.introPhotos; to.planner = from.planner; to.venue = from.venue; to.dateText = from.dateText; to.timesText = from.timesText; to.venueLine = from.venueLine; to.guestsLine = from.guestsLine; to.introText = from.introText;
   }
   // drag and drop between sections
   let dragId = null;
@@ -1809,6 +1919,12 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   }
 
   window.addEventListener("DOMContentLoaded", () => {
+    $("#pk-q").addEventListener("input", drawPicker);
+    $("#pk-close").addEventListener("click", closePicker);
+    $("#picker").addEventListener("click", (e) => { if (e.target.id === "picker") closePicker(); const c = e.target.closest(".pkc"); if (c) applyPick(c.dataset.id && !c.dataset.src.startsWith("data:") && c.dataset.src.indexOf(LOOKBOOK) === 0 ? { slug: c.dataset.id, reason: "picked by planner" } : { src: c.dataset.src, id: c.dataset.id }); });
+    $("#pk-none").addEventListener("click", () => applyPick(null));
+    $("#pk-file").addEventListener("change", async (e) => { const f = e.target.files[0]; if (!f) return; try { const src = await readUpload(f); applyPick({ src, id: "upload-" + Date.now(), reason: "uploaded by planner" }); } catch (err) { alert(err.message || err); } });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#picker").hidden) closePicker(); });
     checkVersion();
     document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") checkVersion(); });
     if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
