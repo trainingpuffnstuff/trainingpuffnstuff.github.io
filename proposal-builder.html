@@ -315,7 +315,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-28.2039"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-28.2044"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -1601,7 +1601,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     return {
       style, assetBase: ASSETS, lookbookBase: LOOKBOOK,
       // every Lookbook photo with its course, for filling photo spots once the look's own photos run out
-      sparePhotos: (() => { const seen = new Set(), out = []; for (const it of (CAT && CAT.items) || []) { if (it.status !== "own" || !it.photo || seen.has(it.photo)) continue; seen.add(it.photo); out.push({ slug: it.photo, cat: RENDER.courseOf(it.section) }); } return out; })(),
+      sparePhotos: (() => { const seen = new Set(), out = []; for (const it of (CAT && CAT.items) || []) { if (it.status !== "own" || !it.photo || seen.has(it.photo) || /breakfast|boxed|light fare|library/i.test(it.section || "")) continue; seen.add(it.photo); out.push({ slug: it.photo, cat: RENDER.courseOf(it.section) }); } return out; })(),
       cover, dateText: m.date, timesText: start && end ? `${start} – ${end}` : start,
       venue: { name: venue.name || "", address: venue.address || "" },
       venueLine: [venue.name, venue.city ? venue.city + ", Florida" : ""].filter(Boolean).join(" – "),
