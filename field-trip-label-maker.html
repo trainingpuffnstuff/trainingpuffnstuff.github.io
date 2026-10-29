@@ -1,0 +1,2055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Field Trip Lunch Label Maker — Puff 'n Stuff</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700;900&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Lato', sans-serif;
+    background: #f1f5f9;
+    min-height: 100vh;
+    color: #1a1a1a;
+  }
+
+  header {
+    background: #1a1a1a;
+    color: white;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  header h1 { font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 600; }
+  header span { font-size: 0.78rem; color: #9ca3af; font-weight: 300; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    height: calc(100vh - 56px);
+  }
+
+  .panel {
+    background: #1a1a1a;
+    color: #e5e5e5;
+    overflow-y: auto;
+    padding: 20px;
+    border-right: 1px solid #333;
+  }
+  .panel h2 {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #9ca3af;
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+  .panel section { margin-bottom: 22px; }
+
+  .filebtn {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    background: #2a2a2a;
+    border: 1px dashed #444;
+    border-radius: 6px;
+    color: #d1d5db;
+    cursor: pointer;
+    font-size: 0.85rem;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .filebtn:hover { background: #333; border-color: #666; color: #fff; }
+  .filebtn input { display: none; }
+  .filebtn.has-file { border-style: solid; border-color: #4ade80; color: #4ade80; }
+
+  .paste-area {
+    width: 100%;
+    min-height: 140px;
+    max-height: 260px;
+    padding: 10px 12px;
+    background: #2a2a2a;
+    border: 1px dashed #444;
+    border-radius: 6px;
+    color: #d1d5db;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    resize: vertical;
+  }
+  .paste-area::placeholder { color: #6b7280; font-family: 'Lato', sans-serif; font-size: 0.82rem; }
+  .paste-area:focus { outline: none; border-color: #4ade80; border-style: solid; }
+  .paste-area.has-content { border-style: solid; border-color: #4ade80; }
+
+  .logo-preview {
+    margin-top: 8px;
+    padding: 8px;
+    background: #fff;
+    border-radius: 4px;
+    text-align: center;
+    display: none;
+  }
+  .logo-preview.show { display: block; }
+  .logo-preview img { max-width: 100%; max-height: 60px; }
+
+  .field { margin-bottom: 10px; }
+  .field label {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #9ca3af;
+    margin-bottom: 4px;
+  }
+  .field input, .field select, .field textarea {
+    width: 100%;
+    padding: 8px 10px;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 0.9rem;
+    font-family: inherit;
+  }
+  .field textarea { resize: vertical; min-height: 36px; }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none;
+    border-color: #4ade80;
+  }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .mix-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+  .mix-table th { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af; font-weight: 600; text-align: left; padding: 4px 4px; }
+  .mix-table th.num, .mix-table td.num { text-align: center; width: 70px; }
+  .mix-table td { padding: 4px; font-size: 0.82rem; color: #e5e5e5; border-top: 1px solid #333; }
+  .mix-table td .sub { display: block; font-size: 0.66rem; color: #9ca3af; }
+  .mix-table input { width: 60px; padding: 5px 6px; background: #2a2a2a; border: 1px solid #444; border-radius: 4px; color: #fff; font-size: 0.85rem; text-align: center; font-family: inherit; }
+  .mix-table input:focus { outline: none; border-color: #4ade80; }
+  .mix-total { font-size: 0.75rem; color: #d1d5db; margin-top: 6px; }
+
+  .roster {
+    background: #232323;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 8px;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  .roster-empty {
+    text-align: center;
+    padding: 24px 12px;
+    color: #6b7280;
+    font-size: 0.82rem;
+    font-style: italic;
+  }
+  .student-row {
+    display: grid;
+    grid-template-columns: 22px 1fr auto;
+    gap: 6px;
+    align-items: center;
+    padding: 7px 4px;
+    border-bottom: 1px solid #2c2c2c;
+    font-size: 0.8rem;
+  }
+  .student-row:last-child { border-bottom: none; }
+  .student-row .sn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: #6b7280;
+    text-align: right;
+    font-weight: 700;
+  }
+  .student-row .info { min-width: 0; }
+  .student-row .name {
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.82rem;
+  }
+  .student-row .meta {
+    font-size: 0.7rem;
+    color: #9ca3af;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 1px;
+  }
+  .student-row .meta .allergens { color: #4ade80; font-weight: 700; }
+  .student-row .del {
+    background: transparent;
+    border: 1px solid #444;
+    color: #9ca3af;
+    padding: 2px 7px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.7rem;
+    line-height: 1;
+  }
+  .student-row .del:hover { background: #333; color: #fff; border-color: #666; }
+  .student-row.edit-mode { grid-template-columns: 22px 1fr; }
+  .student-row .edit-fields { display: flex; flex-direction: column; gap: 4px; }
+  .student-row .edit-fields input {
+    padding: 5px 7px;
+    font-size: 0.78rem;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 3px;
+    color: #fff;
+  }
+  .student-row .edit-fields input:focus { outline: none; border-color: #4ade80; }
+  .student-row .edit-fields .split { display: grid; grid-template-columns: 1fr 90px; gap: 4px; }
+  .student-row .edit-btns { display: flex; gap: 4px; margin-top: 3px; }
+  .student-row .edit-btns button {
+    flex: 1; padding: 4px 6px; font-size: 0.7rem; border: 1px solid #444;
+    background: #2a2a2a; color: #d1d5db; border-radius: 3px; cursor: pointer;
+  }
+  .student-row .edit-btns button:hover { background: #333; color: #fff; }
+  .student-row .edit-btns .save { background: #14532d; border-color: #22c55e; color: #a7f3d0; }
+  .student-row .edit-btns .save:hover { background: #166534; color: #fff; }
+  .student-row .edit-btns .del { background: #3f1414; border-color: #b8271f; color: #fca5a5; }
+  .student-row .edit-btns .del:hover { background: #7f1d1d; color: #fff; }
+
+  .roster-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .roster-actions button {
+    flex: 1;
+    padding: 7px 10px;
+    background: transparent;
+    border: 1px solid #444;
+    color: #9ca3af;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  .roster-actions button:hover { background: #2a2a2a; color: #fff; }
+
+  button.primary {
+    width: 100%;
+    padding: 12px;
+    background: #4ade80;
+    color: #052e16;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+  }
+  button.primary:hover { background: #22c55e; }
+  button.primary:disabled { background: #4b5563; color: #9ca3af; cursor: not-allowed; }
+
+  button.secondary {
+    width: 100%;
+    padding: 9px;
+    background: transparent;
+    color: #9ca3af;
+    border: 1px solid #444;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  button.secondary:hover { background: #2a2a2a; color: #fff; }
+
+  .format-help {
+    background: #1f2024;
+    border-left: 3px solid #4ade80;
+    padding: 8px 10px;
+    font-size: 0.72rem;
+    color: #d1d5db;
+    border-radius: 3px;
+    line-height: 1.5;
+    margin-top: 8px;
+  }
+  .format-help b { color: #4ade80; }
+  .format-help code {
+    background: #2a2a2a; color: #e5e5e5; padding: 1px 4px; border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
+  }
+
+  .preview {
+    overflow-y: auto;
+    padding: 30px;
+    background: #e5e7eb;
+  }
+  .preview-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+    color: #1a1a1a;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .preview-heading .count {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    color: #6b7280;
+    font-weight: 500;
+  }
+  .preview-heading .count b { color: #1a1a1a; font-weight: 800; }
+
+  .sheet {
+    width: 8.5in;
+    height: 11in;
+    background: white;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+    margin: 0 auto 20px;
+    position: relative;
+    padding: 0.25in 1.1875in;
+    transform-origin: top center;
+  }
+
+  .label-grid {
+    display: grid;
+    grid-template-columns: 3in 3in;
+    grid-template-rows: repeat(5, 2in);
+    column-gap: 0.125in;
+    row-gap: 0.125in;
+  }
+
+  /* ── LABEL — Same visual DNA as the camp maker ─────── */
+  .label {
+    width: 3in;
+    height: 2in;
+    background: #fff;
+    border: 1.2pt solid var(--day-accent, #1a4a8c);
+    border-radius: 0.125in;
+    padding: 0.10in 0.12in 0.08in;
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    overflow: hidden;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #0a0a0a;
+  }
+  .label-bg { position: absolute; inset: 0; pointer-events: none; }
+  .label-bg .grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(0,0,0,0.025) 0.4pt, transparent 0.4pt),
+      linear-gradient(to bottom, rgba(0,0,0,0.025) 0.4pt, transparent 0.4pt);
+    background-size: 0.10in 0.10in;
+  }
+  .label-bg .day-icon {
+    position: absolute;
+    right: 0.10in;
+    top: 0.72in;
+    width: 0.92in;
+    height: 0.92in;
+    color: var(--day-accent, #1a4a8c);
+    opacity: 0.35;
+  }
+
+  .label-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.06in;
+    position: relative;
+    z-index: 2;
+  }
+  .label-camper { flex: 1; min-width: 0; }
+  .label-name {
+    font-family: 'Inter', sans-serif;
+    font-size: 11pt;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    color: #0a0a0a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .label-name-rule {
+    display: flex;
+    align-items: center;
+    gap: 3pt;
+    margin: 3pt 0 4pt;
+  }
+  .label-name-rule .rule-line {
+    height: 0.7pt;
+    background: #0a0a0a;
+    flex: 1;
+    max-width: 1.45in;
+  }
+  .label-name-rule .rule-dot {
+    width: 2.2pt;
+    height: 2.2pt;
+    background: #0a0a0a;
+    border-radius: 50%;
+  }
+  .label-grade-pill {
+    display: inline-block;
+    background: var(--day-accent, #1a4a8c);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 8.5pt;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 2.5pt 9pt;
+    border-radius: 999pt;
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .label-tile {
+    flex-shrink: 0;
+    width: 0.46in;
+    height: 0.50in;
+    border: 1pt solid var(--day-accent, #1a4a8c);
+    border-radius: 3pt;
+    background: #fff;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    padding: 1.5pt 3pt 2pt;
+    position: relative;
+    box-shadow: 0.6pt 0.6pt 0 rgba(0,0,0,0.10);
+  }
+  .label-tile .tile-num {
+    font-family: 'Inter', sans-serif;
+    font-size: 5.5pt;
+    font-weight: 700;
+    color: #0a0a0a;
+    line-height: 1;
+  }
+  .label-tile .tile-letter {
+    font-family: 'Inter', sans-serif;
+    font-size: 18pt;
+    font-weight: 900;
+    color: var(--day-accent, #1a4a8c);
+    text-align: center;
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    align-self: center;
+  }
+  .label-tile .tile-letter.two-char { font-size: 13pt; }
+  .label-tile .tile-letter.three-char { font-size: 10pt; }
+  .label-tile .tile-code {
+    font-family: 'Inter', sans-serif;
+    font-size: 5.5pt;
+    font-weight: 700;
+    text-align: center;
+    color: var(--day-accent, #1a4a8c);
+    letter-spacing: 0.05em;
+  }
+
+  .label-section-rule {
+    display: flex;
+    align-items: center;
+    gap: 4pt;
+    margin: 4pt 0 5pt;
+    position: relative;
+    z-index: 2;
+  }
+  .label-section-rule .section-tag {
+    font-family: 'Inter', sans-serif;
+    font-size: 6.5pt;
+    font-weight: 700;
+    letter-spacing: 0.20em;
+    color: #0a0a0a;
+  }
+  .label-section-rule .rule-line {
+    height: 0.7pt;
+    background: #0a0a0a;
+    flex: 1;
+    max-width: 0.7in;
+  }
+  .label-section-rule .rule-dot {
+    width: 2pt;
+    height: 2pt;
+    background: #0a0a0a;
+    border-radius: 50%;
+  }
+
+  .label-allergy-bar {
+    display: block;
+    margin-top: 3pt;
+    background: #c8102e;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 7pt;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    padding: 1.5pt 5pt;
+    border-radius: 3pt;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  .student-row .meta .note { color: #f87171; font-weight: 700; }
+  .student-row .issue { font-size: 0.68rem; color: #fca5a5; margin-top: 2px; white-space: normal; }
+  .student-row .info-note { font-size: 0.68rem; color: #fcd34d; margin-top: 2px; white-space: normal; }
+  .checks { margin-top: 10px; padding: 9px 12px; background: #2a2a2a; border-left: 3px solid #ef4444; border-radius: 3px; font-size: 0.74rem; color: #fca5a5; display: none; }
+  .checks.show { display: block; }
+  .checks.ok { border-left-color: #4ade80; color: #d1d5db; }
+  .checks b { color: #fff; }
+  .checks ul { margin: 6px 0 0 16px; padding: 0; }
+  .checks li { margin: 2px 0; }
+
+  .label-middle {
+    overflow: hidden;
+    min-height: 0;
+    position: relative;
+    z-index: 2;
+  }
+  .label-item-name {
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5pt;
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.015em;
+    color: #0a0a0a;
+  }
+  .label-item-desc {
+    font-size: 6.5pt;
+    color: #2a2a2a;
+    line-height: 1.2;
+    margin-top: 2.5pt;
+    font-weight: 400;
+    max-width: 1.85in;
+  }
+
+  .label-bottom {
+    display: grid;
+    grid-template-columns: 1fr 18pt 1.10in;
+    align-items: center;
+    gap: 4pt;
+    margin-top: 2pt;
+    position: relative;
+    z-index: 2;
+  }
+  .label-allergens {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 3pt;
+    align-items: center;
+    overflow: hidden;
+  }
+  .allergen-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 2.5pt;
+    border: 0.7pt solid var(--chip-color, #2d7a3f);
+    color: var(--chip-color, #2d7a3f);
+    padding: 1pt 5pt 1pt 3pt;
+    border-radius: 999pt;
+    font-family: 'Inter', sans-serif;
+    font-size: 6pt;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    background: #fff;
+  }
+  .allergen-chip svg {
+    width: 7pt; height: 7pt;
+    stroke: var(--chip-color, #2d7a3f);
+    fill: var(--chip-fill, none);
+    stroke-width: 1.1;
+    flex-shrink: 0;
+  }
+
+  .label-portion {
+    width: 16pt;
+    height: 16pt;
+    border-radius: 50%;
+    background: var(--day-accent, #1a4a8c);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', sans-serif;
+    font-weight: 900;
+    font-size: 9pt;
+    letter-spacing: -0.02em;
+    justify-self: center;
+  }
+
+  .label-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-self: end;
+    width: 1.10in;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  .label-logo .logo-image {
+    width: 100%;
+    height: 0.30in;
+    display: block;
+    text-align: right;
+  }
+  .label-logo .logo-image img {
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+    object-position: right center;
+  }
+  .label-logo .logo-serif {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 9.5pt;
+    color: #0a0a0a;
+    line-height: 1;
+    letter-spacing: -0.005em;
+  }
+  .label-logo .logo-serif-tag {
+    font-family: 'Inter', sans-serif;
+    font-size: 4.5pt;
+    font-weight: 700;
+    letter-spacing: 0.35em;
+    color: #0a0a0a;
+    margin-top: 1pt;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: #6b7280;
+    font-size: 0.95rem;
+  }
+  .empty-state svg { margin-bottom: 14px; opacity: 0.4; }
+
+  .status {
+    margin-top: 10px;
+    padding: 9px 12px;
+    background: #2a2a2a;
+    border-left: 3px solid #4ade80;
+    border-radius: 3px;
+    font-size: 0.78rem;
+    color: #d1d5db;
+    display: none;
+  }
+  .status.show { display: block; }
+  .status.error { border-left-color: #ef4444; color: #fca5a5; }
+
+  .print-note {
+    background: #1f2024;
+    border-left: 3px solid #fbbf24;
+    padding: 9px 11px;
+    font-size: 0.74rem;
+    color: #d1d5db;
+    border-radius: 3px;
+    line-height: 1.4;
+  }
+  .print-note b { color: #fbbf24; font-weight: 700; }
+
+  @media print {
+    header, .panel, .preview-heading { display: none; }
+    .layout { display: block; }
+    .preview { padding: 0; background: white; }
+    .sheet { box-shadow: none; margin-bottom: 0; page-break-after: always; }
+    .label { border: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2"/>
+    <line x1="3" y1="9" x2="21" y2="9"/>
+    <line x1="3" y1="15" x2="21" y2="15"/>
+    <line x1="9" y1="3" x2="9" y2="21"/>
+    <line x1="15" y1="3" x2="15" y2="21"/>
+  </svg>
+  <h1>Field Trip Lunch Label Maker</h1>
+  <span>Puff 'n Stuff · OL996 · 3" × 2" · 10/sheet</span>
+</header>
+
+<div class="layout">
+
+  <div class="panel">
+
+    <section>
+      <h2>1 · Group &amp; Field Trip Date</h2>
+      <div class="field">
+        <label>Group / School Name</label>
+        <input type="text" id="groupName" placeholder="e.g. Roosevelt Elementary — 4th Grade">
+      </div>
+      <div class="field">
+        <label>Field Trip Date</label>
+        <input type="date" id="tripDate">
+      </div>
+      <div class="field">
+        <label>Default Portion (if not set per-student)</label>
+        <select id="defaultPortion">
+          <option value="S">Standard (S)</option>
+          <option value="D">Double (D)</option>
+        </select>
+      </div>
+    </section>
+
+    <section>
+      <h2>2 · Bulk import roster</h2>
+      <textarea id="pasteInput" class="paste-area" placeholder="Paste from a spreadsheet, CSV, or type directly.
+
+Example (tab, comma, or pipe separated):
+Jane Smith    Turkey Tornado    peanuts
+John Doe      Lab Experiment    gluten
+Alice Green   Protein Prototype
+
+First row can be a header (Name, Entrée, Allergies, Portion) or just data."></textarea>
+      <div class="status" id="parseStatus"></div>
+      <div class="format-help">
+        <b>Columns (in order):</b> Name · Entrée · Allergies · Portion<br>
+        <b>Entrée tags</b> (<code>VEG</code> <code>NF</code> etc.) fill in from the menu automatically.<br>
+        <b>Allergies:</b> free text. Prints as typed on a red bar under the name.<br>
+        <b>Portion:</b> <code>S</code>/<code>Standard</code> (default), <code>D</code>/<code>Double</code>
+      </div>
+    </section>
+
+    <section>
+      <h2>3 · Roster (<span id="rosterCount">0</span>)</h2>
+      <div class="roster" id="rosterContainer">
+        <div class="roster-empty">Paste your roster above to populate this list, or add students manually.</div>
+      </div>
+      <div class="checks" id="checksBox"></div>
+      <div class="roster-actions">
+        <button id="addStudentBtn">+ Add Student</button>
+        <button id="clearRosterBtn">Clear All</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>4 · Boxes without names (<span id="mixCount">0</span>)</h2>
+      <div class="format-help" style="margin-top:0; margin-bottom:8px;">
+        For orders that are just a mix of the box types. Enter how many of each. These print after any named labels, grouped by entrée. Allergy notes only go on named labels.
+      </div>
+      <table class="mix-table">
+        <thead><tr><th>Box</th><th class="num">Standard</th><th class="num">Double</th></tr></thead>
+        <tbody id="mixBody"></tbody>
+      </table>
+      <div class="mix-total" id="mixTotal"></div>
+      <div class="field" style="margin-top:10px;">
+        <label>Name line on these labels</label>
+        <input type="text" id="mixNameText" placeholder="Leave blank to write names in by hand">
+      </div>
+    </section>
+
+    <section>
+      <h2>5 · Logo (saved permanently)</h2>
+      <label class="filebtn" id="logoBtn">
+        <span id="logoBtnLabel">Choose logo image…</span>
+        <input type="file" id="logoInput" accept="image/*">
+      </label>
+      <div class="logo-preview" id="logoPreview"><img id="logoImg"></div>
+    </section>
+
+    <section>
+      <h2>6 · Print Alignment (optional)</h2>
+      <div class="print-note">
+        When printing, set <b>scale to 100% / Actual size</b> — no "Fit to page". If labels print slightly off, nudge with the offsets below.
+      </div>
+      <div class="row2" style="margin-top:8px;">
+        <div class="field">
+          <label>Offset X (inches)</label>
+          <input type="number" id="offsetX" value="0" step="0.01" min="-0.5" max="0.5">
+        </div>
+        <div class="field">
+          <label>Offset Y (inches)</label>
+          <input type="number" id="offsetY" value="0" step="0.01" min="-0.5" max="0.5">
+        </div>
+      </div>
+      <div style="font-size:0.68rem; color:#6b7280; margin-top:4px;">
+        Positive X moves right, positive Y moves down. Try ±0.05 increments.
+      </div>
+    </section>
+
+    <section>
+      <button class="primary" id="generateBtn" disabled>Generate Label PDF</button>
+      <button class="secondary" id="resetBtn">Reset All</button>
+      <div class="status" id="genStatus"></div>
+    </section>
+
+  </div>
+
+  <div class="preview">
+    <div class="preview-heading">
+      <span>Preview · 8.5" × 11" sheet</span>
+      <span class="count" id="previewCount"></span>
+    </div>
+    <div id="previewContainer">
+      <div class="empty-state">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+        <div>Enter a group name, trip date, and roster to begin.</div>
+        <div style="font-size:0.8rem; margin-top:6px; color:#9ca3af;">Preview shows the first sheet — full PDF spans all pages needed.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Field trip labels use ONE dedicated theme — planetarium teal — so the
+//    whole batch reads uniformly as "field trip" and doesn't collide with
+//    any of the Mon–Fri camp colors/icons.
+const THEMES = [
+  { key: "PL", code: "MSI", label: "Planetarium", color: "#0FA8BA" },
+];
+
+const ALLERGEN_MAP = { V: "Vegan", VEG: "Vegetarian", GF: "Gluten Free", DF: "Dairy Free", NF: "Nut Free" };
+const ALLERGEN_COLORS = { V: "#2d7a3f", VEG: "#2d7a3f", GF: "#b8851a", DF: "#1a4a8c", NF: "#1a4a8c" };
+// ── Field trip menu ────────────────────────────────────────────────────
+// Entrée tags (the chips on the label) describe the FOOD and come from here,
+// not from the order sheet. "contains" drives the cross-check against each
+// person's allergy note.
+const MENU = {
+  "turkey tornado":    { name: "Turkey Tornado",    desc: "Turkey & cheddar pinwheel on soft tortilla", tags: ["NF"],        contains: ["dairy", "gluten", "meat"] },
+  "protein prototype": { name: "Protein Prototype", desc: "Ham & cheddar on soft bread",                tags: ["NF"],        contains: ["dairy", "gluten", "meat"] },
+  "lab experiment":    { name: "Lab Experiment",    desc: "Cheese & veggie snack box",                  tags: ["VEG", "NF"], contains: ["dairy", "gluten"], specialOK: true },
+};
+const NEED_RX = {
+  gluten: /gluten|wheat|celiac|coeliac/i,
+  dairy:  /dairy|milk|lactose|cheese|casein/i,
+  nut:    /nut|peanut|almond|cashew|pecan|walnut/i,
+  vegan:  /vegan/i,
+  veg:    /vegetarian|no meat/i,
+};
+const OTHER_RX = /egg|soy|sesame|shellfish|shrimp|fish|corn|berr|fruit|strawberr|pineapple|kiwi|citrus|sulfite|mustard|celery|tomato/i;
+
+function lookupMenu(entree) {
+  return MENU[(entree || "").trim().toLowerCase()] || null;
+}
+
+// Works out the entrée tags, description and any checks for one person.
+function enrich(s) {
+  const item = lookupMenu(s.entree);
+  const note = (s.note || "").trim();
+  const needs = {};
+  for (const [k, rx] of Object.entries(NEED_RX)) needs[k] = rx.test(note);
+  // "nut" also matches "peanut"; "gluten free"/"dairy free" style wording is still a need.
+  const issues = [];
+  const infos = [];
+  let tags = item ? [...item.tags] : [...(s.explicitTags || [])];
+  let desc = (s.description || "").trim() || (item ? item.desc : "");
+  let special = false;
+
+  if (!(s.entree || "").trim()) {
+    issues.push("No entrée picked. No label will print.");
+  } else if (!item) {
+    issues.push(`"${s.entree}" isn't on the field trip menu. Check spelling. Entrée tags won't auto-fill.`);
+  }
+
+  if (item) {
+    const wantGF = needs.gluten, wantDF = needs.dairy;
+    if ((wantGF || wantDF) && item.specialOK) {
+      special = true;
+      if (wantGF && !tags.includes("GF")) tags.push("GF");
+      if (wantDF && !tags.includes("DF")) tags.push("DF");
+      const parts = [wantGF ? "gluten free" : "", wantDF ? "dairy free" : ""].filter(Boolean).join(" & ");
+      desc = `SPECIAL: ${parts} version`;
+      infos.push(`Special ${parts} snack box.`);
+    } else if (wantGF || wantDF) {
+      const hit = [wantGF && item.contains.includes("gluten") ? "gluten" : "", wantDF && item.contains.includes("dairy") ? "dairy" : ""].filter(Boolean);
+      if (hit.length) issues.push(`${item.name} contains ${hit.join(" and ")}. Switch to Lab Experiment (special version) or confirm.`);
+    }
+    if (needs.vegan) issues.push("Noted vegan. No entrée on the menu is vegan as-is. Confirm with the kitchen.");
+    else if (needs.veg && item.contains.includes("meat")) issues.push(`Noted vegetarian but picked ${item.name}. Switch to Lab Experiment or confirm.`);
+  }
+  if (OTHER_RX.test(note)) issues.push("Allergy not covered by menu tags. Confirm the whole box (entrée, sides, cookie) with the kitchen.");
+  if (special) infos.push("Check the sides and cookie for this box too.");
+
+  return { item, tags: tags.slice(0, 3), desc, special, issues, infos, note };
+}
+
+// Boxes for orders with no names. "note" lets a box use the special version
+// logic in enrich() (e.g. the gluten free snack box).
+const MIX_BOXES = [
+  { id: "tt",    entree: "Turkey Tornado" },
+  { id: "pp",    entree: "Protein Prototype" },
+  { id: "le",    entree: "Lab Experiment" },
+  { id: "le-gf", entree: "Lab Experiment", note: "gluten free", label: "Lab Experiment, gluten free" },
+];
+
+const MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+
+const state = {
+  logoDataUrl: localStorage.getItem("ftlabel_logo") || null,
+  groupName: "",
+  tripDate: "",
+  defaultPortion: "S",
+  students: [],
+  editingIndex: -1,
+  mix: {},          // { "<boxId>|S": count, "<boxId>|D": count }
+  mixNameText: "",
+};
+
+function mixCount(id, portion) { return Math.max(0, Math.floor(+state.mix[`${id}|${portion}`] || 0)); }
+function mixTotal() { return MIX_BOXES.reduce((t, b) => t + mixCount(b.id, "S") + mixCount(b.id, "D"), 0); }
+// Expands the counts into one pseudo-student per box, in menu order.
+function mixRows() {
+  const rows = [];
+  MIX_BOXES.forEach(b => ["S", "D"].forEach(p => {
+    for (let n = 0; n < mixCount(b.id, p); n++) {
+      rows.push({ name: state.mixNameText.trim(), entree: b.entree, note: b.note || "", portion: p, unnamed: true });
+    }
+  }));
+  return rows;
+}
+
+function esc(s) { return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+// Periodic tile: the trip day picks the element (day 17 = element 17, Cl).
+const ELEMENTS = ["H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca","Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga"];
+function formatDateForTile(iso) {
+  if (!iso) return { top: "FT", bottom: "TRIP", num: "" };
+  const [y, m, d] = iso.split("-").map(Number);
+  if (!y || !m || !d) return { top: "FT", bottom: "TRIP", num: "" };
+  return { top: ELEMENTS[d - 1] || String(d), bottom: `${MONTHS[m - 1] || ""} ${d}`, num: String(d) };
+}
+function formatGroupPill(name) {
+  const s = (name || "").trim();
+  return s ? s.toUpperCase() : "GROUP NAME";
+}
+function themeForIndex(i) { return THEMES[i % THEMES.length]; }
+
+// ── Roster rendering ───────────────────────────────────────────────────
+function renderChecks() {
+  const box = document.getElementById("checksBox");
+  if (!box) return;
+  if (!state.students.length && !mixTotal()) { box.className = "checks"; box.innerHTML = ""; return; }
+  const problems = [];
+  let specials = 0, notes = 0;
+  state.students.forEach((s, i) => {
+    const e = enrich(s);
+    if (e.special) specials++;
+    if (e.note) notes++;
+    e.issues.forEach(t => problems.push(`<li><b>${esc(s.name || "Row " + (i + 1))}</b>: ${esc(t)}</li>`));
+  });
+  const counts = {};
+  state.students.filter(s => (s.name || "").trim() && (s.entree || "").trim()).concat(mixRows()).forEach(s => {
+    const k = (lookupMenu(s.entree)?.name || s.entree.trim()) + ((s.portion || "S") === "D" ? " (Double)" : "");
+    counts[k] = (counts[k] || 0) + 1;
+  });
+  mixRows().forEach(s => { if (enrich(s).special) specials++; });
+  const countLine = Object.entries(counts).map(([k, v]) => `${esc(k)}: ${v}`).join(" · ");
+  const summary = `<div><b>Kitchen count</b> · ${countLine || "none"}${specials ? ` · Special snack boxes: ${specials}` : ""} · Allergy notes: ${notes}</div>`;
+  if (problems.length) {
+    box.className = "checks show";
+    box.innerHTML = `${summary}<div style="margin-top:6px;"><b>${problems.length} thing${problems.length === 1 ? "" : "s"} to check before printing</b></div><ul>${problems.join("")}</ul>`;
+  } else {
+    box.className = "checks show ok";
+    box.innerHTML = `${summary}<div style="margin-top:6px;">No conflicts found.</div>`;
+  }
+}
+
+function renderRoster() {
+  renderChecks();
+  const container = document.getElementById("rosterContainer");
+  document.getElementById("rosterCount").textContent = state.students.length;
+
+  if (state.students.length === 0) {
+    container.innerHTML = `<div class="roster-empty">Paste your roster above to populate this list, or add students manually.</div>`;
+    return;
+  }
+
+  container.innerHTML = state.students.map((s, i) => {
+    if (state.editingIndex === i) {
+      return `
+        <div class="student-row edit-mode">
+          <span class="sn">${String(i + 1).padStart(2, "0")}</span>
+          <div class="edit-fields">
+            <input type="text" data-editfield="name" value="${esc(s.name)}" placeholder="Student Name">
+            <div class="split">
+              <input type="text" data-editfield="entree" value="${esc(s.entree)}" placeholder="Entrée">
+              <input type="text" data-editfield="portion" value="${esc(s.portion || "S")}" placeholder="S/D" maxlength="1">
+            </div>
+            <input type="text" data-editfield="note" value="${esc(s.note || "")}" placeholder="Allergies / dietary note (prints on red bar)">
+            <div class="edit-btns">
+              <button data-action="cancel">Cancel</button>
+              <button data-action="remove" class="del">Delete</button>
+              <button data-action="save" class="save">Save</button>
+            </div>
+          </div>
+        </div>`;
+    }
+    const e = enrich(s);
+    const tagsDisplay = e.tags.length
+      ? `<span class="allergens">${e.tags.join(" · ")}</span>`
+      : `<span style="color:#4b5563">no tags</span>`;
+    const noteDisplay = e.note ? ` · <span class="note">ALLERGY: ${esc(e.note)}</span>` : "";
+    return `
+      <div class="student-row">
+        <span class="sn">${String(i + 1).padStart(2, "0")}</span>
+        <div class="info">
+          <div class="name">${esc(s.name) || "(no name)"}</div>
+          <div class="meta">${esc(s.entree) || "(no entrée)"} · ${tagsDisplay} · ${esc(s.portion || "S")}${noteDisplay}</div>
+          ${e.issues.map(t => `<div class="issue">⚠ ${esc(t)}</div>`).join("")}
+          ${e.infos.map(t => `<div class="info-note">${esc(t)}</div>`).join("")}
+        </div>
+        <button class="del" data-index="${i}" data-action="edit">Edit</button>
+      </div>`;
+  }).join("");
+
+  container.querySelectorAll("[data-action='edit']").forEach(btn => {
+    btn.addEventListener("click", e => {
+      state.editingIndex = +e.currentTarget.dataset.index;
+      renderRoster();
+    });
+  });
+  container.querySelectorAll("[data-action='cancel']").forEach(btn => {
+    btn.addEventListener("click", () => { state.editingIndex = -1; renderRoster(); });
+  });
+  container.querySelectorAll("[data-action='remove']").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = state.editingIndex;
+      if (idx < 0) return;
+      state.students.splice(idx, 1);
+      state.editingIndex = -1;
+      renderRoster();
+      renderPreview();
+      updateGenerateBtn();
+    });
+  });
+  container.querySelectorAll("[data-action='save']").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const row = btn.closest(".student-row");
+      const inputs = row.querySelectorAll("[data-editfield]");
+      const patch = {};
+      inputs.forEach(inp => { patch[inp.dataset.editfield] = inp.value; });
+      const idx = state.editingIndex;
+      state.students[idx].name = patch.name.trim();
+      state.students[idx].entree = patch.entree.trim();
+      state.students[idx].note = (patch.note || "").trim();
+      const p = (patch.portion || "S").trim().toUpperCase();
+      state.students[idx].portion = (p === "D" || p === "DOUBLE") ? "D" : "S";
+      state.editingIndex = -1;
+      renderRoster();
+      renderPreview();
+      updateGenerateBtn();
+    });
+  });
+}
+
+// ── Add/Clear roster ──────────────────────────────────────────────────
+document.getElementById("addStudentBtn").addEventListener("click", () => {
+  state.students.push({
+    name: "", entree: "", description: "", note: "", explicitTags: [], portion: state.defaultPortion,
+  });
+  state.editingIndex = state.students.length - 1;
+  renderRoster();
+  updateGenerateBtn();
+});
+
+document.getElementById("clearRosterBtn").addEventListener("click", () => {
+  if (state.students.length && !confirm(`Remove all ${state.students.length} students?`)) return;
+  state.students = [];
+  state.editingIndex = -1;
+  const pi = document.getElementById("pasteInput");
+  pi.value = ""; pi.classList.remove("has-content");
+  document.getElementById("parseStatus").classList.remove("show");
+  renderRoster();
+  renderPreview();
+  updateGenerateBtn();
+});
+
+// ── Group + date bindings ─────────────────────────────────────────────
+document.getElementById("groupName").addEventListener("input", e => {
+  state.groupName = e.target.value; renderPreview(); updateGenerateBtn();
+});
+document.getElementById("tripDate").addEventListener("input", e => {
+  state.tripDate = e.target.value; renderPreview(); updateGenerateBtn();
+});
+document.getElementById("defaultPortion").addEventListener("change", e => {
+  state.defaultPortion = e.target.value;
+});
+
+// ── Logo upload ───────────────────────────────────────────────────────
+function captureLogoSize(dataUrl) {
+  const img = new Image();
+  img.onload = () => { state._logoSize = { w: img.naturalWidth, h: img.naturalHeight }; };
+  img.src = dataUrl;
+}
+document.getElementById("logoInput").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    state.logoDataUrl = reader.result;
+    try { localStorage.setItem("ftlabel_logo", reader.result); } catch (e) {}
+    captureLogoSize(reader.result);
+    document.getElementById("logoImg").src = reader.result;
+    document.getElementById("logoPreview").classList.add("show");
+    document.getElementById("logoBtnLabel").textContent = file.name;
+    document.getElementById("logoBtn").classList.add("has-file");
+    renderPreview();
+  };
+  reader.readAsDataURL(file);
+});
+if (state.logoDataUrl) {
+  captureLogoSize(state.logoDataUrl);
+  document.getElementById("logoImg").src = state.logoDataUrl;
+  document.getElementById("logoPreview").classList.add("show");
+  document.getElementById("logoBtnLabel").textContent = "Logo loaded from session";
+  document.getElementById("logoBtn").classList.add("has-file");
+}
+
+// ── Bulk paste parser (TSV / CSV / pipe) ──────────────────────────────
+// Normalise Unicode lookalikes that Shopify + spreadsheet exports throw at us:
+//   ‚ (low-quote) → ,     '' ʼ ′ ´ ` → '     （ ） → ( )     : → :     nbsp → space
+function normalizeText(s) {
+  return (s || "")
+    .replace(/[‘’ʼ′´`]/g, "'")
+    .replace(/[，、،‚]/g, ",")
+    .replace(/[：]/g, ":")
+    .replace(/[（]/g, "(")
+    .replace(/[）]/g, ")")
+    .replace(/[     ]/g, " ");
+}
+
+// Extract allergen codes from any parenthetical group at the end of an item
+// string, e.g. "The Turkey Test Lab -Sliced Turkey (NF)" → { codes: [NF], stripped }
+// A parenthetical is treated as an allergen group only if EVERY token inside is
+// a known allergen code — that way real parentheticals like "(VEG)" fire but
+// "(served warm)" does not.
+function extractParenAllergens(s) {
+  const parenRx = /\(([^()]+)\)/g;
+  const codes = new Set();
+  const strip = [];
+  let m;
+  while ((m = parenRx.exec(s)) !== null) {
+    const inner = m[1].trim();
+    const tokens = inner
+      .split(/[,;\s\/.·•・]+/)
+      .map(c => c.trim().toUpperCase())
+      .filter(Boolean);
+    if (!tokens.length) continue;
+    const valid = tokens.filter(c => ALLERGEN_MAP[c]);
+    if (valid.length === tokens.length) {
+      valid.forEach(c => codes.add(c));
+      strip.push(m[0]);
+    }
+  }
+  let cleaned = s;
+  for (const p of strip) cleaned = cleaned.replace(p, "");
+  cleaned = cleaned.replace(/\s+/g, " ").trim();
+  return { codes: [...codes], cleaned };
+}
+
+function parseBulkInput(text) {
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  if (!lines.length) return { rows: [], warnings: [] };
+
+  const first = lines[0];
+  const counts = {
+    "\t": (first.match(/\t/g) || []).length,
+    "|":  (first.match(/\|/g) || []).length,
+    ",":  (first.match(/,/g)  || []).length,
+  };
+  let delim = "\t";
+  let maxCount = counts["\t"];
+  for (const [d, c] of Object.entries(counts)) {
+    if (c > maxCount) { delim = d; maxCount = c; }
+  }
+  let delimForSplit = delim;
+  if (maxCount === 0) delimForSplit = /\s{2,}/;
+
+  const splitRow = (line) => {
+    if (delimForSplit instanceof RegExp) return line.split(delimForSplit).map(c => c.trim());
+    return line.split(delimForSplit).map(c => c.trim());
+  };
+
+  let startIdx = 0;
+  const firstRow = splitRow(lines[0]);
+  const firstJoined = firstRow.join(" ").toLowerCase();
+  if (/\b(name|first)\b/.test(firstJoined) && firstRow.length >= 2) startIdx = 1;
+
+  const rows = [];
+  const warnings = [];
+  for (let i = startIdx; i < lines.length; i++) {
+    const cells = splitRow(lines[i]).map(normalizeText);
+    if (!cells.length || !cells[0]) continue;
+
+    // Excel copy-paste often includes blank columns between real ones,
+    // producing rows like  "Name TAB TAB Entrée TAB Allergens".
+    // Collapse leading empty cells between name and the next non-empty cell
+    // so columns still map to Name / Entrée / Allergens / Portion in order.
+    while (cells.length >= 3 && cells[0] && cells[1] === "" && cells[2] !== "") {
+      cells.splice(1, 1);
+    }
+
+    const [name, entree = "", noteRaw = "", portionRaw = ""] = cells;
+
+    // Pull allergens from any parenthetical inside the entrée cell FIRST —
+    // handles the "…Ranch (NF)" case where the allergen ships with the item.
+    const { codes: parenCodes, cleaned: cleanedEntree } = extractParenAllergens(entree);
+
+    // Column 3 is the person's allergy note (free text, printed on the red bar).
+    // Old-format sheets put entrée codes here (e.g. "VEG, NF"): if every token is
+    // a known code, treat them as entrée tags instead of a note.
+    const rawTokens = noteRaw.split(/[,\s\/;]+/).map(a => a.trim().toUpperCase()).filter(Boolean);
+    const allCodes = rawTokens.length > 0 && rawTokens.every(a => ALLERGEN_MAP[a]);
+    const note = allCodes ? "" : noteRaw.trim();
+    const explicitTags = [...new Set([...parenCodes, ...(allCodes ? rawTokens : [])])];
+
+    const p = portionRaw.trim().toUpperCase();
+    const portion = (p === "D" || p === "DOUBLE") ? "D" : "S";
+
+    // Split entrée on " -" or " —" into name + description (cleaned, no allergens)
+    let entreeName = cleanedEntree;
+    let description = "";
+    const dashIdx = cleanedEntree.search(/\s[-—](?=\s*\S)/);
+    if (dashIdx >= 0) {
+      entreeName = cleanedEntree.substring(0, dashIdx).trim();
+      description = cleanedEntree.substring(dashIdx + 1).replace(/^[-—]\s*/, "").trim();
+    }
+
+    if (!entreeName) warnings.push(`${name.trim()}: no entrée`);
+    rows.push({ name: name.trim(), entree: entreeName, description, note, explicitTags, portion });
+  }
+  return { rows, warnings };
+}
+
+document.getElementById("pasteInput").addEventListener("input", e => {
+  const text = e.target.value;
+  e.target.classList.toggle("has-content", !!text.trim());
+  const status = document.getElementById("parseStatus");
+
+  if (!text.trim()) {
+    status.classList.remove("show");
+    return;
+  }
+
+  const { rows, warnings } = parseBulkInput(text);
+  if (!rows.length) {
+    status.classList.add("show", "error");
+    status.textContent = "Couldn't find any rows. Check the delimiter — tabs, commas, or pipes all work.";
+    return;
+  }
+
+  state.students = rows;
+  state.editingIndex = -1;
+  renderRoster();
+  renderPreview();
+  updateGenerateBtn();
+
+  status.classList.add("show");
+  status.classList.remove("error");
+  const noEntree = rows.filter(r => !r.entree).length;
+  let msg = `Imported ${rows.length} ${rows.length === 1 ? "person" : "people"}.`;
+  if (noEntree) msg += ` ${noEntree} with no entrée (won't print).`;
+  msg += " See the checks below the roster before printing.";
+  status.textContent = msg;
+});
+
+// ── Build labels ───────────────────────────────────────────────────────
+function buildLabels() {
+  const dateCode = formatDateForTile(state.tripDate);
+  return state.students
+    .filter(s => (s.name || "").trim() && (s.entree || "").trim())
+    .concat(mixRows())
+    .map((s, i) => {
+      const theme = themeForIndex(i);
+      return {
+        studentName: (s.name || "").trim(),
+        unnamed:     !!s.unnamed,
+        groupName:   state.groupName.trim(),
+        tripDateISO: state.tripDate,
+        tileNum:     dateCode.num || String(i + 1).padStart(2, "0"),
+        tileLetter:  dateCode.top,
+        tileCode:    dateCode.bottom,
+        themeKey:    theme.key,
+        themeColor:  theme.color,
+        itemName:    (lookupMenu(s.entree)?.name || s.entree.trim()),
+        itemDesc:    enrich(s).desc,
+        allergens:   enrich(s).tags,
+        note:        (s.note || "").trim(),
+        portion:     (s.portion || state.defaultPortion || "S"),
+      };
+    });
+}
+
+// ── Preview ────────────────────────────────────────────────────────────
+function renderPreview() {
+  const labels = buildLabels();
+  const container = document.getElementById("previewContainer");
+  const countLine = document.getElementById("previewCount");
+
+  if (!labels.length) {
+    countLine.textContent = "";
+    container.innerHTML = `
+      <div class="empty-state">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+        <div>Enter a group name, trip date, and roster to begin.</div>
+        <div style="font-size:0.8rem; margin-top:6px; color:#9ca3af;">Preview shows the first sheet — full PDF spans all pages needed.</div>
+      </div>`;
+    return;
+  }
+
+  const LABELS_PER_SHEET = 10;
+  const totalSheets = Math.ceil(labels.length / LABELS_PER_SHEET);
+  countLine.innerHTML = `<b>${labels.length}</b> label${labels.length === 1 ? "" : "s"} · <b>${totalSheets}</b> sheet${totalSheets === 1 ? "" : "s"} of 10`;
+
+  const firstSheet = labels.slice(0, LABELS_PER_SHEET);
+  const grid = firstSheet.map(l => labelHTML(l)).join("");
+  const moreNote = labels.length > LABELS_PER_SHEET
+    ? `<div style="text-align:center; font-size:0.85rem; color:#6b7280; margin: 6px 0 14px;">+ ${labels.length - LABELS_PER_SHEET} more labels on ${totalSheets - 1} additional sheet${totalSheets - 1 === 1 ? "" : "s"} in the PDF.</div>`
+    : "";
+  container.innerHTML = `<div class="sheet"><div class="label-grid">${grid}</div></div>${moreNote}`;
+  scaleSheet();
+}
+
+// ── Allergen icon SVGs ─────────────────────────────────────────────────
+const ALLERGEN_ICONS = {
+  V: `<svg viewBox="0 0 12 12"><circle cx="6" cy="3" r="1.8"/><circle cx="3" cy="7" r="1.8"/><circle cx="9" cy="7" r="1.8"/></svg>`,
+  VEG: `<svg viewBox="0 0 12 12"><path d="M2.5 9.5 Q5 1 10.5 3 Q9 9 5 10 Z" fill="rgba(45,122,63,0.18)" /><path d="M2.5 9.5 L6 6" /></svg>`,
+  GF: `<svg viewBox="0 0 12 12"><line x1="6" y1="2" x2="6" y2="10.5"/><path d="M6 4 L3.5 2.8 M6 4 L8.5 2.8 M6 6 L3.5 4.8 M6 6 L8.5 4.8 M6 8 L3.5 6.8 M6 8 L8.5 6.8"/></svg>`,
+  DF: `<svg viewBox="0 0 12 12"><path d="M6 1.5 Q9 5.5 9 8 A3 3 0 1 1 3 8 Q3 5.5 6 1.5 Z" fill="rgba(26,74,140,0.15)"/></svg>`,
+  NF: `<svg viewBox="0 0 12 12"><line x1="4" y1="1.5" x2="8" y2="1.5"/><line x1="4.5" y1="1.5" x2="4.5" y2="4.5"/><line x1="7.5" y1="1.5" x2="7.5" y2="4.5"/><path d="M4.5 4.5 L2.8 10.5 L9.2 10.5 L7.5 4.5 Z" fill="rgba(26,74,140,0.15)"/></svg>`,
+};
+
+// ── Theme icons (PL for field trips; M/Tu/W/Th/F retained for reference) ─
+const THEME_ICONS = {
+  // Planetarium — MOSI Saunders Planetarium dome + base + starry sky
+  PL: `<g stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Ground line -->
+        <line x1="8" y1="88" x2="92" y2="88" stroke-opacity="0.5"/>
+        <!-- Base building rectangle -->
+        <rect x="18" y="68" width="64" height="20" fill="currentColor" fill-opacity="0.06"/>
+        <!-- Dome (top half of ellipse) -->
+        <path d="M 18 68 A 32 22 0 0 1 82 68 Z" fill="currentColor" fill-opacity="0.10"/>
+        <!-- Vertical panel lines on dome -->
+        <line x1="50" y1="46" x2="50" y2="68" stroke-opacity="0.55"/>
+        <line x1="34" y1="49" x2="34" y2="68" stroke-opacity="0.4"/>
+        <line x1="66" y1="49" x2="66" y2="68" stroke-opacity="0.4"/>
+        <line x1="24" y1="58" x2="24" y2="68" stroke-opacity="0.35"/>
+        <line x1="76" y1="58" x2="76" y2="68" stroke-opacity="0.35"/>
+        <!-- Horizontal band mid-dome -->
+        <path d="M 20 58 Q 50 54 80 58" stroke-opacity="0.35" stroke-width="1"/>
+        <!-- Finial antenna on top -->
+        <line x1="50" y1="46" x2="50" y2="38"/>
+        <circle cx="50" cy="36" r="1.6" fill="currentColor"/>
+        <!-- Entrance arch on base -->
+        <path d="M 44 88 L 44 78 Q 44 73 50 73 Q 56 73 56 78 L 56 88 Z" fill="currentColor" fill-opacity="0.18"/>
+        <!-- Small windows on base -->
+        <rect x="24" y="76" width="4" height="6" fill="currentColor" fill-opacity="0.4" stroke="none"/>
+        <rect x="32" y="76" width="4" height="6" fill="currentColor" fill-opacity="0.4" stroke="none"/>
+        <rect x="64" y="76" width="4" height="6" fill="currentColor" fill-opacity="0.4" stroke="none"/>
+        <rect x="72" y="76" width="4" height="6" fill="currentColor" fill-opacity="0.4" stroke="none"/>
+        <!-- Stars in the sky around the dome -->
+        <circle cx="12" cy="20" r="1.3" fill="currentColor"/>
+        <circle cx="88" cy="24" r="1.4" fill="currentColor"/>
+        <circle cx="16" cy="34" r="0.9" fill="currentColor"/>
+        <circle cx="84" cy="40" r="0.9" fill="currentColor"/>
+        <!-- Sparkles -->
+        <path d="M 10 46 l 0 3 m -1.5 -1.5 l 3 0" stroke-width="0.9"/>
+        <path d="M 82 12 l 0 2 m -1 -1 l 2 0" stroke-width="0.85"/>
+      </g>`,
+  M: `<g stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <ellipse cx="50" cy="50" rx="38" ry="7" transform="rotate(-22 50 50)"/>
+        <ellipse cx="50" cy="50" rx="30" ry="4.8" transform="rotate(-22 50 50)" stroke-opacity="0.55"/>
+        <circle cx="50" cy="50" r="18" fill="currentColor" fill-opacity="0.07" stroke="none"/>
+        <circle cx="50" cy="50" r="18"/>
+        <path d="M 35 53 Q 50 60 65 51" stroke-opacity="0.45" stroke-width="1"/>
+        <path d="M 41 44 Q 50 47 60 43" stroke-opacity="0.35" stroke-width="1"/>
+        <circle cx="78" cy="22" r="1.3" fill="currentColor"/>
+        <circle cx="22" cy="75" r="1" fill="currentColor"/>
+        <path d="M 16 30 l 0 3 m -1.5 -1.5 l 3 0" stroke-width="0.9"/>
+        <path d="M 82 72 l 0 2 m -1 -1 l 2 0" stroke-width="0.8"/>
+      </g>`,
+  Tu: `<g stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M 24 88 L 76 88 L 71 82 L 29 82 Z" fill="currentColor" fill-opacity="0.06"/>
+        <line x1="29" y1="82" x2="29" y2="78"/>
+        <line x1="71" y1="82" x2="71" y2="78"/>
+        <rect x="33" y="62" width="34" height="7" rx="1.5"/>
+        <rect x="43" y="64" width="14" height="3" fill="currentColor" fill-opacity="0.3" stroke="none"/>
+        <path d="M 33 78 L 33 50 Q 33 46 37 46 L 53 46"/>
+        <rect x="46" y="32" width="14" height="14" rx="2.5"/>
+        <path d="M 49 32 L 57 32 L 56 22 L 50 22 Z"/>
+        <line x1="48" y1="22" x2="58" y2="22"/>
+        <circle cx="27" cy="50" r="3.4"/>
+        <line x1="27" y1="46.5" x2="27" y2="49"/>
+        <circle cx="53" cy="65.5" r="1.4" fill="currentColor"/>
+      </g>`,
+  W: `<g stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M 47 7 Q 51 14 47 20" stroke-opacity="0.5" stroke-width="1"/>
+        <path d="M 55 9 Q 59 16 55 22" stroke-opacity="0.4" stroke-width="1"/>
+        <line x1="38" y1="24" x2="62" y2="24"/>
+        <line x1="42" y1="24" x2="42" y2="40"/>
+        <line x1="58" y1="24" x2="58" y2="40"/>
+        <path d="M 42 40 L 22 83 L 78 83 L 58 40" fill="currentColor" fill-opacity="0.05"/>
+        <path d="M 30 70 L 70 70" stroke-dasharray="2 3" stroke-width="1.1"/>
+        <line x1="28" y1="58" x2="34" y2="58" stroke-width="1"/>
+        <line x1="28" y1="64" x2="32" y2="64" stroke-width="1"/>
+        <line x1="28" y1="76" x2="34" y2="76" stroke-width="1"/>
+        <circle cx="44" cy="76" r="2" fill="currentColor" fill-opacity="0.35"/>
+        <circle cx="56" cy="66" r="1.6" fill="currentColor" fill-opacity="0.35"/>
+        <circle cx="52" cy="78" r="1.2" fill="currentColor" fill-opacity="0.35"/>
+        <circle cx="62" cy="74" r="1.7" fill="currentColor" fill-opacity="0.35"/>
+      </g>`,
+  Th: `<g stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <ellipse cx="50" cy="50" rx="36" ry="12"/>
+        <ellipse cx="50" cy="50" rx="36" ry="12" transform="rotate(60 50 50)"/>
+        <ellipse cx="50" cy="50" rx="36" ry="12" transform="rotate(-60 50 50)"/>
+        <circle cx="50" cy="50" r="5" fill="currentColor"/>
+        <circle cx="48" cy="48.5" r="1.4" fill="white" stroke="none" opacity="0.5"/>
+        <circle cx="86" cy="50" r="2.8" fill="currentColor"/>
+        <circle cx="32" cy="80" r="2.8" fill="currentColor"/>
+        <circle cx="32" cy="20" r="2.8" fill="currentColor"/>
+      </g>`,
+  F: `<g stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M 50 10 Q 38 22 38 36 L 62 36 Q 62 22 50 10" fill="currentColor" fill-opacity="0.06"/>
+        <line x1="38" y1="36" x2="62" y2="36"/>
+        <rect x="38" y="36" width="24" height="36"/>
+        <circle cx="50" cy="46" r="3.6"/>
+        <circle cx="50" cy="46" r="1.6" fill="currentColor"/>
+        <line x1="38" y1="58" x2="62" y2="58"/>
+        <path d="M 38 60 L 24 78 L 38 73"/>
+        <path d="M 62 60 L 76 78 L 62 73"/>
+        <path d="M 44 72 Q 42 82 44 90" stroke-opacity="0.85"/>
+        <path d="M 50 72 Q 50 86 50 94" stroke-width="1.7"/>
+        <path d="M 56 72 Q 58 82 56 90" stroke-opacity="0.85"/>
+        <circle cx="22" cy="22" r="1.1" fill="currentColor"/>
+        <circle cx="80" cy="28" r="0.9" fill="currentColor"/>
+        <path d="M 16 50 l 0 2.5 m -1.2 -1.25 l 2.4 0" stroke-width="0.85"/>
+      </g>`,
+};
+
+function labelHTML(l) {
+  const accent = l.themeColor;
+  const dayIcon = THEME_ICONS[l.themeKey] || "";
+  const letterClass = l.tileLetter.length > 2 ? " three-char" : (l.tileLetter.length > 1 ? " two-char" : "");
+  const pillText = formatGroupPill(l.groupName);
+
+  const allergensHTML = l.allergens.length
+    ? l.allergens.map(code => {
+        const c = ALLERGEN_COLORS[code] || "#0a0a0a";
+        const icon = ALLERGEN_ICONS[code] || "";
+        return `<span class="allergen-chip" style="--chip-color:${c}">${icon}${esc(code)}</span>`;
+      }).join("")
+    : "";
+
+  const logoBlock = state.logoDataUrl
+    ? `<div class="label-logo"><div class="logo-image"><img src="${state.logoDataUrl}"></div></div>`
+    : `<div class="label-logo">
+         <div class="logo-serif">Puff 'n Stuff</div>
+         <div class="logo-serif-tag">DELIVERY</div>
+       </div>`;
+
+  return `
+    <div class="label" style="--day-accent:${accent}">
+      <div class="label-bg">
+        <div class="grid"></div>
+        ${dayIcon ? `<svg viewBox="0 0 100 100" class="day-icon" preserveAspectRatio="xMidYMid meet">${dayIcon}</svg>` : ""}
+      </div>
+
+      <div class="label-top">
+        <div class="label-camper">
+          <div class="label-name">${l.studentName ? esc(l.studentName) : (l.unnamed ? "&nbsp;" : '<span style="color:#9ca3af">Student Name</span>')}</div>
+          <div class="label-name-rule">
+            <span class="rule-line"></span>
+            <span class="rule-dot"></span>
+          </div>
+          <div class="label-grade-pill">${esc(pillText)}</div>
+          ${l.note ? `<div class="label-allergy-bar">ALLERGY: ${esc(l.note)}</div>` : ""}
+        </div>
+        <div class="label-tile">
+          <div class="tile-num">${l.tileNum}</div>
+          <div class="tile-letter${letterClass}">${l.tileLetter}</div>
+          <div class="tile-code">${l.tileCode}</div>
+        </div>
+      </div>
+
+      <div class="label-middle">
+        <div class="label-section-rule">
+          <span class="section-tag">ENTR&Eacute;E</span>
+          <span class="rule-line"></span>
+          <span class="rule-dot"></span>
+        </div>
+        <div class="label-item-name">${esc(l.itemName) || '<span style="color:#9ca3af; font-weight:600;">Item Name</span>'}</div>
+        ${l.itemDesc ? `<div class="label-item-desc">${esc(l.itemDesc)}</div>` : ""}
+      </div>
+
+      <div class="label-bottom">
+        <div class="label-allergens">${allergensHTML}</div>
+        <div class="label-portion">${l.portion}</div>
+        ${logoBlock}
+      </div>
+    </div>`;
+}
+
+function scaleSheet() {
+  const sheet = document.querySelector(".sheet");
+  if (!sheet) return;
+  const container = document.querySelector(".preview");
+  const availW = container.clientWidth - 60;
+  const sheetW = 8.5 * 96;
+  const scale = Math.min(1, availW / sheetW);
+  sheet.style.transform = `scale(${scale})`;
+  sheet.style.marginBottom = `${(scale - 1) * 11 * 96 + 20}px`;
+}
+window.addEventListener("resize", scaleSheet);
+
+function updateGenerateBtn() {
+  const btn = document.getElementById("generateBtn");
+  const labels = buildLabels();
+  const hasGroup = !!state.groupName.trim();
+  const hasDate = !!state.tripDate;
+  btn.disabled = !(labels.length && hasGroup && hasDate);
+}
+
+// ── PDF generation ────────────────────────────────────────────────────
+document.getElementById("generateBtn").addEventListener("click", () => generatePDF());
+
+function generatePDF() {
+  const status = document.getElementById("genStatus");
+  status.classList.remove("error");
+  status.classList.add("show");
+  status.textContent = "Generating PDF…";
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "in", format: "letter", orientation: "portrait" });
+    const labels = buildLabels();
+
+    const MARGIN_TOP  = 0.25;
+    const MARGIN_LEFT = 1.1875;
+    const LABEL_W = 3.0, LABEL_H = 2.0;
+    const H_GAP = 0.125, V_GAP = 0.125;
+    const COLS = 2, ROWS = 5;
+    const LABELS_PER_SHEET = COLS * ROWS;
+
+    const clamp = (v, mn, mx) => Math.min(mx, Math.max(mn, v));
+    const offsetX = clamp(parseFloat(document.getElementById("offsetX").value) || 0, -0.5, 0.5);
+    const offsetY = clamp(parseFloat(document.getElementById("offsetY").value) || 0, -0.5, 0.5);
+
+    labels.forEach((l, i) => {
+      const sheetIndex = Math.floor(i / LABELS_PER_SHEET);
+      const posInSheet = i % LABELS_PER_SHEET;
+      if (posInSheet === 0 && sheetIndex > 0) doc.addPage("letter", "portrait");
+      const col = posInSheet % COLS;
+      const row = Math.floor(posInSheet / COLS);
+      const x = MARGIN_LEFT + col * (LABEL_W + H_GAP) + offsetX;
+      const y = MARGIN_TOP  + row * (LABEL_H + V_GAP) + offsetY;
+      drawLabel(doc, l, x, y, LABEL_W, LABEL_H);
+    });
+
+    const grpSlug = slugify(state.groupName) || "group";
+    const dateSlug = state.tripDate ? state.tripDate.replace(/-/g, "") : "";
+    const filename = `field-trip-labels-${grpSlug}${dateSlug ? "-" + dateSlug : ""}.pdf`;
+    doc.save(filename);
+    status.textContent = `Saved: ${filename} · ${labels.length} labels on ${Math.ceil(labels.length / LABELS_PER_SHEET)} sheet(s)`;
+  } catch (err) {
+    console.error(err);
+    status.classList.add("error");
+    status.textContent = "Generation failed: " + err.message;
+  }
+}
+
+function slugify(s) { return (s||"").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
+
+function drawLabel(doc, l, x, y, w, h) {
+  const PAD_X = 0.12;
+  const PAD_Y = 0.10;
+  const innerX = x + PAD_X;
+  const innerY = y + PAD_Y;
+  const innerW = w - 2 * PAD_X;
+
+  const hex2rgb = h => {
+    const v = h.replace("#", "");
+    return [parseInt(v.substring(0,2),16), parseInt(v.substring(2,4),16), parseInt(v.substring(4,6),16)];
+  };
+  const accentRGB = hex2rgb(l.themeColor || "#1a4a8c");
+  const INK = [10, 10, 10];
+  const MUTE = [42, 42, 42];
+  const ptToIn = pt => pt / 72;
+
+  doc.setDrawColor(...accentRGB);
+  doc.setLineWidth(ptToIn(1.2));
+  doc.roundedRect(x + 0.02, y + 0.02, w - 0.04, h - 0.04, 0.115, 0.115, "S");
+
+  doc.setDrawColor(238, 238, 238);
+  doc.setLineWidth(ptToIn(0.15));
+  const gridStep = 0.10;
+  for (let gx = x + gridStep; gx < x + w - 0.02; gx += gridStep) doc.line(gx, y + 0.04, gx, y + h - 0.04);
+  for (let gy = y + gridStep; gy < y + h - 0.02; gy += gridStep) doc.line(x + 0.04, gy, x + w - 0.04, gy);
+
+  drawThemeIcon(doc, l.themeKey, x + w - 0.10 - 0.85, y + 0.72, 0.85, 0.85, accentRGB);
+
+  const tileW = 0.46, tileH = 0.50;
+  const tileX = x + w - PAD_X - tileW;
+  const tileY = innerY;
+  doc.setFillColor(230, 230, 230);
+  doc.roundedRect(tileX + ptToIn(0.6), tileY + ptToIn(0.6), tileW, tileH, 0.03, 0.03, "F");
+  doc.setFillColor(255, 255, 255);
+  doc.setDrawColor(...accentRGB);
+  doc.setLineWidth(ptToIn(1));
+  doc.roundedRect(tileX, tileY, tileW, tileH, 0.03, 0.03, "FD");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(5.5);
+  doc.setTextColor(...INK);
+  doc.text(l.tileNum || "01", tileX + 0.035, tileY + 0.08);
+  const letterLen = (l.tileLetter || "").length;
+  const letterSize = letterLen > 2 ? 10 : (letterLen > 1 ? 13 : 18);
+  doc.setFontSize(letterSize);
+  doc.setTextColor(...accentRGB);
+  const letterY = tileY + tileH / 2 + ptToIn(letterSize) * 0.30;
+  doc.text(l.tileLetter || "", tileX + tileW / 2, letterY, { align: "center" });
+  doc.setFontSize(5.5);
+  doc.setTextColor(...accentRGB);
+  doc.text(l.tileCode || "", tileX + tileW / 2, tileY + tileH - 0.04, { align: "center" });
+
+  const nameMaxW = tileX - innerX - 0.04;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(...INK);
+  const fullName = l.studentName || (l.unnamed ? "" : "Student Name");
+  let displayName = fullName;
+  while (doc.getTextWidth(displayName) > nameMaxW && displayName.length > 4) {
+    displayName = displayName.slice(0, -1);
+  }
+  if (displayName !== fullName) displayName = displayName.trim() + "…";
+  const nameY = innerY + 0.13;
+  if (displayName) doc.text(displayName, innerX, nameY);
+
+  const ruleY = nameY + 0.05;
+  doc.setLineWidth(ptToIn(0.7));
+  doc.setDrawColor(...INK);
+  doc.setFillColor(...INK);
+  doc.line(innerX, ruleY, innerX + 1.40, ruleY);
+  doc.circle(innerX + 1.43, ruleY, 0.015, "F");
+
+  const pillText = formatGroupPill(l.groupName);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  const pillTextW = doc.getTextWidth(pillText);
+  const pillW = Math.min(pillTextW + 0.20, nameMaxW);
+  const pillH = 0.18;
+  const pillY = ruleY + 0.05;
+  doc.setFillColor(...accentRGB);
+  doc.setDrawColor(...accentRGB);
+  doc.roundedRect(innerX, pillY, pillW, pillH, 0.09, 0.09, "F");
+  doc.setTextColor(255, 255, 255);
+  let pt = pillText;
+  while (doc.getTextWidth(pt) > pillW - 0.14 && pt.length > 4) pt = pt.slice(0, -1);
+  if (pt !== pillText) pt = pt.trim() + "…";
+  doc.text(pt, innerX + pillW / 2, pillY + pillH / 2 + 0.030, { align: "center" });
+
+  // Red allergy bar: the person's own allergy note, printed as typed.
+  let topBottom = pillY + pillH;
+  if (l.note) {
+    const barY = pillY + pillH + 0.035;
+    const barH = 0.16;
+    const barW = nameMaxW;
+    doc.setFillColor(200, 16, 46);
+    doc.roundedRect(innerX, barY, barW, barH, 0.03, 0.03, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7);
+    doc.setTextColor(255, 255, 255);
+    const full = "ALLERGY: " + l.note;
+    let bt = full;
+    while (doc.getTextWidth(bt) > barW - 0.10 && bt.length > 10) bt = bt.slice(0, -1);
+    if (bt !== full) bt = bt.trim() + "…";
+    doc.text(bt, innerX + 0.05, barY + barH / 2 + 0.028);
+    topBottom = barY + barH;
+  }
+
+  const sectionTag = "ENTRÉE";
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(6.5);
+  doc.setTextColor(...INK);
+  const sectionY = topBottom + 0.13;
+  doc.text(sectionTag, innerX, sectionY);
+  const tagW = doc.getTextWidth(sectionTag);
+  doc.setLineWidth(ptToIn(0.8));
+  doc.setDrawColor(...INK);
+  const lineY = sectionY - 0.035;
+  doc.line(innerX + tagW + 0.05, lineY, innerX + tagW + 0.55, lineY);
+  doc.setFillColor(...INK);
+  doc.circle(innerX + tagW + 0.575, lineY, 0.012, "F");
+
+  let bodyY = sectionY + 0.22;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12.5);
+  doc.setTextColor(...INK);
+  const itemMaxW = innerW - 0.05;
+  const itemLines = doc.splitTextToSize(l.itemName || "", itemMaxW).slice(0, 2);
+  doc.text(itemLines, innerX, bodyY);
+  bodyY += (itemLines.length - 1) * 0.165 + 0.16;
+
+  if (l.itemDesc) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(6.5);
+    doc.setTextColor(...MUTE);
+    const descMaxW = innerW * 0.62;
+    const descLines = doc.splitTextToSize(l.itemDesc, descMaxW).slice(0, 2);
+    doc.text(descLines, innerX, bodyY);
+  }
+
+  const bottomY = y + h - PAD_Y;
+  const rowY = bottomY - 0.04;
+
+  let chipX = innerX;
+  const chipH = 0.14;
+  const chipY = rowY - chipH + 0.01;
+  for (const code of (l.allergens || []).slice(0, 3)) {
+    const colorRGB = hex2rgb(ALLERGEN_COLORS[code] || "#0a0a0a");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(6.5);
+    const codeW = doc.getTextWidth(code);
+    const chipW = codeW + 0.18;
+    doc.setDrawColor(...colorRGB);
+    doc.setLineWidth(ptToIn(0.7));
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(chipX, chipY, chipW, chipH, 0.07, 0.07, "FD");
+    drawAllergenIcon(doc, code, chipX + 0.06, chipY + chipH / 2, 0.045, colorRGB);
+    doc.setTextColor(...colorRGB);
+    doc.text(code, chipX + 0.11, chipY + chipH / 2 + 0.025);
+    chipX += chipW + 0.04;
+  }
+
+  const circR = 0.10;
+  const circX = x + w / 2;
+  const circY = rowY - circR + 0.04;
+  doc.setFillColor(...accentRGB);
+  doc.circle(circX, circY, circR, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9.5);
+  doc.setTextColor(255, 255, 255);
+  doc.text(l.portion || "S", circX, circY + 0.035, { align: "center" });
+
+  const logoBlockW = 1.10;
+  const logoBlockX = x + w - PAD_X - logoBlockW;
+  if (state.logoDataUrl) {
+    try {
+      const lh = 0.30;
+      const img = state._logoSize;
+      if (img) {
+        const boxAR = logoBlockW / lh;
+        const imgAR = img.w / img.h;
+        let drawW = logoBlockW, drawH = lh;
+        if (imgAR > boxAR) drawH = logoBlockW / imgAR;
+        else               drawW = lh * imgAR;
+        const dx = logoBlockX + (logoBlockW - drawW);
+        const dy = rowY - lh + 0.04 + (lh - drawH) / 2;
+        doc.addImage(state.logoDataUrl, dx, dy, drawW, drawH, undefined, "FAST");
+      } else {
+        doc.addImage(state.logoDataUrl, logoBlockX, rowY - lh + 0.04, logoBlockW, lh, undefined, "FAST");
+      }
+    } catch (e) { console.warn("Logo embed failed", e); }
+  } else {
+    doc.setFont("times", "italic");
+    doc.setFontSize(10);
+    doc.setTextColor(...INK);
+    doc.text("Puff 'n Stuff", logoBlockX + logoBlockW, rowY - 0.05, { align: "right" });
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(5);
+    doc.text("DELIVERY", logoBlockX + logoBlockW, rowY + 0.01, { align: "right", charSpace: ptToIn(2.5) * 72 });
+  }
+}
+
+function drawThemeIcon(doc, themeKey, bx, by, bw, bh, rgb) {
+  const blend = (a, b, t) => Math.round(a + (b - a) * t);
+  const faded   = [blend(rgb[0], 255, 0.62), blend(rgb[1], 255, 0.62), blend(rgb[2], 255, 0.62)];
+  const fader   = [blend(rgb[0], 255, 0.78), blend(rgb[1], 255, 0.78), blend(rgb[2], 255, 0.78)];
+  const lighter = [blend(rgb[0], 255, 0.90), blend(rgb[1], 255, 0.90), blend(rgb[2], 255, 0.90)];
+  doc.setDrawColor(...faded);
+  doc.setFillColor(...faded);
+  doc.setLineWidth(0.013);
+
+  const X = u => bx + u * bw;
+  const Y = v => by + v * bh;
+  const cx = X(0.5), cy = Y(0.5);
+
+  if (themeKey === "PL") {
+    // ── Planetarium — MOSI Saunders dome + base + starry sky ──
+    const baseTop = Y(0.68);
+    const baseLeft = X(0.18);
+    const baseW = bw * 0.64;
+    const baseH = bh * 0.20;
+    const domeRX = bw * 0.32;
+    const domeRY = bh * 0.22;
+
+    // Ground line (subtle)
+    doc.setDrawColor(...fader);
+    doc.line(X(0.08), Y(0.88), X(0.92), Y(0.88));
+
+    // Dome — top-half semicircle (path with many small line segments)
+    const domeSteps = 26;
+    const domeDeltas = [];
+    let prevPx = 0, prevPy = 0;
+    for (let i = 1; i <= domeSteps; i++) {
+      const angle = Math.PI - (i / domeSteps) * Math.PI;    // 180° → 0°
+      const nx = domeRX + domeRX * Math.cos(angle);          // relative to left edge of dome
+      const ny = -domeRY * Math.sin(angle);                  // negative = up
+      domeDeltas.push([nx - prevPx, ny - prevPy]);
+      prevPx = nx;
+      prevPy = ny;
+    }
+    doc.setFillColor(...lighter);
+    doc.setDrawColor(...faded);
+    doc.lines(domeDeltas, cx - domeRX, baseTop, [1, 1], "FD", true);
+
+    // Base building rectangle
+    doc.setFillColor(...lighter);
+    doc.rect(baseLeft, baseTop, baseW, baseH, "FD");
+
+    // Vertical panel lines on dome
+    doc.setDrawColor(...fader);
+    doc.line(cx, baseTop, cx, baseTop - domeRY + 0.02);
+    doc.line(X(0.34), baseTop, X(0.34), baseTop - domeRY * 0.55);
+    doc.line(X(0.66), baseTop, X(0.66), baseTop - domeRY * 0.55);
+    doc.line(X(0.24), baseTop, X(0.24), baseTop - domeRY * 0.28);
+    doc.line(X(0.76), baseTop, X(0.76), baseTop - domeRY * 0.28);
+
+    // Horizontal band mid-dome
+    doc.line(X(0.20), baseTop - domeRY * 0.42, X(0.80), baseTop - domeRY * 0.42);
+
+    // Finial antenna on top of dome
+    doc.setDrawColor(...faded);
+    doc.line(cx, baseTop - domeRY, cx, baseTop - domeRY - 0.05);
+    doc.setFillColor(...faded);
+    doc.circle(cx, baseTop - domeRY - 0.06, 0.018, "F");
+
+    // Entrance arch — approximated by a small rounded rect
+    doc.setFillColor(...fader);
+    doc.setDrawColor(...faded);
+    doc.roundedRect(X(0.44), Y(0.76), bw * 0.12, bh * 0.12, 0.03, 0.03, "FD");
+
+    // Small lit windows on base
+    doc.setFillColor(...faded);
+    doc.setDrawColor(...faded);
+    doc.rect(X(0.24), Y(0.76), bw * 0.04, bh * 0.06, "F");
+    doc.rect(X(0.30), Y(0.76), bw * 0.04, bh * 0.06, "F");
+    doc.rect(X(0.64), Y(0.76), bw * 0.04, bh * 0.06, "F");
+    doc.rect(X(0.70), Y(0.76), bw * 0.04, bh * 0.06, "F");
+
+    // Stars around the dome
+    doc.setFillColor(...faded);
+    doc.circle(X(0.10), Y(0.20), 0.014, "F");
+    doc.circle(X(0.88), Y(0.24), 0.015, "F");
+    doc.circle(X(0.14), Y(0.34), 0.010, "F");
+    doc.circle(X(0.86), Y(0.42), 0.010, "F");
+
+    // Sparkles
+    doc.setDrawColor(...faded);
+    doc.line(X(0.08), Y(0.48), X(0.14), Y(0.48));
+    doc.line(X(0.11), Y(0.45), X(0.11), Y(0.51));
+    doc.line(X(0.82), Y(0.14), X(0.86), Y(0.14));
+    doc.line(X(0.84), Y(0.12), X(0.84), Y(0.16));
+  } else if (themeKey === "M") {
+    const rx = bw * 0.42, ry = bh * 0.10;
+    drawEllipse(doc, cx, cy, rx, ry, -22);
+    doc.setDrawColor(...fader);
+    drawEllipse(doc, cx, cy, rx * 0.78, ry * 0.72, -22);
+    doc.setDrawColor(...faded);
+    doc.setFillColor(...lighter);
+    doc.circle(cx, cy, bw * 0.19, "F");
+    doc.circle(cx, cy, bw * 0.20, "S");
+    doc.setDrawColor(...fader);
+    doc.line(X(0.36), Y(0.54), X(0.64), Y(0.54));
+    doc.line(X(0.41), Y(0.46), X(0.59), Y(0.46));
+    doc.setFillColor(...faded);
+    doc.setDrawColor(...faded);
+    doc.circle(X(0.80), Y(0.18), 0.014, "F");
+    doc.circle(X(0.18), Y(0.78), 0.011, "F");
+    doc.line(X(0.13), Y(0.27), X(0.17), Y(0.27));
+    doc.line(X(0.15), Y(0.25), X(0.15), Y(0.29));
+  } else if (themeKey === "Tu") {
+    doc.setFillColor(...lighter);
+    doc.lines([[bw * 0.52, 0], [-bw * 0.05, -bh * 0.06], [-bw * 0.42, 0]], X(0.24), Y(0.88), [1, 1], "FD", true);
+    doc.line(X(0.29), Y(0.82), X(0.29), Y(0.78));
+    doc.line(X(0.71), Y(0.82), X(0.71), Y(0.78));
+    doc.roundedRect(X(0.33), Y(0.62), bw * 0.34, bh * 0.07, 0.012, 0.012, "S");
+    doc.setFillColor(...fader);
+    doc.rect(X(0.43), Y(0.64), bw * 0.14, bh * 0.03, "F");
+    doc.setDrawColor(...faded);
+    doc.line(X(0.33), Y(0.78), X(0.33), Y(0.50));
+    doc.line(X(0.33), Y(0.50), X(0.53), Y(0.46));
+    doc.roundedRect(X(0.46), Y(0.32), bw * 0.14, bh * 0.14, 0.020, 0.020, "S");
+    doc.lines([[bw * 0.08, 0], [-bw * 0.01, -bh * 0.10], [-bw * 0.06, 0]], X(0.49), Y(0.32), [1, 1], "S", true);
+    doc.line(X(0.48), Y(0.22), X(0.58), Y(0.22));
+    doc.setFillColor(...lighter);
+    doc.circle(X(0.27), Y(0.50), 0.030, "FD");
+    doc.line(X(0.27), Y(0.47), X(0.27), Y(0.495));
+    doc.setFillColor(...faded);
+    doc.circle(X(0.53), Y(0.655), 0.014, "F");
+  } else if (themeKey === "W") {
+    doc.setDrawColor(...fader);
+    doc.line(X(0.46), Y(0.06), X(0.48), Y(0.18));
+    doc.line(X(0.54), Y(0.08), X(0.56), Y(0.20));
+    doc.setDrawColor(...faded);
+    doc.line(X(0.36), Y(0.24), X(0.64), Y(0.24));
+    doc.line(X(0.42), Y(0.24), X(0.42), Y(0.40));
+    doc.line(X(0.58), Y(0.24), X(0.58), Y(0.40));
+    doc.setFillColor(...lighter);
+    doc.lines([[-bw * 0.20, bh * 0.43], [bw * 0.56, 0], [-bw * 0.20, -bh * 0.43]], X(0.42), Y(0.40), [1, 1], "FD", true);
+    doc.setDrawColor(...faded);
+    doc.line(X(0.28), Y(0.58), X(0.34), Y(0.58));
+    doc.line(X(0.28), Y(0.64), X(0.32), Y(0.64));
+    doc.line(X(0.28), Y(0.76), X(0.34), Y(0.76));
+    doc.setLineDashPattern([0.018, 0.025], 0);
+    doc.line(X(0.30), Y(0.70), X(0.70), Y(0.70));
+    doc.setLineDashPattern([], 0);
+    doc.setFillColor(...faded);
+    doc.circle(X(0.44), Y(0.76), 0.020, "F");
+    doc.circle(X(0.56), Y(0.66), 0.016, "F");
+    doc.circle(X(0.52), Y(0.78), 0.012, "F");
+    doc.circle(X(0.62), Y(0.74), 0.018, "F");
+  } else if (themeKey === "Th") {
+    const rx = bw * 0.38, ry = bh * 0.13;
+    drawEllipse(doc, cx, cy, rx, ry, 0);
+    drawEllipse(doc, cx, cy, rx, ry, 60);
+    drawEllipse(doc, cx, cy, rx, ry, -60);
+    doc.setFillColor(...faded);
+    doc.circle(cx, cy, 0.045, "F");
+    doc.setFillColor(255, 255, 255);
+    doc.circle(cx - 0.012, cy - 0.012, 0.013, "F");
+    doc.setFillColor(...faded);
+    doc.circle(X(0.88), Y(0.50), 0.025, "F");
+    doc.circle(X(0.30), Y(0.84), 0.025, "F");
+    doc.circle(X(0.30), Y(0.16), 0.025, "F");
+  } else if (themeKey === "F") {
+    doc.setFillColor(...lighter);
+    doc.lines([[bw * 0.12, -bh * 0.12], [bw * 0.12, bh * 0.12], [0, bh * 0.26]], X(0.38), Y(0.36), [1, 1], "FD", true);
+    doc.rect(X(0.38), Y(0.36), bw * 0.24, bh * 0.36, "S");
+    doc.line(X(0.38), Y(0.58), X(0.62), Y(0.58));
+    doc.setFillColor(...lighter);
+    doc.circle(X(0.50), Y(0.46), bw * 0.045, "FD");
+    doc.setFillColor(...faded);
+    doc.circle(X(0.50), Y(0.46), bw * 0.022, "F");
+    doc.lines([[-bw * 0.14, bh * 0.18], [bw * 0.14, -bh * 0.05]], X(0.38), Y(0.60), [1, 1], "S", true);
+    doc.lines([[bw * 0.14, bh * 0.18], [-bw * 0.14, -bh * 0.05]], X(0.62), Y(0.60), [1, 1], "S", true);
+    doc.line(X(0.44), Y(0.72), X(0.42), Y(0.88));
+    doc.setLineWidth(0.018);
+    doc.line(X(0.50), Y(0.72), X(0.50), Y(0.94));
+    doc.setLineWidth(0.013);
+    doc.line(X(0.56), Y(0.72), X(0.58), Y(0.88));
+    doc.setFillColor(...faded);
+    doc.circle(X(0.22), Y(0.22), 0.012, "F");
+    doc.circle(X(0.80), Y(0.28), 0.010, "F");
+    doc.line(X(0.14), Y(0.50), X(0.18), Y(0.50));
+    doc.line(X(0.16), Y(0.48), X(0.16), Y(0.52));
+  }
+}
+
+function drawEllipse(doc, cx, cy, rx, ry, deg) {
+  const rad = deg * Math.PI / 180;
+  const cos = Math.cos(rad), sin = Math.sin(rad);
+  const steps = 40;
+  let prev = null;
+  for (let i = 0; i <= steps; i++) {
+    const t = (i / steps) * Math.PI * 2;
+    const px = rx * Math.cos(t);
+    const py = ry * Math.sin(t);
+    const x = cx + px * cos - py * sin;
+    const y = cy + px * sin + py * cos;
+    if (prev) doc.line(prev.x, prev.y, x, y);
+    prev = { x, y };
+  }
+}
+
+function drawAllergenIcon(doc, code, cx, cy, r, rgb) {
+  doc.setDrawColor(...rgb);
+  doc.setLineWidth(0.005);
+  doc.setFillColor(255, 255, 255);
+  if (code === "V") {
+    doc.circle(cx, cy - r * 0.5, r * 0.35, "S");
+    doc.circle(cx - r * 0.5, cy + r * 0.3, r * 0.35, "S");
+    doc.circle(cx + r * 0.5, cy + r * 0.3, r * 0.35, "S");
+  } else if (code === "VEG") {
+    doc.ellipse(cx, cy, r * 0.9, r * 0.5, "S");
+    doc.line(cx - r * 0.6, cy + r * 0.3, cx + r * 0.6, cy - r * 0.3);
+  } else if (code === "GF") {
+    doc.line(cx, cy - r, cx, cy + r);
+    for (let i = -1; i <= 1; i++) {
+      const yo = i * r * 0.45;
+      doc.line(cx, cy + yo, cx - r * 0.5, cy + yo - r * 0.25);
+      doc.line(cx, cy + yo, cx + r * 0.5, cy + yo - r * 0.25);
+    }
+  } else if (code === "DF") {
+    doc.circle(cx, cy + r * 0.1, r * 0.7, "S");
+    doc.line(cx, cy - r, cx, cy);
+  } else if (code === "NF") {
+    doc.line(cx - r * 0.35, cy - r, cx + r * 0.35, cy - r);
+    doc.line(cx - r * 0.3, cy - r, cx - r * 0.3, cy - r * 0.2);
+    doc.line(cx + r * 0.3, cy - r, cx + r * 0.3, cy - r * 0.2);
+    doc.lines([[-r * 0.5, r * 1.0], [r * 1.6, 0], [-r * 0.5, -r * 1.0]], cx - r * 0.3, cy - r * 0.2, [1, 1], "S");
+  }
+}
+
+// ── Reset ─────────────────────────────────────────────────────────────
+document.getElementById("resetBtn").addEventListener("click", () => {
+  if (!confirm("Reset all fields and roster?")) return;
+  state.groupName = "";
+  state.tripDate = "";
+  state.defaultPortion = "S";
+  state.students = [];
+  state.editingIndex = -1;
+  state.mix = {};
+  state.mixNameText = "";
+  document.getElementById("mixNameText").value = "";
+  renderMix();
+  document.getElementById("groupName").value = "";
+  document.getElementById("tripDate").value = "";
+  document.getElementById("defaultPortion").value = "S";
+  document.getElementById("pasteInput").value = "";
+  document.getElementById("pasteInput").classList.remove("has-content");
+  document.getElementById("parseStatus").classList.remove("show");
+  document.getElementById("genStatus").classList.remove("show");
+  renderRoster();
+  renderPreview();
+  updateGenerateBtn();
+});
+
+// ── Boxes without names ───────────────────────────────────────────────
+function renderMixTotals() {
+  const t = mixTotal();
+  document.getElementById("mixCount").textContent = t;
+  const s = MIX_BOXES.reduce((n, b) => n + mixCount(b.id, "S"), 0);
+  const d = MIX_BOXES.reduce((n, b) => n + mixCount(b.id, "D"), 0);
+  document.getElementById("mixTotal").textContent = t ? `${t} box${t === 1 ? "" : "es"} · ${s} standard · ${d} double` : "";
+}
+function renderMix() {
+  const body = document.getElementById("mixBody");
+  body.innerHTML = MIX_BOXES.map(b => {
+    const item = lookupMenu(b.entree);
+    const sub = b.note ? "Special version" : (item ? item.desc : "");
+    return `<tr>
+      <td>${esc(b.label || b.entree)}<span class="sub">${esc(sub)}</span></td>
+      <td class="num"><input type="number" min="0" step="1" inputmode="numeric" data-mix="${b.id}|S" value="${mixCount(b.id, "S") || ""}" placeholder="0"></td>
+      <td class="num"><input type="number" min="0" step="1" inputmode="numeric" data-mix="${b.id}|D" value="${mixCount(b.id, "D") || ""}" placeholder="0"></td>
+    </tr>`;
+  }).join("");
+  body.querySelectorAll("[data-mix]").forEach(inp => {
+    inp.addEventListener("input", e => {
+      state.mix[e.target.dataset.mix] = e.target.value;
+      renderMixTotals(); renderChecks(); renderPreview(); updateGenerateBtn();
+    });
+  });
+  renderMixTotals();
+}
+document.getElementById("mixNameText").addEventListener("input", e => {
+  state.mixNameText = e.target.value; renderPreview();
+});
+
+// ── Init ──────────────────────────────────────────────────────────────
+renderMix();
+renderRoster();
+renderPreview();
+updateGenerateBtn();
+</script>
+</body>
+</html>
