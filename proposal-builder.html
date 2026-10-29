@@ -219,6 +219,7 @@ button.add:hover{border-color:var(--mr);color:var(--mr)}
 .nums li:before{content:"\2022\00a0\00a0 "}
 .blist{list-style:none;padding:0;margin:.06in 0 0;color:var(--soft);font-size:9.2pt;line-height:1.7}
 .blist li+li{margin-top:.07in}
+.blist .ckd{display:block;font-size:.86em;line-height:1.4;color:var(--mute,#7a7a78);font-style:italic}
 .bargrid{position:absolute;left:.9in;top:2.95in;width:5.35in;display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--rule);background:var(--paper)}
 .bc{padding:.26in .28in}.br{border-right:1px solid var(--rule)}.bb{border-bottom:1px solid var(--rule)}
 .bh{font-family:"Cormorant",serif;font-size:15pt;font-weight:600}
@@ -315,7 +316,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-29.1616"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-29.1624"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -646,8 +647,12 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     meta.on_site_contact = g(/On Site Contact:\s*(.+?)\s*\(E\)/);
     meta.market = /Columbus Drive/.test(joined) ? "Tampa" : /Rio Drive/.test(joined) ? "Orlando" : /King Street/.test(joined) ? "Jacksonville" : "";
     // rep: the name row right of the page header, under SPECIAL EVENT ORDER
-    const repRow = rows.find((r) => r.x > 380 && /^[A-Z][A-Za-z.'-]+\s+[A-Z][A-Za-z.'-]+/.test(r.text) && !/SPECIAL|Event|Revised|@|^(January|February|March|April|May|June|July|August|September|October|November|December)\b/.test(r.text));
-    const rm = repRow ? repRow.text.match(/^(.*?)(?:\s*(\(\d{3}\)\s*\d{3}-\d{4}))?\s*(?:\(\s*\)\s*-?)?\s*$/) : null;
+    // Miami SEOs print "MIAMI - Lauren Balden ( ) -": market prefix, then the rep
+    const repRow = rows.find((r) => r.x > 380 && /^(?:[A-Z]{3,}(?:\s[A-Z]{3,})?\s*-\s*)?[A-Z][A-Za-z.'-]+\s+[A-Z][A-Za-z.'-]+/.test(r.text) && !/SPECIAL|Event|Revised|@|^(January|February|March|April|May|June|July|August|September|October|November|December)\b/.test(r.text));
+    const mp = repRow ? repRow.text.match(/^([A-Z]{3,}(?:\s[A-Z]{3,})?)\s*-\s*(?=[A-Z][a-z])/) : null;
+    if (mp) { const mk = mp[1].charAt(0) + mp[1].slice(1).toLowerCase(); if (/^(Miami|Tampa|Orlando|Jacksonville)$/.test(mk)) meta.market = mk; }
+    const repText = repRow ? repRow.text.slice(mp ? mp[0].length : 0) : "";
+    const rm = repRow ? repText.match(/^(.*?)(?:\s*(\(\d{3}\)\s*\d{3}-\d{4}))?\s*(?:\(\s*\)\s*-?)?\s*$/) : null;
     meta.rep_name = rm ? clean(rm[1]) : "";
     meta.rep_phone = rm && rm[2] ? rm[2] : "";
     // timeline
@@ -665,7 +670,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     const sections = parseMenu(menuRows, { month: meta.month });
 
     // bar
-    const bar = { extras: [], type: "", hours: "", hours_text: "", spirits: [], beer: [], wine: [], inclusions: "", open: "", close: "" };
+    const bar = { extras: [], cocktails: [], type: "", hours: "", hours_text: "", spirits: [], beer: [], wine: [], inclusions: "", open: "", close: "" };
     const bl = lines.findIndex((l) => /Hour .*Full Bar|Premium Full Bar|^\(\d+\)\s*Full Bar\b|Hour .*(?:Beer\s*(?:&|and)\s*Wine|Wine\s*(?:&|and)\s*Beer)|(?:Beer\s*(?:&|and)\s*Wine|Wine\s*(?:&|and)\s*Beer) Bar/i.test(l));
     if (bl >= 0) {
       bar.type = /Full Bar/i.test(lines[bl]) ? (/Premium/i.test(lines[bl]) ? "Premium Full Bar" : "Full Bar") : "Beer & Wine Bar";
@@ -700,7 +705,15 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
         const l = lines[j];
         if (/Beverages\s*:|SERVICE PERSONNEL/i.test(l)) break;
         const q = l.match(/^\(\d+\)\s*(.+)$/);
-        if (q && !/Inclusions/i.test(q[1])) bar.extras.push(clean(q[1]));
+        if (q && !/Inclusions/i.test(q[1])) {
+          // a specialty cocktail is a named item with an ingredient line under it (mixed case, commas)
+          const nx = lines[j + 1] || "";
+          if (!/^\(\d+\)/.test(nx) && /,/.test(nx) && nx !== nx.toUpperCase() && !/Beverages\s*:/i.test(nx)) {
+            let nm = clean(q[1].split(/\s+-\s+/)[0]);
+            if (/[A-Z]{3}/.test(nm)) nm = titleCase(nm);
+            bar.cocktails.push(nm + ": " + clean(nx).replace(/[.]\s*$/, ""));
+          } else bar.extras.push(clean(q[1]));
+        }
         else if (/^ADD\s+[A-Z]/.test(l) && l === l.toUpperCase()) bar.extras.push(clean(l));
       }
     }
@@ -1146,9 +1159,13 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       <div class="bargrid">
         ${(() => {
           const g = [["Spirits", b.spirits], ["Wine", b.wine], ["Beer", b.beer]].filter((x) => x[1] && x[1].length);
-          const col = (arr) => arr.map((x, i) => `<div class="bh"${i ? ' style="margin-top:.24in"' : ""}>${x[0]}</div>${list(x[1])}`).join("");
+          const ck = (b.cocktails || []).filter(Boolean);
+          const ckList = `<ul class="blist">${ck.map((x) => { const i = x.indexOf(":"); return i > 0 ? `<li>${esc(x.slice(0, i).trim())}<span class="ckd">${esc(x.slice(i + 1).trim())}</span></li>` : `<li>${esc(x)}</li>`; }).join("")}</ul>`;
+          const col = (arr) => arr.map((x, i) => `<div class="bh"${i ? ' style="margin-top:.24in"' : ""}>${x[0]}</div>${x[2] || list(x[1])}`).join("");
           // two columns: spirits | wine + beer, or wine | beer when there are no spirits
-          const left = g.length >= 3 ? [g[0]] : g.slice(0, 1), right = g.length >= 3 ? g.slice(1) : g.slice(1);
+          const left = g.slice(0, 1), right = g.slice(1);
+          // specialty cocktails go under the shorter column
+          if (ck.length) { const n = (c) => c.reduce((t, x) => t + x[1].length + 1.5, 0); (n(left) <= n(right) ? left : right).push(["Specialty Cocktails", ck, ckList]); }
           return `<div class="bc br bb">${col(left)}</div><div class="bc bb">${col(right)}</div>`;
         })()}
         <div class="bc br"><div class="bh">Bar Inclusions</div><p class="lead" style="font-size:9pt;margin-top:.08in">${esc(b.inclusions)}</p></div>
@@ -1609,7 +1626,12 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     if (p.bar.type) svcStyle.push(p.bar.type);
     const rentals = rentalLines(p.rentals);
     const rep = m.rep_name || "";
-    const dir = DIRECTORS[m.market] || null;
+    let dir = DIRECTORS[m.market] || null;
+    let repTitle = TITLES[rep] || "Sales Event Planner", repPhone = m.rep_phone;
+    if (dir && dir.name === rep) { // the director is the planner on this one
+      if (m.market === "Miami") repTitle = "Director of Sales";
+      repPhone = repPhone || dir.phone; dir = null;
+    }
     const repFirst = rep.split(" ")[0] || "Your planner";
     // investment
     const inv = p.investment || [];
@@ -1640,7 +1662,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       introText: options ? `This proposal presents your ${pkg ? pkg.package + " " : ""}menu with the full range of selections available to you. Once you have chosen your favorites, we will finalize your menu and confirm every detail.` : "This proposal presents your confirmed menu and every detail of your event.",
       menuLead: "",
       sections,
-      bar: { show: !!p.bar.type, type: p.bar.type, spirits: p.bar.spirits.slice(), wine: p.bar.wine.slice(), beer: p.bar.beer.slice(), inclusions: p.bar.inclusions ? p.bar.inclusions.replace(/\s*Station set up on.*$/i, "").replace(/\.$/, "") + "." : "Assorted soft drinks, sparkling and bottled water, fruit juices, tonic, club soda, ginger ale, sour mix, drink garnishes, linen-like cocktail napkins, appropriate glassware, ice, serving equipment, and Puff 'n Stuff Catering's liquor liability insurance.", headline: [p.bar.hours ? `${titleCase(NUM[p.bar.hours] || String(p.bar.hours))}-hour ${String(p.bar.type || "").toLowerCase()}` : p.bar.type, barOpen && barClose ? `${barOpen} – ${barClose}` : ""].filter(Boolean).join(" • "), bartenders: bart ? `${titleCase(NUM[bart] || String(bart))} bartender${bart === 1 ? " is" : "s are"}` : "" },
+      bar: { show: !!p.bar.type, type: p.bar.type, spirits: p.bar.spirits.slice(), wine: p.bar.wine.slice(), beer: p.bar.beer.slice(), cocktails: (p.bar.cocktails || []).slice(), inclusions: p.bar.inclusions ? p.bar.inclusions.replace(/\s*Station set up on.*$/i, "").replace(/\.$/, "") + "." : "Assorted soft drinks, sparkling and bottled water, fruit juices, tonic, club soda, ginger ale, sour mix, drink garnishes, linen-like cocktail napkins, appropriate glassware, ice, serving equipment, and Puff 'n Stuff Catering's liquor liability insurance.", headline: [p.bar.hours ? `${titleCase(NUM[p.bar.hours] || String(p.bar.hours))}-hour ${String(p.bar.type || "").toLowerCase()}` : p.bar.type, barOpen && barClose ? `${barOpen} – ${barClose}` : ""].filter(Boolean).join(" • "), bartenders: bart ? `${titleCase(NUM[bart] || String(bart))} bartender${bart === 1 ? " is" : "s are"}` : "" },
       details: {
         colA_title: "Tabletop & Service", colA: inclusionPhrases(p.sections).slice(0, 6),
         colB_title: style === "wedding" ? "Rentals & Linen" : "Setup", colB: rentals.length ? rentals : ["Tables and linens: to be confirmed"],
@@ -1648,7 +1670,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
         note: rentals.length ? "Rental and linen pricing is estimated until final selections are confirmed." : "Tables, linens, and decor accents are confirmed with you and the venue during final details.",
       },
       team, dayOf, serviceShow: team.length > 0,
-      planner: { name: rep, title: TITLES[rep] || "Sales Event Planner", phone: m.rep_phone, email: REP_EMAILS[rep] || "", headshot: headshot(rep), bio: `${repFirst} is part of our ${m.market || "Puff 'n Stuff"} planning team and will be your partner from this proposal through your event, crafting the ideal menu with the proper staff and flow for your celebration.` },
+      planner: { name: rep, title: repTitle, phone: repPhone, email: REP_EMAILS[rep] || "", headshot: headshot(rep), bio: `${repFirst} is part of our ${m.market || "Puff 'n Stuff"} planning team and will be your partner from this proposal through your event, crafting the ideal menu with the proper staff and flow for your celebration.` },
       director: dir ? Object.assign({ headshot: headshot(dir.name), title: m.market === "Miami" ? "Director of Sales" : TITLES[dir.name] || "Director of Sales" }, dir) : null,
       investment: { rows, total: get("Grand Total"), deposit: deposit && deposit !== "0.00" ? deposit : "", balance: get("Balance Due") },
       terms: ["A booking retainer of $1,000 or 15% of the estimated event cost, whichever is greater, secures your date.", "50% of the remaining balance is due 60 days prior to your event.", "Final guest count is confirmed 14 days prior; the remaining balance is due 10 days prior."].concat(rentals.length ? ["Rental and linen pricing is estimated until selections are confirmed."] : []),
@@ -1810,6 +1832,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     $("#ed-bar").innerHTML = `<h2>Bar <label class="inline"><input type="checkbox" data-path="bar.show"${B.show ? " checked" : ""}> Include the bar page</label></h2>${B.show ? `<div class="grid">
       ${field("Headline", "bar.headline", B.headline, { wide: true })}
       ${field("Spirits (one per line)", "bar.spirits", B.spirits.join("\n"), { area: true, rows: 5 })}${field("Wine (one per line)", "bar.wine", B.wine.join("\n"), { area: true, rows: 5 })}${field("Beer (one per line)", "bar.beer", B.beer.join("\n"), { area: true, rows: 5 })}
+      ${field("Specialty cocktails (one per line, Name: ingredients)", "bar.cocktails", (B.cocktails || []).join("\n"), { area: true, wide: true, rows: 3 })}
       ${field("Bar inclusions", "bar.inclusions", B.inclusions, { area: true, wide: true, rows: 3 })}</div>` : ""}`;
     const D = M.details;
     $("#ed-details").innerHTML = `<h2>Event details page</h2><div class="grid">
