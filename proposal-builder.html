@@ -315,7 +315,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-28.2051"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-28.2058"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -1234,7 +1234,12 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     for (const t of nodes) {
       const v = t.nodeValue;
       if (!/\S+\s+\S+\s+\S+/.test(v)) continue; // three words or more
-      t.nodeValue = v.replace(/\s+(\S{1,14})(\s*)$/, "\u00A0$1$2");
+      const tied = v.replace(/\s+(\S{1,14})(\s*)$/, "\u00A0$1$2");
+      if (tied === v) continue;
+      t.nodeValue = tied;
+      // a tied pair that is wider than its box (big headings) would run off the edge: undo it there
+      const el = t.parentElement;
+      if (el && el.isConnected && el.scrollWidth > el.clientWidth + 1) t.nodeValue = v;
     }
   }
   // ---------- menu pagination (DOM) ----------
