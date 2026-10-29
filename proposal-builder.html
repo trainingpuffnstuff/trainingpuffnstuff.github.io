@@ -315,7 +315,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-29.1428"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-29.1616"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -665,11 +665,11 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     const sections = parseMenu(menuRows, { month: meta.month });
 
     // bar
-    const bar = { type: "", hours: "", hours_text: "", spirits: [], beer: [], wine: [], inclusions: "", open: "", close: "" };
-    const bl = lines.findIndex((l) => /Hour .*Full Bar|Premium Full Bar|^\(\d+\)\s*Full Bar\b|Hour .*Beer\s*(?:&|and)\s*Wine|Beer\s*(?:&|and)\s*Wine Bar/i.test(l));
+    const bar = { extras: [], type: "", hours: "", hours_text: "", spirits: [], beer: [], wine: [], inclusions: "", open: "", close: "" };
+    const bl = lines.findIndex((l) => /Hour .*Full Bar|Premium Full Bar|^\(\d+\)\s*Full Bar\b|Hour .*(?:Beer\s*(?:&|and)\s*Wine|Wine\s*(?:&|and)\s*Beer)|(?:Beer\s*(?:&|and)\s*Wine|Wine\s*(?:&|and)\s*Beer) Bar/i.test(l));
     if (bl >= 0) {
       bar.type = /Full Bar/i.test(lines[bl]) ? (/Premium/i.test(lines[bl]) ? "Premium Full Bar" : "Full Bar") : "Beer & Wine Bar";
-      const hm = lines[bl].match(/\((\d+)\)\s*Hour.*?From\s*([\d:]+)\s*-\s*([\d:]+)/i);
+      const hm = lines[bl].match(/\((\d+)\)\s*Hour.*?From\s*([\d:]+)\s*(?:[ap]\.?m\.?)?\s*-\s*([\d:]+)/i);
       if (hm) { bar.hours = +hm[1]; bar.open = hm[2]; bar.close = hm[3]; }
       const block = [];
       for (let j = bl + 1; j < lines.length; j++) {
@@ -686,14 +686,22 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       const split = (s) => s.split(/,(?![^(]*\))/).map(clean).filter(Boolean);
       for (const grp of jb.split(";").map(clean).filter(Boolean)) {
         if (SP.test(grp) && !bar.spirits.length) bar.spirits = split(grp);
-        else if (WI.test(grp) && !bar.wine.length) bar.wine = split(grp);
+        else if (WI.test(grp) && !bar.wine.length) bar.wine = split(grp).flatMap((w) => w.split(/\s+&\s+/)).map(clean).filter(Boolean);
         else if (BE.test(grp) && !bar.beer.length) bar.beer = split(grp);
       }
-      const inc = lines.findIndex((l) => /(Full Bar|Beer\s*(?:&|and)\s*Wine( Bar)?) Inclusions/i.test(l));
+      const inc = lines.findIndex((l) => /(Full Bar|(?:Beer\s*(?:&|and)\s*Wine|Wine\s*(?:&|and)\s*Beer)( Bar)?) Inclusions/i.test(l));
       if (inc >= 0) {
         const tx = [];
         for (let j = inc + 1; j < Math.min(inc + 6, lines.length); j++) { if (/Beverages\s*:|SERVICE PERSONNEL|Station set up/i.test(lines[j])) break; tx.push(lines[j]); }
         bar.inclusions = clean(tx.join(" "));
+      }
+      // other beverage lines the bar page doesn't carry (specialty cocktails, add-ons)
+      for (let j = bl + 1; j < lines.length; j++) {
+        const l = lines[j];
+        if (/Beverages\s*:|SERVICE PERSONNEL/i.test(l)) break;
+        const q = l.match(/^\(\d+\)\s*(.+)$/);
+        if (q && !/Inclusions/i.test(q[1])) bar.extras.push(clean(q[1]));
+        else if (/^ADD\s+[A-Z]/.test(l) && l === l.toUpperCase()) bar.extras.push(clean(l));
       }
     }
     // staff
@@ -1136,12 +1144,17 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       <h1 class="display" style="position:absolute;left:.9in;top:1.18in;width:3.4in">The Bar Experience</h1>
       <div class="caps" style="position:absolute;left:.9in;top:2.6in">${esc(b.headline)}</div>
       <div class="bargrid">
-        <div class="bc br bb"><div class="bh">Spirits</div>${list(b.spirits)}</div>
-        <div class="bc bb"><div class="bh">Wine</div>${list(b.wine)}<div class="bh" style="margin-top:.24in">Beer</div>${list(b.beer)}</div>
+        ${(() => {
+          const g = [["Spirits", b.spirits], ["Wine", b.wine], ["Beer", b.beer]].filter((x) => x[1] && x[1].length);
+          const col = (arr) => arr.map((x, i) => `<div class="bh"${i ? ' style="margin-top:.24in"' : ""}>${x[0]}</div>${list(x[1])}`).join("");
+          // two columns: spirits | wine + beer, or wine | beer when there are no spirits
+          const left = g.length >= 3 ? [g[0]] : g.slice(0, 1), right = g.length >= 3 ? g.slice(1) : g.slice(1);
+          return `<div class="bc br bb">${col(left)}</div><div class="bc bb">${col(right)}</div>`;
+        })()}
         <div class="bc br"><div class="bh">Bar Inclusions</div><p class="lead" style="font-size:9pt;margin-top:.08in">${esc(b.inclusions)}</p></div>
         <div class="pbox" style="position:relative;height:2.6in"><img src="${m.assetBase}template/${S.img.barCocktail}"></div>
       </div>
-      <div class="ds" style="position:absolute;left:.9in;top:9.0in;width:5.3in;font-size:8pt;font-style:italic">Listed brands are typically found on our bars, but may occasionally be substituted for a brand of equal or greater quality.${b.bartenders ? ` ${b.bartenders} included for your guest count.` : ""}</div>
+      <div class="ds barnote" style="position:absolute;left:.9in;top:9.0in;width:5.3in;font-size:8pt;font-style:italic">Listed brands are typically found on our bars, but may occasionally be substituted for a brand of equal or greater quality.${b.bartenders ? ` ${b.bartenders} included for your guest count.` : ""}</div>
       <div class="footer" style="right:2.0in"><span>Passionately perfecting life's celebrations</span><span>puffnstuff.com</span></div></div>`;
   }
   function detailsPage(m, S) {
@@ -1376,6 +1389,14 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
         box.querySelectorAll(".blist, .blist li").forEach((x) => { x.style.fontSize = fs + "pt"; x.style.lineHeight = "1.45"; });
         box.children[1].style.marginTop = gap + "in";
       }
+    });
+    // bar page: keep the brand note below the grid, tightening the lists if the grid runs long
+    container.querySelectorAll(".bargrid").forEach((grid) => {
+      const pg = grid.closest(".page"), note = pg.querySelector(".barnote"); if (!note) return;
+      const bottom = () => (grid.getBoundingClientRect().bottom - pg.getBoundingClientRect().top) / 96;
+      let fs = 9.2;
+      while (bottom() > 9.25 && fs > 7.2) { fs -= 0.4; grid.querySelectorAll(".blist, .blist li").forEach((x) => { x.style.fontSize = fs + "pt"; x.style.lineHeight = "1.5"; }); }
+      note.style.top = Math.max(9.0, bottom() + 0.18) + "in";
     });
     // The Signature has no accented letters or en dash: "Entrée" -> "Entree" in script lines only
     container.querySelectorAll(".script").forEach(el => {
@@ -1666,6 +1687,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       const fmt = (n) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       if (Math.abs(sum - num(sub.amount)) > 0.05) f.push({ lvl: "warn", t: `The price lines on the SEO add up to ${fmt(sum)}, but its subtotal says ${fmt(num(sub.amount))}. The client will see both numbers, so check the SEO in Caterease before sending.` });
     }
+    if (PARSED && PARSED.bar && PARSED.bar.extras && PARSED.bar.extras.length) f.push({ lvl: "info", t: "Beverages on the SEO that the bar page doesn't show: " + PARSED.bar.extras.join("; ") + ". Add them under Bar inclusions or the menu if the client should see them." });
     if (M.bar.show && !(M.bar.spirits.length + M.bar.wine.length + M.bar.beer.length)) f.push({ lvl: "warn", t: "The bar page is on, but the SEO doesn't list any brands. Add them under Bar, or turn the bar page off." });
     return f;
   }
