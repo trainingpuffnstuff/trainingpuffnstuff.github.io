@@ -12,6 +12,14 @@ const SALAD_NAME = /\bsalad\b|caprese|crudite/i;
 
 // ---- menu photo catalog (curated pro shots, hosted at img/menu/) ----
 const MENU_PHOTOS = [
+  {slug:"pear-goat-cheese-crostini",name:"Pear and Goat Cheese Crostini",alts:["pear-goat-cheese-crostini-2", "pear-goat-cheese-crostini-3", "pear-goat-cheese-crostini-4"],aliases:["Pear and Goat Cheese Crostini", "Pear & Goat Cheese Crostini", "Pear Crostini"]},
+  {slug:"flourless-chocolate-torte",name:"Flourless Chocolate Torte",aliases:["Flourless Chocolate Torte", "Flourless Chocolate Cake"]},
+  {slug:"eggplant-rollatini",name:"Eggplant Rollatini",alts:["eggplant-rollatini-2"],aliases:["Eggplant Rollatini"]},
+  {slug:"roasted-acorn-squash-boats",name:"Roasted Acorn Squash Boats",aliases:["Roasted Acorn Squash Boats", "Acorn Squash Boats", "Roasted Acorn Squash"]},
+  {slug:"chicken-strudel",name:"Chicken Strudel",alts:["chicken-strudel-2"],aliases:["Holiday Chicken Strudel", "Roasted Chicken Strudel", "Chicken Strudel"]},
+  {slug:"mini-chicken-wellington",name:"Mini Chicken Wellington",aliases:["Mini Chicken Wellington", "Chicken Wellington"]},
+  {slug:"swanky-franks",name:"Swanky Franks",alts:["swanky-franks-2", "swanky-franks-3"],aliases:["Swanky Franks", "Swanky Frank"]},
+  {slug:"pastry-wrapped-brie",name:"Pastry Wrapped Brie",aliases:["Pastry Wrapped Brie", "Brie en Croute"]},
   {slug:"key-lime-shooter",name:"Key Lime Shooter",aliases:["Key Lime Shooter","Key Lime Dessert Shooter","Key Lime Pie Shooter"]},
   {slug:"classic-caesar",name:"Classic Caesar",aliases:["Classic Caesar"]},
   {slug:"individual-assorted-yogurts",name:"Individual Assorted Yogurts",aliases:["Individual Assorted Yogurts","Assorted Yogurts","Individual Yogurts"]},
