@@ -49,6 +49,13 @@ main{max-width:1240px;margin:0 auto;padding:28px 32px 48px}
 .howto div{padding:18px 20px;color:var(--sc);line-height:1.55;font-weight:300}
 .howto div+div{border-left:1px solid var(--ps)}
 .howto b{color:var(--mr);display:block;margin-bottom:6px;font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+.updates{margin-top:22px;border:1px solid var(--ps);background:var(--cf);padding:18px 20px 8px}
+.updates h3{margin:0 0 12px;color:var(--mr);font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+.updates .day{display:grid;grid-template-columns:90px 1fr;gap:16px;padding:10px 0;border-top:1px solid var(--ps)}
+.updates .day>span{font-family:"Cormorant",serif;font-size:19px;line-height:1.1;color:var(--mr)}
+.updates ul{margin:0;padding-left:18px;color:var(--sc);font-weight:300;line-height:1.55}
+.updates li+li{margin-top:3px}
+.updates .more{color:var(--sc);font-size:12.5px;font-weight:300;margin:10px 0 8px}
 #status{margin:16px 0;color:var(--sc)} .err{color:var(--mr);font-weight:700}
 .loaded #intro{display:none}
 #work{display:none;grid-template-columns:1fr 320px;gap:24px;align-items:start}
@@ -258,7 +265,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   #out .page{margin:0!important;box-shadow:none!important;page-break-after:always;break-after:page}
   #out .page:last-child{page-break-after:auto;break-after:auto}
 }
-@media (max-width:900px){#work{grid-template-columns:1fr}#side{position:static}.grid{grid-template-columns:1fr 1fr}.howto{grid-template-columns:1fr}.shead{grid-template-columns:1fr}}
+@media (max-width:900px){#work{grid-template-columns:1fr}#side{position:static}.grid{grid-template-columns:1fr 1fr}.howto{grid-template-columns:1fr}.updates .day{grid-template-columns:1fr;gap:4px}.shead{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -276,6 +283,26 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
         <div><b>1. Drop the SEO</b>The menu, bar, staff, timeline and investment are read straight from it, and dish photos are matched from the Menu Photo Lookbook.</div>
         <div><b>2. Pick a theme and review</b>Wedding, Corporate, Social or Holiday. Fix anything flagged, drag dishes between sections, turn photos on or off.</div>
         <div><b>3. Build and save</b>Preview the pages, then click Download PDF. The file is named after the event.</div>
+      </div>
+      <div class="updates" id="updates">
+        <h3>Recent updates</h3>
+        <div class="day"><span>Nov 5</span><ul>
+          <li>Drinks without a bar (coffee, iced coffee, a signature mocktail) now show in a Beverages section. Recipes stay off the proposal.</li>
+          <li>Specialty linen, chargers and napkins from Additional Services are listed on the Event Details page.</li>
+          <li>A beverage attendant on the SEO gets a Beverage Service card on the service page.</li>
+          <li>New "Show quantities" checkbox on each menu section. Quantities can be edited next to each dish.</li>
+          <li>"Look" is now "Theme". Needs attention notes are clearer, and upcharges are marked as for you only.</li>
+        </ul></div>
+        <div class="day"><span>Oct 29</span><ul>
+          <li>Bars written "Wine and Beer" are read, and specialty cocktails show on the bar page.</li>
+          <li>Miami SEOs read the planner correctly, and Lauren's cell fills in automatically.</li>
+          <li>A 2-minute walkthrough video is on the How to use page.</li>
+        </ul></div>
+        <div class="day"><span>Oct 28</span><ul>
+          <li>Download PDF builds the file right in the browser.</li>
+          <li>Change any dish photo from the Lookbook, approved event photos or your own upload.</li>
+        </ul></div>
+        <p class="more">Something still not right? Use the Something look off? button at the top and it comes straight to Rosie.</p>
       </div>
       <div id="status"></div>
     </section>
@@ -318,7 +345,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-11-05.1305"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-11-05.1417"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
