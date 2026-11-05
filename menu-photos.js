@@ -12,6 +12,9 @@ const SALAD_NAME = /\bsalad\b|caprese|crudite/i;
 
 // ---- menu photo catalog (curated pro shots, hosted at img/menu/) ----
 const MENU_PHOTOS = [
+  {slug:"very-merry-chicken",name:"Very Merry Chicken",alts:["very-merry-chicken-2"],aliases:["Very Merry Chicken"]},
+  {slug:"red-bliss-smashed-potatoes",name:"Red Bliss Smashed Potatoes",alts:["red-bliss-smashed-potatoes-2"],aliases:["Red Bliss Smashed Potatoes","Smashed Red Bliss Potatoes","Red Bliss Smashed"]},
+  {slug:"holiday-cheer",name:"Holiday Cheer",alts:["holiday-cheer-2"],aliases:["Holiday Cheer"]},
   {slug:"pear-goat-cheese-crostini",name:"Pear and Goat Cheese Crostini",alts:["pear-goat-cheese-crostini-2", "pear-goat-cheese-crostini-3", "pear-goat-cheese-crostini-4"],aliases:["Pear and Goat Cheese Crostini", "Pear & Goat Cheese Crostini", "Pear Crostini"]},
   {slug:"flourless-chocolate-torte",name:"Flourless Chocolate Torte",aliases:["Flourless Chocolate Torte", "Flourless Chocolate Cake"]},
   {slug:"eggplant-rollatini",name:"Eggplant Rollatini",alts:["eggplant-rollatini-2"],aliases:["Eggplant Rollatini"]},
@@ -106,7 +109,7 @@ const MENU_PHOTOS = [
   {slug:"pumpkin-chiffon-pie",name:"Pumpkin Chiffon Pie",aliases:["Pumpkin Chiffon Pie","Pumpkin Chiffon","Pumpkin Pie"]},
   {slug:"turtle-cheesecake",name:"Turtle Cheesecake",aliases:["Turtle Cheesecake","Caramel Pecan Cheesecake"]},
   {slug:"pumpkin-pie-martini",name:"Pumpkin Pie Martini",aliases:["Pumpkin Pie Martini","Pumpkin Martini"]},
-  {slug:"apple-cider-bourbon",name:"Apple Cider Bourbon",aliases:["Apple Cider Bourbon","Apple Cider Cocktail","Cider Bourbon"]},
+  {slug:"apple-cider-bourbon",name:"Apple Cider Bourbon",alts:["apple-cider-bourbon-2"],aliases:["Apple Cider Bourbon","Apple Cider Cocktail","Cider Bourbon"]},
   {slug:"caprese-flatbread",name:"Caprese Flatbread",aliases:["Caprese Flatbread","Caprese Flat Bread","Tomato Mozzarella Flatbread"]},
   {slug:"ginger-cookie-sandwich",name:"Ginger Cookie Sandwich",aliases:["Ginger Cookie Sandwich"]},
   {slug:"gingersnap-cookies",name:"Gingersnap Cookies",aliases:["Gingersnap Cookies","Gingersnap Cookie","Ginger Cookies","Gingersnap"]},
