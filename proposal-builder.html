@@ -287,6 +287,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       <div class="updates" id="updates">
         <h3>Recent updates</h3>
         <div class="day"><span>Nov 5</span><ul>
+          <li>The investment and cover page photos stay sharp. When their photo is already on the menu, they switch to another full-page photo instead of a stretched small one.</li>
           <li>Drinks without a bar (coffee, iced coffee, a signature mocktail) now show in a Beverages section. Recipes stay off the proposal.</li>
           <li>Specialty linen, chargers and napkins from Additional Services are listed on the Event Details page.</li>
           <li>A beverage attendant on the SEO gets a Beverage Service card on the service page.</li>
@@ -345,7 +346,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-11-05.1417"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-11-05.1441"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -1064,9 +1065,13 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     for (const pk of model.introPhotos || []) if (pk && pk.id) used.add(pk.id);
     // the look's own spares first, then food photos from the other looks
     const spares = [...new Set((base.img.fill || []).concat(...Object.values(STYLES).map((x) => x.img.fill || [])))];
-    const take = (f) => {
+    // the shots behind the cover and investment pages stay for those pages, so no other slot borrows them
+    const keep = new Set([photoId(base.img.cover), photoId(base.img.invest)]);
+    const take = (f, pool) => {
       if (!used.has(photoId(f)) && !used.has(photoId(f).replace(/-\d+$/, ""))) { used.add(photoId(f)); return f; }
-      const k = spares.findIndex((x) => !used.has(photoId(x)) && !used.has(photoId(x).replace(/-\d+$/, "")));
+      // full-page backgrounds only swap for another full-page photo; a small menu photo stretched to a page goes blurry
+      if (pool) { const alt = pool.find((x) => x !== f && !used.has(photoId(x))); if (alt) { used.add(photoId(alt)); return alt; } return f; }
+      const k = spares.findIndex((x) => !keep.has(photoId(x)) && !used.has(photoId(x)) && !used.has(photoId(x).replace(/-\d+$/, "")));
       if (k < 0) return f;
       const alt = spares.splice(k, 1)[0]; used.add(photoId(alt)); return alt;
     };
@@ -1076,20 +1081,21 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     I.intro = [0, 1, 2].map((k) => {
       const pk = picks[k];
       if (pk && pk.src) { if (pk.id) used.add(pk.id); return { src: pk.src, id: pk.id || "", picked: true }; }
-      const j = spares.findIndex((x) => !used.has(photoId(x)) && !used.has(photoId(x).replace(/-\d+$/, "")));
+      const j = spares.findIndex((x) => !keep.has(photoId(x)) && !used.has(photoId(x)) && !used.has(photoId(x).replace(/-\d+$/, "")));
       if (j < 0) return null;
       const f = spares.splice(j, 1)[0]; used.add(photoId(f));
       return { src: model.assetBase + "template/" + f, id: photoId(f), picked: false };
     });
-    I.cover = take(I.cover);
-    I.about = I.about.map(take);
+    const FULL = { cover: ["hol_bg_cover.jpg", "social_bg_cover.jpg", "corp_bg_cover.jpg", "bg_cover.jpg"], invest: ["hol_bg_invest.jpg", "social_bg_invest.jpg", "corp_bg_invest.jpg", "bg_invest.jpg"] };
+    I.cover = take(I.cover, FULL.cover);
+    I.about = I.about.map((f) => take(f));
     if (model.bar && model.bar.show) { I.barCol = take(I.barCol); I.barCocktail = take(I.barCocktail); }
     I.rentals = take(I.rentals);
     if (model.serviceShow !== false) { I.venue = take(I.venue); I.team = I.team.map((f) => { used.add(photoId(f)); return f; }); }
     I.planner = take(I.planner);
-    I.invest = take(I.invest);
+    I.invest = take(I.invest, FULL.invest);
     I.closing = take(I.closing);
-    I.closingRow = I.closingRow.map(take);
+    I.closingRow = I.closingRow.map((f) => take(f));
     const free = (x) => !used.has(photoId(x)) && !used.has(photoId(x).replace(/-\d+$/, ""));
     const own = new Set(base.img.fill || []);
     I.fill = spares.filter((x) => own.has(x) && free(x));
