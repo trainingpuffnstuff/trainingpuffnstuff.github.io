@@ -318,7 +318,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-11-05.1225"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-11-05.1305"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -719,6 +719,36 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
         else if (/^ADD\s+[A-Z]/.test(l) && l === l.toUpperCase()) bar.extras.push(clean(l));
       }
     }
+    // beverages without a bar (coffee, iced coffee, a signature mocktail): read them as their own menu section
+    if (bl < 0) {
+      const b0 = rows.findIndex((r) => /^QTY\s*BEVERAGES/.test(r.text));
+      const b1 = rows.findIndex((r, i) => i > b0 && /^Beverages\s*:/i.test(r.text));
+      if (b0 >= 0) {
+        const br = [], notes = [];
+        let recipe = false;
+        for (const r of rows.slice(b0 + 1, b1 > 0 ? b1 : rows.length)) {
+          if (/^\(\d+\)/.test(r.text) && r.x < 80) recipe = false;
+          // the bartender's recipe (ingredients, steps) stays on the SEO
+          if (/Italic/i.test(r.font || "") && /^(Ingredients|Instructions|Recipe|Directions)\s*:?$/i.test(clean(r.text))) { recipe = true; continue; }
+          if (recipe) continue;
+          // a bold italic line under a drink is a serving note ("Serve in Mojito Glass"); keep it as its own line
+          if (r.bold && /Italic/i.test(r.font || "") && r.x > 80) { notes.push(clean(r.text)); br.push(Object.assign({}, r, { bold: false })); continue; }
+          br.push(r);
+        }
+        const bs = parseMenu(br, { month: meta.month });
+        for (const sct of bs) for (const it of sct.items) for (let k = 0; k < it.desc.length; k++) {
+          for (const n of notes) {
+            const d = it.desc[k], at = d.text.indexOf(n);
+            if (at < 0) continue;
+            const before = clean(d.text.slice(0, at)), after = clean(d.text.slice(at + n.length));
+            const parts = [before ? { label: d.label, text: before } : null, { label: "", text: n, em: true }, after ? { label: "", text: after } : null].filter(Boolean);
+            it.desc.splice(k, 1, ...parts); k += parts.length - 1; break;
+          }
+        }
+        for (const sct of bs) { sct.beverage = true; if (sct.header === "Menu") sct.header = "Beverages"; }
+        sections.push(...bs);
+      }
+    }
     // staff
     const staff = {};
     for (const l of lines) {
@@ -726,13 +756,26 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       if (mm) { const role = mm[1].toLowerCase().replace(/prem/g, "").trim(); staff[role] = (staff[role] || 0) + +mm[2]; }
     }
     // rentals / equipment
-    const rentals = [];
-    const e0 = lines.findIndex((l) => l.trim() === "EQUIPMENT");
-    const e1 = lines.findIndex((l) => l.trim() === "INVESTMENT BREAKDOWN");
-    if (e0 >= 0) for (const r of rows.slice(e0 + 1, e1 > 0 ? e1 : rows.length)) {
-      if (isFooter(r) || isPageHeader(r) || /Total\s*:|^ADDITIONAL SERVICES$|^SPECIAL EVENT|^QTY/i.test(r.text)) continue;
-      rentals.push(clean(r.text));
-    }
+    const rentals = [], rentalItems = [], addServices = [];
+    const e0 = rows.findIndex((r) => clean(r.text) === "EQUIPMENT");
+    const a0 = rows.findIndex((r) => clean(r.text) === "ADDITIONAL SERVICES");
+    const e1 = rows.findIndex((r) => clean(r.text) === "INVESTMENT BREAKDOWN");
+    const scan = (from, to, inAdd) => {
+      let cur = null;
+      for (const r of rows.slice(from + 1, to > from ? to : rows.length)) {
+        if (isFooter(r) || isPageHeader(r) || /Total\s*:|^ADDITIONAL SERVICES$|^SPECIAL EVENT|^QTY/i.test(r.text)) continue;
+        const t = clean(r.text);
+        rentals.push(t);
+        // a bold line is the rental itself ("Natural Wood Folded Chair 40 $4.00 $160.00"); the plain lines under it say where it goes
+        const pm = t.match(/^(.+?)\s+(\d+)\s+\$[\d,]+\.\d{2}\s+\$[\d,]+\.\d{2}$/);
+        if (r.bold && pm) {
+          cur = { name: clean(pm[1]), qty: +pm[2], parts: [] };
+          (inAdd ? addServices : rentalItems).push(cur);
+        } else if (cur && inAdd) cur.parts.push(t);
+      }
+    };
+    if (e0 >= 0) scan(e0, a0 > e0 ? a0 : e1, false);
+    if (a0 >= 0) scan(a0, e1, true);
     // investment
     const investment = [];
     const v0 = lines.findIndex((l) => l.trim() === "INVESTMENT BREAKDOWN"), v1 = lines.findIndex((l, i) => i > v0 && /PAYMENT TERMS/.test(l));
@@ -748,7 +791,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       const tt = l.match(/^(Subtotal|Production Fee|Sales Tax|Grand Total|Minus Deposit|Balance Due)\s+\(?\$([\d,]+\.\d{2})\)?$/);
       if (tt) investment.push({ label: tt[1], amount: tt[2], credit: false, total: true });
     }
-    return { meta, sections, bar, staff, rentals, investment };
+    return { meta, sections, bar, staff, rentals, rentalItems, addServices, investment };
   }
 
   root.SEO_PARSE = { parse, splitVenue, longDate };
@@ -1047,7 +1090,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     let h = `<div class="item"><div class="nm">${esc(it.name)}${it.variant ? `<span class="var"> · ${esc(it.variant)}</span>` : ""}${tagSpan(it.tags)}${q ? `<span class="qtyp">Qty ${esc(q)}</span>` : ""}</div>`;
     for (const d of it.desc || []) {
       if (!d.text && !d.label) continue;
-      h += `<div class="ds">${d.label && d.label !== it.variant ? `<b>${esc(d.label)}:</b> ` : ""}${esc(d.text)}</div>`;
+      h += `<div class="ds">${d.label && d.label !== it.variant ? `<b>${esc(d.label)}:</b> ` : ""}${d.em ? `<i>${esc(d.text)}</i>` : esc(d.text)}</div>`;
     }
     for (const g of it.groups || []) {
       h += `<div class="sub"><div class="sublab">${esc(g.label)}${g.tags ? " · " + esc(g.tags) : ""}</div>`;
@@ -1535,6 +1578,21 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     }
     return out;
   }
+  // rentals as the client should read them: "(40) Natural Wood Folded Chair", then the pieces of any linen or decor package
+  function rentalList(p) {
+    const items = p.rentalItems || [], adds = p.addServices || [];
+    if (!items.length && !adds.length) return rentalLines(p.rentals);
+    const out = [];
+    for (const a of adds) {
+      // keep the pieces themselves; skip pricing notes and all-caps crew instructions ("SWAP BACK TO FULL TABLE")
+      const isCrewNote = (x) => x === x.toUpperCase() && x.replace(/^\(\d+\)\s*/, "").split(/\s+/).length > 2;
+      const parts = a.parts.map((x) => x.replace(/^-\s*/, "").trim()).filter((x) => x && !/estimat|price/i.test(x) && !isCrewNote(x)).map((x) => (x === x.toUpperCase() ? titleCase(x) : x.charAt(0).toUpperCase() + x.slice(1)));
+      if (parts.length) out.push(...parts);
+      else if (!/:$|ORDERED|VENDOR/i.test(a.name)) out.push(a.name);
+    }
+    for (const it of items) out.push(`(${it.qty}) ${it.name}`);
+    return out.filter((l) => l.length <= 70).slice(0, 10);
+  }
   function rentalLines(lines) {
     const out = [];
     for (let l of lines || []) {
@@ -1594,7 +1652,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
           const ph = PHOTOS.match(it.name, s.header, CAT);
           const descTxt = (it.desc || []).map((d) => d.text).join(" ");
           return {
-            id: it.id, name: fixCaps(it.name), variant: it.variant || "", qty: it.qty, tags: normTags(it.tags), desc: (it.desc || []).map((d) => ({ label: d.label || "", text: d.text })),
+            id: it.id, name: fixCaps(it.name), variant: it.variant || "", qty: it.qty, tags: normTags(it.tags), desc: (it.desc || []).map((d) => ({ label: d.label || "", text: d.text, em: !!d.em })),
             groups: (it.groups || []).map((g) => ({ label: g.label, tags: normTags(g.tags), options: g.options.map((o) => ({ label: o.label, text: o.text, tags: normTags(o.tags) })) })),
             included: !!it.included, hidden: false, altOf: it.altOf || "", group: RENDER.guessGroup(it.name, descTxt, it.tags),
             photo: { slug: ph.slug, status: ph.status, reason: ph.reason, catalog: ph.catalog_name || "", on: ph.status === "own" && !it.included, focus: null },
@@ -1616,6 +1674,12 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     if (serv) team.push({ title: "Servers", counts: [plural(serv, "Server")], text: `${serv} professionally trained server${serv === 1 ? "" : "s"} attending your guests from first bite to last.`, photo: 2 });
     const bart = sum(/bartender/), barback = sum(/bar back/);
     if (bart) team.push({ title: "Bartenders", counts: [plural(bart, "Bartender"), barback ? plural(barback, "Bar Back") : ""].filter(Boolean), text: `Pouring for your ${p.bar.type ? p.bar.type.toLowerCase() : "bar"} from open to last call.`, photo: 3 });
+    const bev = sum(/beverage attendant/);
+    if (bev) {
+      const bt = team.find((c) => c.title === "Bartenders");
+      if (bt) bt.counts.push(plural(bev, "Beverage Attendant"));
+      else team.push({ title: "Beverage Service", counts: [plural(bev, "Beverage Attendant")], text: sections.some((s) => s.items.some((it) => /mocktail|cocktail|signature/i.test(it.name))) ? "Serving your signature drink and keeping the beverage station stocked." : "Keeping the beverage station stocked and every glass full.", photo: 3 });
+    }
     const barOpen = p.bar.open ? hour12(p.bar.open, start) : "", barClose = p.bar.close ? hour12(p.bar.close, end) : "";
     const dayOf = [];
     if (tl.arrival) dayOf.push({ time: tl.arrival, label: "Team on site" });
@@ -1629,7 +1693,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     if (info.some((x) => /full service/i.test(x))) svcStyle.push("Full service");
     for (let x of info) { x = x.replace(/^[\s\-–]+|[\s\-–]+$/g, ""); if (x && !/full service/i.test(x) && !/^(HOD|dinner|lunch|brunch|breakfast)$/i.test(x)) svcStyle.push(x.replace(/^HOD$/, "Hors d'oeuvres")); }
     if (p.bar.type) svcStyle.push(p.bar.type);
-    const rentals = rentalLines(p.rentals);
+    const rentals = rentalList(p);
     const rep = m.rep_name || "";
     let dir = DIRECTORS[m.market] || null;
     let repTitle = TITLES[rep] || "Sales Event Planner", repPhone = CELLS[rep] || m.rep_phone;
