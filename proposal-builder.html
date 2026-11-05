@@ -114,6 +114,7 @@ input[type=checkbox]{accent-color:var(--mr)}
 .iname{font-weight:700;flex:1}
 .itags{width:110px;flex:none;font-size:12px}
 .iline select{width:90px;flex:none;font-size:12px}
+.iqty{width:52px}
 .qty{font-size:11px;color:var(--mute);flex:none}
 .idesc,.igroups{margin-top:6px;font-size:12.5px;color:var(--sc)}
 .igroups{background:#FAFAF8;font-family:ui-monospace,monospace;font-size:11.5px}
@@ -239,6 +240,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
 .group{font-family:"Cormorant",serif;font-weight:500;font-size:12pt;letter-spacing:.06em;color:var(--soft);margin:.04in 0 .06in}
 .item .nm{font-family:"Cormorant",serif;font-weight:600;font-size:12pt;line-height:1.15;color:var(--ink)}
 .item .nm .var{font-weight:500}
+.item .nm .qtyp{font-family:"Lato",sans-serif;font-weight:700;font-size:7.4pt;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);margin-left:.5em;white-space:nowrap}
 .tag{font-family:"Lato",sans-serif;font-weight:700;font-size:6.2pt;letter-spacing:.08em;color:var(--wine);margin-left:.04in;vertical-align:.03in;white-space:nowrap}
 .item .ds{margin-top:.01in}
 .sub{margin:.05in 0 0 .02in;padding-left:.1in;border-left:1px solid var(--rule)}
@@ -272,7 +274,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       </div>
       <div class="howto">
         <div><b>1. Drop the SEO</b>The menu, bar, staff, timeline and investment are read straight from it, and dish photos are matched from the Menu Photo Lookbook.</div>
-        <div><b>2. Pick a look and review</b>Wedding, Corporate or Social. Fix anything flagged, drag dishes between sections, turn photos on or off.</div>
+        <div><b>2. Pick a theme and review</b>Wedding, Corporate, Social or Holiday. Fix anything flagged, drag dishes between sections, turn photos on or off.</div>
         <div><b>3. Build and save</b>Preview the pages, then click Download PDF. The file is named after the event.</div>
       </div>
       <div id="status"></div>
@@ -287,7 +289,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
         <div class="panel" id="ed-invest"></div>
       </div>
       <aside id="side">
-        <div class="panel"><h2>Look</h2><div id="styles"></div><button id="build">Build proposal</button></div>
+        <div class="panel"><h2>Theme</h2><div id="styles"></div><button id="build">Build proposal</button></div>
         <div class="panel"><h2>Needs attention <span id="flagcount"></span></h2><ul id="flags"></ul></div>
       </aside>
     </section>
@@ -316,7 +318,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-10-29.1637"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-11-05.1225"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -1040,8 +1042,9 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
 
   // ---------- pieces ----------
   function tagSpan(t) { return t ? ` <span class="tag">${esc(t)}</span>` : ""; }
-  function itemHTML(it) {
-    let h = `<div class="item"><div class="nm">${esc(it.name)}${it.variant ? `<span class="var"> · ${esc(it.variant)}</span>` : ""}${tagSpan(it.tags)}</div>`;
+  function itemHTML(it, showQty) {
+    const q = showQty && it.qty != null && String(it.qty).trim() !== "" ? String(it.qty).trim() : "";
+    let h = `<div class="item"><div class="nm">${esc(it.name)}${it.variant ? `<span class="var"> · ${esc(it.variant)}</span>` : ""}${tagSpan(it.tags)}${q ? `<span class="qtyp">Qty ${esc(q)}</span>` : ""}</div>`;
     for (const d of it.desc || []) {
       if (!d.text && !d.label) continue;
       h += `<div class="ds">${d.label && d.label !== it.variant ? `<b>${esc(d.label)}:</b> ` : ""}${esc(d.text)}</div>`;
@@ -1068,7 +1071,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       let first = true;
       const push = (html, itemIds) => { blocks.push({ html: (first ? head : "") + html, ids: itemIds || [], sec: s.id, start: first }); first = false; };
       if (included.length) {
-        push(`<div class="incl"><div class="inclhead">Included</div>${included.map((it) => `<div class="ds"><b>${esc(it.name)}</b>${it.desc && it.desc[0] ? ", " + esc(it.desc.map((d) => d.text).join(", ")).toLowerCase() : ""}</div>`).join("")}</div>`);
+        push(`<div class="incl"><div class="inclhead">Included</div>${included.map((it) => `<div class="ds"><b>${esc(it.name)}</b>${s.showQty && it.qty != null && String(it.qty).trim() ? ` (${esc(String(it.qty).trim())})` : ""}${it.desc && it.desc[0] ? ", " + esc(it.desc.map((d) => d.text).join(", ")).toLowerCase() : ""}</div>`).join("")}</div>`);
       }
       if (s.grouping) {
         const order = /entr|dinner|main|plated/i.test(s.title) ? GROUP_ORDER_ENTREE : GROUP_ORDER_HORS;
@@ -1076,7 +1079,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
         for (const gname of order) {
           const gi = choices.filter((it) => (it.group || "Garden") === gname);
           if (!gi.length) continue;
-          gi.forEach((it, k) => push((k === 0 ? `<div class="group">${esc((prefix + gname).toUpperCase())}</div>` : "") + itemHTML(it), [it.id]));
+          gi.forEach((it, k) => push((k === 0 ? `<div class="group">${esc((prefix + gname).toUpperCase())}</div>` : "") + itemHTML(it, s.showQty), [it.id]));
         }
       } else {
         // "X or Y" choices from the SEO: a small CHOOSE ONE over the first dish and "or" between the alternates
@@ -1086,7 +1089,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
           const head = (x) => x && (x.altOf || x.id);
           const isAlt = useOr && it.altOf && prev && head(prev) === it.altOf;
           const startsSet = useOr && !it.altOf && choices[k + 1] && choices[k + 1].altOf === it.id;
-          push((startsSet ? `<div class="group">CHOOSE ONE</div>` : "") + (isAlt ? `<div class="orline">or</div>` : "") + itemHTML(it), [it.id]);
+          push((startsSet ? `<div class="group">CHOOSE ONE</div>` : "") + (isAlt ? `<div class="orline">or</div>` : "") + itemHTML(it, s.showQty), [it.id]);
         });
       }
       if (first) push("", []);
@@ -1696,11 +1699,19 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       const unmarked = choices.filter((it) => !it.qty && !it.altOf).length;
       if (!s.select && unmarked >= 2) f.push({ lvl: "warn", sec: s.id, t: `${s.title}: the SEO doesn't say how many dishes the client picks. Type it in the Select box (for example "Select 2"), or leave it blank if they get all of them.` });
       for (const it of choices) {
-        if (it.groups.length) f.push({ lvl: "info", sec: s.id, item: it.id, t: `${it.name} has its own list of choices (${it.groups.map((g) => g.label).join(", ")}). Check the list reads right.` });
-        if (it.photo.status === "review") f.push({ lvl: "info", sec: s.id, item: it.id, t: /^matched on one word/.test(it.photo.reason) && it.photo.catalog ? `${it.name}: the closest Lookbook photo is "${it.photo.catalog}", which may be a different dish. It's off. Click the thumbnail to use it.` : `${it.name}: ${it.photo.reason.replace(/^the/, "the closest")}, so it may not look right. It's off. Click the thumbnail to use it.` });
+        if (it.groups.length) f.push({ lvl: "info", sec: s.id, item: it.id, t: `${it.name}: has its own choices (${it.groups.map((g) => g.label).join(", ")}). Check they read right on the proposal.` });
+        if (it.photo.status === "review") {
+          const ver = (it.photo.reason.match(/is the (.+) version$/) || [])[1];
+          const why = ver ? `the closest Lookbook photo, "${it.photo.catalog || "photo"}", is the ${ver} version` : `the closest Lookbook photo is "${it.photo.catalog || "a similar dish"}"`;
+          f.push({ lvl: "info", sec: s.id, item: it.id, t: `${it.name}: possible photo. ${why[0].toUpperCase() + why.slice(1)}, which may not be the same dish, so it's turned off. Click the thumbnail to use it, or Change to pick another.` });
+        }
       }
-      if (s.notes.length) f.push({ lvl: "note", sec: s.id, t: `${s.title}: notes from the SEO that won't print on the proposal: ${s.notes.join(" • ")}` });
-      if (s.setupNote) f.push({ lvl: "note", sec: s.id, t: `${s.title}: setup note from the SEO, not printed: ${s.setupNote}` });
+      if (s.notes.length) {
+        const up = s.notes.filter((n) => /^(additional|add)\b.*\$/i.test(n)), other = s.notes.filter((n) => !up.includes(n));
+        if (up.length) f.push({ lvl: "note", sec: s.id, t: `${s.title}: upcharges from the SEO, for you only (not on the proposal): ${up.join(" • ")}` });
+        if (other.length) f.push({ lvl: "note", sec: s.id, t: `${s.title}: these SEO notes stay off the proposal: ${other.join(" • ")}. Add them to a description if the client should see them.` });
+      }
+      if (s.setupNote) f.push({ lvl: "note", sec: s.id, t: `${s.title}: this setup note stays off the proposal: ${s.setupNote}` });
     }
     // the SEO's own math: line items should add up to its subtotal
     const num = (a) => +String(a || "0").replace(/,/g, "");
@@ -1737,7 +1748,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       <div class="grip" title="Drag to reorder or move to another section">☰</div>
       ${thumb}
       <div class="ibody">
-        <div class="iline"><input class="iname" data-item="${it.id}" data-f="name" value="${esc(it.name)}"><input class="itags" data-item="${it.id}" data-f="tags" value="${esc(it.tags)}" placeholder="tags">${grp}${it.qty ? `<span class="qty" title="Quantity on the SEO">(${it.qty})</span>` : ""}</div>
+        <div class="iline"><input class="iname" data-item="${it.id}" data-f="name" value="${esc(it.name)}"><input class="itags" data-item="${it.id}" data-f="tags" value="${esc(it.tags)}" placeholder="tags">${grp}<input class="iqty" data-item="${it.id}" data-f="qty" value="${esc(it.qty == null ? "" : String(it.qty))}" placeholder="qty" title="Quantity. Prints when Show quantities is checked for this section."></div>
         <textarea class="idesc" data-item="${it.id}" data-f="desc" rows="${Math.max(1, Math.min(4, it.desc.length || 1))}" placeholder="Description">${esc(descTxt)}</textarea>
         ${it.groups.length ? `<textarea class="igroups" data-item="${it.id}" data-f="groups" rows="${Math.min(10, groupsTxt.split("\n").length)}" title="First line: the choice label (e.g. Select 3). Then one option per line starting with -. Tags after a |.">${esc(groupsTxt)}</textarea>` : ""}
         <div class="iflags"><label><input type="checkbox" data-item="${it.id}" data-f="included"${it.included ? " checked" : ""}> Included (not a choice)</label><label><input type="checkbox" data-item="${it.id}" data-f="hidden"${it.hidden ? " checked" : ""}> Leave off proposal</label>
@@ -1752,6 +1763,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
         <input class="ssel" data-sec="${s.id}" data-f="select" value="${esc(s.select)}" placeholder='e.g. "Select 3"'>
         <input class="spkg" data-sec="${s.id}" data-f="package" value="${esc(s.package)}" placeholder="Package name (optional)">
         <label><input type="checkbox" data-sec="${s.id}" data-f="grouping"${s.grouping ? " checked" : ""}> Group Garden / Land / Air / Sea</label>
+        <label><input type="checkbox" data-sec="${s.id}" data-f="showQty"${s.showQty ? " checked" : ""}> Show quantities</label>
         <label><input type="checkbox" data-sec="${s.id}" data-f="hidden"${s.hidden ? " checked" : ""}> Leave section off</label>
         <span class="smove"><button data-act="secup" data-sec="${s.id}" title="Move section up">↑</button><button data-act="secdown" data-sec="${s.id}" title="Move section down">↓</button></span>
       </div>
@@ -1786,7 +1798,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       looks = files.map((f) => ({ src: ASSETS + "template/" + f, id: RENDER.photoId(f), name: "" }));
     }
     const cell = (x) => `<button class="pkc" data-src="${esc(x.src)}" data-id="${esc(x.id)}" title="${esc(x.name)}"><img src="${esc(x.src)}" loading="lazy" onerror="this.closest('.pkc').remove()">${x.name ? `<span>${esc(x.name)}</span>` : ""}</button>`;
-    $("#pk-grid").innerHTML = (looks.length ? `<div class="pkh">Photos from this look</div>${looks.map(cell).join("")}<div class="pkh">Lookbook</div>` : "") + (list.length ? list.slice(0, 120).map(cell).join("") : `<p class="muted">No Lookbook photos match. Try another word, or upload a photo.</p>`);
+    $("#pk-grid").innerHTML = (looks.length ? `<div class="pkh">Photos from this theme</div>${looks.map(cell).join("")}<div class="pkh">Lookbook</div>` : "") + (list.length ? list.slice(0, 120).map(cell).join("") : `<p class="muted">No Lookbook photos match. Try another word, or upload a photo.</p>`);
   }
   function applyPick(p) {
     if (!PICK) return;
@@ -1828,7 +1840,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       ${field("Name on cover", "cover.title", M.cover.title)}${field("Script line", "cover.script", M.cover.script)}${coverExtra}
       ${field("Date", "dateText", M.dateText)}${field("Times", "timesText", M.timesText)}${field("Venue line", "venueLine", M.venueLine)}${field("Guests line", "guestsLine", M.guestsLine)}
       ${field("Intro paragraph", "introText", M.introText, { area: true, wide: true, rows: 3 })}</div>
-      <div class="p2"><span>Page 2 photos</span>${RENDER.resolvePhotos(M).img.intro.map((p, k) => `<button class="p2ph" data-act="pick" data-intro="${k}" title="Change this photo">${p ? `<img src="${p.src}">` : ""}<em>Change</em></button>`).join("")}${(M.introPhotos || []).some(Boolean) ? `<button class="tchg" data-act="introauto">Back to the look's photos</button>` : ""}</div>`;
+      <div class="p2"><span>Page 2 photos</span>${RENDER.resolvePhotos(M).img.intro.map((p, k) => `<button class="p2ph" data-act="pick" data-intro="${k}" title="Change this photo">${p ? `<img src="${p.src}">` : ""}<em>Change</em></button>`).join("")}${(M.introPhotos || []).some(Boolean) ? `<button class="tchg" data-act="introauto">Back to the theme's photos</button>` : ""}</div>`;
     $("#ed-menu").innerHTML = `<h2>Menu <small>Drag dishes to reorder or move them between sections. Click a photo to turn it on or off, or Change to pick another or upload your own.</small></h2>${M.sections.map(sectionCard).join("")}<button class="add" data-act="addsec">+ Add a section</button>`;
     const B = M.bar;
     $("#ed-bar").innerHTML = `<h2>Bar <label class="inline"><input type="checkbox" data-path="bar.show"${B.show ? " checked" : ""}> Include the bar page</label></h2>${B.show ? `<div class="grid">
@@ -1885,7 +1897,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     }
     if (t.dataset.sec && t.dataset.f) {
       const s = MODEL.sections.find((x) => x.id === t.dataset.sec);
-      if (t.type === "checkbox") { s[t.dataset.f] = t.checked; if (t.dataset.f === "grouping") drawEditor(); else t.closest(".scard").classList.toggle("hid", s.hidden); }
+      if (t.type === "checkbox") { s[t.dataset.f] = t.checked; if (t.dataset.f === "grouping") drawEditor(); else if (t.dataset.f === "hidden") t.closest(".scard").classList.toggle("hid", s.hidden); }
       else s[t.dataset.f] = t.value;
       drawFlags();
     }
@@ -2096,7 +2108,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       "Event #: " + (P ? P.meta.event_no || "" : "(no SEO loaded)"),
       "Event: " + (P ? (P.meta.party || P.meta.client || "") : ""),
       "SEO file: " + (window.__PB_FILE || ""),
-      "Look: " + (M ? RENDER.STYLES[M.style].label : ""),
+      "Theme: " + (M ? RENDER.STYLES[M.style].label : ""),
       "Where: " + where,
       "Browser: " + browser + " (" + (navigator.platform || "") + ")",
       "Tool version: " + (CFG.version || ""),
