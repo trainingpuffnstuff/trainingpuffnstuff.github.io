@@ -862,12 +862,14 @@ async function loadOrder(retry) {
   if (!data || !data.name) { status.textContent = 'No Delivery order #' + num + ' found.'; return; }
 
   const skipped = [];
+  let noDetails = 0;
   orderLines = [];
   (data.lineItems && data.lineItems.nodes || []).forEach(li => {
-    if (!li.product) { skipped.push(li.title); return; }              // tips, custom items
     if (attr(li, '_presentation') === 'true') return;                  // Delivery Options line
     if (attr(li, '_main-product') === 'true') { skipped.push(li.title + ' (bundle, own label design)'); return; }
-    const d = splitDescription(li.product.descriptionHtml);
+    if (/^tip$/i.test(li.title.trim())) return;                         // tips
+    if (!li.product) { noDetails++; }                                    // deleted product, or lookup can't read products
+    const d = splitDescription(li.product ? li.product.descriptionHtml : '');
     orderLines.push({ name: li.title.replace(/^\*+\s*/, '').trim(), description: d.description, tags: d.tags, qty: li.quantity, count: 1 });
   });
 
@@ -889,6 +891,11 @@ async function loadOrder(retry) {
     row.appendChild(label); row.appendChild(inp);
     box.appendChild(row);
   });
+  if (noDetails) {
+    const w = document.createElement('div'); w.className = 'order-skip'; w.style.color = '#f87171';
+    w.textContent = noDetails + ' dish(es) came back without a description or tags. Add them by hand in the box below, or tell Rosie the lookup can\'t read products.';
+    box.appendChild(w);
+  }
   if (skipped.length) {
     const s = document.createElement('div'); s.className = 'order-skip';
     s.textContent = 'No card for: ' + skipped.join('; ');
