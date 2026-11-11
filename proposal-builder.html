@@ -245,6 +245,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
 .sechead .script{font-size:30pt;line-height:1.02}
 .sechead .caps{margin-top:.02in}
 .group{font-family:"Cormorant",serif;font-weight:500;font-size:12pt;letter-spacing:.06em;color:var(--soft);margin:.04in 0 .06in}
+.group.grouprule{height:0;width:.9in;border-top:1px solid currentColor;opacity:.35;margin:.1in 0 .12in}
 .item .nm{font-family:"Cormorant",serif;font-weight:600;font-size:12pt;line-height:1.15;color:var(--ink)}
 .item .nm .var{font-weight:500}
 .item .nm .qtyp{font-family:"Lato",sans-serif;font-weight:700;font-size:7.4pt;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);margin-left:.5em;white-space:nowrap}
@@ -287,6 +288,8 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       <div class="updates" id="updates">
         <h3>Recent updates</h3>
         <div class="day"><span>Nov 11</span><ul>
+          <li>Grouped sections have a "No group" choice. Displays and desserts start there and list after Garden, Land, Air and Sea under a short rule.</li>
+          <li>The vegan scallop photo no longer fills empty space on Holiday and Corporate menus.</li>
           <li>Facility rental from the SEO (venue fees like the room, parking, add-ons) shows under Your Venue on the Event Details page. The notes under each line stay off the proposal and show in Needs attention.</li>
           <li>SEOs printed with Microsoft Print to PDF now read the same as a saved PDF: menu sections, dish names and diet tags all come through.</li>
           <li>Bar hours written on the bar setup line ("5:45PM-10:00PM") are picked up.</li>
@@ -351,7 +354,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-11-11.1003"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-11-11.1057"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -1073,7 +1076,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     },
     corporate: {
       label: "Corporate",
-      img: { cover: "corp_bg_cover.jpg", invest: "corp_bg_invest.jpg", about: ["corp_about_1.jpg", "corp_about_2.jpg", "corp_about_3.jpg"], barCol: "corp_bar_column.jpg", barCocktail: "corp_bar_cocktail.jpg", rentals: "corp_rentals_banner.jpg", venue: "corp_venue_banner.jpg", team: ["corp_team_1.jpg", "corp_team_2.jpg", "corp_team_3.jpg", "corp_team_4.jpg"], planner: "corp_planner_floral.jpg", closing: "corp_journey_plate.jpg", closingRow: ["corp_journey_1.jpg", "corp_journey_2.jpg", "corp_journey_3.jpg", "corp_journey_4.jpg"], fill: ["corp_menu_flatbread.jpg", "corp_menu_potato.jpg", "corp_menu_scallop.jpg", "corp_menu_col_1.jpg", "corp_menu_col_2.jpg", "corp_menu_col_3.jpg"] },
+      img: { cover: "corp_bg_cover.jpg", invest: "corp_bg_invest.jpg", about: ["corp_about_1.jpg", "corp_about_2.jpg", "corp_about_3.jpg"], barCol: "corp_bar_column.jpg", barCocktail: "corp_bar_cocktail.jpg", rentals: "corp_rentals_banner.jpg", venue: "corp_venue_banner.jpg", team: ["corp_team_1.jpg", "corp_team_2.jpg", "corp_team_3.jpg", "corp_team_4.jpg"], planner: "corp_planner_floral.jpg", closing: "corp_journey_plate.jpg", closingRow: ["corp_journey_1.jpg", "corp_journey_2.jpg", "corp_journey_3.jpg", "corp_journey_4.jpg"], fill: ["corp_menu_flatbread.jpg", "corp_menu_potato.jpg", "corp_menu_col_1.jpg", "corp_menu_col_2.jpg", "corp_menu_col_3.jpg"] },
       aboutScript: "Passionately perfecting life’s celebrations.",
       aboutHead: "40+ Years of Corporate Excellence",
       aboutBody: "For over four decades, Puff 'n Stuff has delivered professionally executed events across Florida, backed by proven systems, trained staff, and consistent quality.",
@@ -1107,7 +1110,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     },
     holiday: {
       label: "Holiday",
-      img: { thumb: "hol_thumb.jpg", cover: "hol_bg_cover.jpg", invest: "hol_bg_invest.jpg", about: ["hol_about_1.jpg", "hol_about_2.jpg", "hol_about_3.jpg"], barCol: "hol_bar_column.jpg", barCocktail: "hol_bar_cocktail.jpg", rentals: "corp_rentals_banner.jpg", venue: "corp_venue_banner.jpg", team: ["corp_team_1.jpg", "corp_team_2.jpg", "corp_team_3.jpg", "corp_team_4.jpg"], planner: "hol_planner_photo.jpg", closing: "hol_journey_plate.jpg", closingRow: ["corp_journey_1.jpg", "corp_journey_2.jpg", "corp_journey_3.jpg", "corp_journey_4.jpg"], fill: ["hol_menu_1.jpg", "hol_menu_2.jpg", "hol_menu_3.jpg", "hol_menu_4.jpg", "hol_menu_5.jpg", "hol_menu_6.jpg", "hol_menu_7.jpg", "corp_menu_potato.jpg", "corp_menu_col_1.jpg", "corp_menu_col_2.jpg", "corp_menu_col_3.jpg", "corp_menu_flatbread.jpg", "corp_menu_scallop.jpg"] },
+      img: { thumb: "hol_thumb.jpg", cover: "hol_bg_cover.jpg", invest: "hol_bg_invest.jpg", about: ["hol_about_1.jpg", "hol_about_2.jpg", "hol_about_3.jpg"], barCol: "hol_bar_column.jpg", barCocktail: "hol_bar_cocktail.jpg", rentals: "corp_rentals_banner.jpg", venue: "corp_venue_banner.jpg", team: ["corp_team_1.jpg", "corp_team_2.jpg", "corp_team_3.jpg", "corp_team_4.jpg"], planner: "hol_planner_photo.jpg", closing: "hol_journey_plate.jpg", closingRow: ["corp_journey_1.jpg", "corp_journey_2.jpg", "corp_journey_3.jpg", "corp_journey_4.jpg"], fill: ["hol_menu_1.jpg", "hol_menu_2.jpg", "hol_menu_3.jpg", "hol_menu_4.jpg", "hol_menu_5.jpg", "hol_menu_6.jpg", "hol_menu_7.jpg", "corp_menu_potato.jpg", "corp_menu_col_1.jpg", "corp_menu_col_2.jpg", "corp_menu_col_3.jpg", "corp_menu_flatbread.jpg"] },
       aboutScript: "Passionately perfecting the season’s celebrations.",
       aboutHead: "40+ Years of Making the Season Bright",
       aboutBody: "For over four decades, Puff 'n Stuff has gathered Florida around the holiday table. From seasonal menus built on the flavors of the season to a service team that lets you be a guest at your own party, we handle every detail so you can enjoy the people you're celebrating with.",
@@ -1202,6 +1205,9 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   const GROUP_ORDER_ENTREE = ["Land", "Air", "Sea", "Garden"];
   function guessGroup(name, desc, tags) {
     const t = (name + " " + desc).toLowerCase();
+    // displays and sweets don't belong under Garden / Land / Air / Sea; they list after the groups
+    if (/\b(display|board|grazing|platter|spread)\b/.test(name.toLowerCase())) return "None";
+    if (/cheesecake|\bcake\b|cookie|brownie|\btart|black forest|mousse|pudding|macaron|cupcake|eclair|cannoli|tiramisu|truffle|blondie|dessert|whoopie|petit four|bon ?bon/.test(t) && !/crab cake|salmon cake|fish cake/.test(t)) return "None";
     if (/shrimp|salmon|crab|scallop|tuna|ahi|grouper|mahi|snapper|cod|fish|lobster|oyster|seafood|clam|mussel|calamari|branzino|sea bass|halibut/.test(t)) return "Sea";
     if (/chicken|turkey|duck|quail|hen\b/.test(t)) return "Air";
     if (/beef|steak|tenderloin|short rib|brisket|pork|ham\b|bacon|prosciutto|salami|lamb|veal|sausage|chorizo|meatball|pancetta|ribeye|sirloin|filet|bresaola|ropa vieja|burger/.test(t)) return "Land";
@@ -1250,6 +1256,10 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
           if (!gi.length) continue;
           gi.forEach((it, k) => push((k === 0 ? `<div class="group">${esc((prefix + gname).toUpperCase())}</div>` : "") + itemHTML(it, s.showQty), [it.id]));
         }
+        // "No group" dishes follow the groups under a plain rule, no heading
+        const loose = choices.filter((it) => it.group === "None");
+        const grouped = choices.length - loose.length;
+        loose.forEach((it, k) => push((k === 0 && grouped ? `<div class="group grouprule"></div>` : "") + itemHTML(it, s.showQty), [it.id]));
       } else {
         // "X or Y" choices from the SEO: a small CHOOSE ONE over the first dish and "or" between the alternates
         const useOr = !s.select;
@@ -1935,7 +1945,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     const t0 = has ? `<button class="thumb ${ph.on ? "on" : ""} st-${ph.status}" data-act="photo" data-item="${it.id}" title="${ph.on ? "Photo on (click to turn off)" : "Photo off (click to turn on)"}${ph.reason ? " • " + esc(ph.reason) : ""}"><img src="${ph.src || LOOKBOOK + ph.slug + ".jpg"}" loading="lazy"><span>${ph.on ? "on" : ph.status === "review" ? "check" : "off"}</span></button>` : `<div class="thumb none" title="No Lookbook photo"><span>no photo</span></div>`;
     const thumb = `<div class="tcol">${t0}<button class="tchg" data-act="pick" data-item="${it.id}">${has ? "Change" : "Add photo"}</button></div>`;
     const descTxt = it.desc.map((d) => (d.label ? d.label + ": " : "") + d.text).join("\n");
-    const grp = s.grouping ? `<select data-item="${it.id}" data-f="group">${["Garden", "Land", "Air", "Sea"].map((g) => `<option${it.group === g ? " selected" : ""}>${g}</option>`).join("")}</select>` : "";
+    const grp = s.grouping ? `<select data-item="${it.id}" data-f="group">${["Garden", "Land", "Air", "Sea", "None"].map((g) => `<option value="${g}"${it.group === g ? " selected" : ""}>${g === "None" ? "No group" : g}</option>`).join("")}</select>` : "";
     const groupsTxt = it.groups.map((g) => [g.label + (g.tags ? " | " + g.tags : "")].concat(g.options.map((o) => "- " + (o.label ? o.label + ": " : "") + o.text + (o.tags ? " | " + o.tags : ""))).join("\n")).join("\n\n");
     return `<div class="irow${it.hidden ? " hid" : ""}${it.included ? " incl" : ""}" draggable="true" data-item="${it.id}" data-sec="${s.id}">
       <div class="grip" title="Drag to reorder or move to another section">☰</div>
