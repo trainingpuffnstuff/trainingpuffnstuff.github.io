@@ -288,6 +288,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       <div class="updates" id="updates">
         <h3>Recent updates</h3>
         <div class="day"><span>Nov 12</span><ul>
+          <li>The planner page uses your own team. A Tampa planner gets the Tampa bio and Lauren as director, even when the SEO prints the Orlando address.</li>
           <li>Bar Inclusions no longer pick up the page footer (address, page number, SEO number) when they run onto the next page.</li>
           <li>Every chef role on the SEO (floor chef, carving chef and others) shows on the Culinary Team card. Staff the page doesn't cover are listed in Needs attention.</li>
         </ul></div>
@@ -358,7 +359,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-11-12.1633"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-11-12.1640"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -1846,10 +1847,14 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     if (p.bar.type) svcStyle.push(p.bar.type);
     const rentals = rentalList(p);
     const rep = m.rep_name || "";
-    let dir = DIRECTORS[m.market] || null;
+    // the planner's own team decides the director and the bio, not the office address the SEO prints
+    // (a Tampa planner's SEO can carry the Orlando address); Miami SEOs name their market on the rep line
+    const tm = (TITLES[rep] || "").match(/,\s*(Orlando|Tampa|Miami)$/);
+    const teamMkt = m.market === "Miami" ? "Miami" : (tm ? tm[1] : m.market);
+    let dir = DIRECTORS[teamMkt] || null;
     let repTitle = TITLES[rep] || "Sales Event Planner", repPhone = CELLS[rep] || m.rep_phone;
     if (dir && dir.name === rep) { // the director is the planner on this one
-      if (m.market === "Miami") repTitle = "Director of Sales";
+      if (teamMkt === "Miami") repTitle = "Director of Sales";
       repPhone = repPhone || dir.phone; dir = null;
     }
     const repFirst = rep.split(" ")[0] || "Your planner";
@@ -1892,8 +1897,8 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
         note: rentals.length ? "Rental and linen pricing is estimated until final selections are confirmed." : "Tables, linens, and decor accents are confirmed with you and the venue during final details.",
       },
       team, dayOf, serviceShow: team.length > 0,
-      planner: { name: rep, title: repTitle, phone: repPhone, email: REP_EMAILS[rep] || "", headshot: headshot(rep), bio: `${repFirst} is part of our ${m.market || "Puff 'n Stuff"} planning team and will be your partner from this proposal through your event, crafting the ideal menu with the proper staff and flow for your celebration.` },
-      director: dir ? Object.assign({ headshot: headshot(dir.name), title: m.market === "Miami" ? "Director of Sales" : TITLES[dir.name] || "Director of Sales" }, dir) : null,
+      planner: { name: rep, title: repTitle, phone: repPhone, email: REP_EMAILS[rep] || "", headshot: headshot(rep), bio: `${repFirst} is part of our ${teamMkt || "Puff 'n Stuff"} planning team and will be your partner from this proposal through your event, crafting the ideal menu with the proper staff and flow for your celebration.` },
+      director: dir ? Object.assign({ headshot: headshot(dir.name), title: teamMkt === "Miami" ? "Director of Sales" : TITLES[dir.name] || "Director of Sales" }, dir) : null,
       investment: { rows, total: get("Grand Total"), deposit: deposit && deposit !== "0.00" ? deposit : "", balance: get("Balance Due") },
       terms: ["A booking retainer of $1,000 or 15% of the estimated event cost, whichever is greater, secures your date.", "50% of the remaining balance is due 60 days prior to your event.", "Final guest count is confirmed 14 days prior; the remaining balance is due 10 days prior."].concat(rentals.length ? ["Rental and linen pricing is estimated until selections are confirmed."] : []),
       steps,
