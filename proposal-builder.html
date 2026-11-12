@@ -287,6 +287,10 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       </div>
       <div class="updates" id="updates">
         <h3>Recent updates</h3>
+        <div class="day"><span>Nov 12</span><ul>
+          <li>Bar Inclusions no longer pick up the page footer (address, page number, SEO number) when they run onto the next page.</li>
+          <li>Every chef role on the SEO (floor chef, carving chef and others) shows on the Culinary Team card. Staff the page doesn't cover are listed in Needs attention.</li>
+        </ul></div>
         <div class="day"><span>Nov 11</span><ul>
           <li>Grouped sections have a "No group" choice. Displays and desserts start there and list after Garden, Land, Air and Sea under a short rule.</li>
           <li>The vegan scallop photo no longer fills empty space on Holiday and Corporate menus.</li>
@@ -354,7 +358,7 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
   </div>
 </div>
 <div id="out"></div>
-<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-11-11.1057"};</script>
+<script>window.PB_CONFIG={assetBase:"proposal-builder/",lookbookBase:"img/menu/",lookbookPage:"menu-lookbook.html",reportTo:"rosie@puffnstuff.com",version:"2026-11-12.1631"};</script>
 <script>
 // Shared by the browser tool and the Node test harness.
 // Turns a pdf.js document into visual rows that carry position and type style,
@@ -812,7 +816,15 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
       const inc = lines.findIndex((l) => /(Full Bar|(?:Beer\s*(?:&|and)\s*Wine|Wine\s*(?:&|and)\s*Beer)( Bar)?) Inclusions/i.test(l));
       if (inc >= 0) {
         const tx = [];
-        for (let j = inc + 1; j < Math.min(inc + 6, lines.length); j++) { if (/Beverages\s*:|SERVICE PERSONNEL|Station set up/i.test(lines[j])) break; tx.push(lines[j]); }
+        // skip the page footer and header when the inclusions run onto the next page, and stop at the closing period
+        for (let j = inc + 1, n = 0; j < lines.length && n < 8; j++) {
+          const r = rows[j];
+          if (isFooter(r) || isPageHeader(r) || /^SPECIAL EVENT ORDER|^QTY\b|Catering, LLC|Page \d+ of \d+/i.test(lines[j])) continue;
+          if (/Beverages\s*:|SERVICE PERSONNEL|Station set up|Listed brands/i.test(lines[j])) break;
+          if (lines[j] === lines[j].toUpperCase() && lines[j].split(/\s+/).length > 3) break; // a setup note, not inclusions
+          tx.push(lines[j]); n++;
+          if (/\.\s*$/.test(lines[j])) break;
+        }
         bar.inclusions = clean(tx.join(" "));
       }
       // other beverage lines the bar page doesn't carry (specialty cocktails, add-ons)
@@ -1804,8 +1816,11 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     const team = [];
     const sup = sum(/supervisor|captain|manager/);
     if (sup) team.push({ title: "Supervisor", counts: [plural(sup, "Supervisor")], text: `${sup === 1 ? "1 on site" : sup + " on site"}, overseeing every detail of service from arrival to breakdown.`, photo: 0 });
-    const lead = sum(/^lead event chef/), chef = sum(/^event chef/), floor = sum(/floor chef/);
-    if (lead + chef + floor) team.push({ title: "Culinary Team", counts: [lead ? plural(lead, "Lead Event Chef") : "", chef ? plural(chef, "Event Chef") : "", floor ? plural(floor, "Floor Chef") : ""].filter(Boolean), text: "Preparing and presenting every dish fresh on site throughout your event.", photo: 1 });
+    const lead = sum(/^lead event chef/), chef = sum(/^event chef/);
+    // any other kitchen role on the SEO (floor chef, carving chef, chef attendant...) goes on the culinary card by its own name
+    const cap = (k) => k.replace(/\b\w/g, (c) => c.toUpperCase());
+    const otherChefs = Object.keys(staff).filter((k) => /chef|carv|cook|culinary/.test(k) && !/^(lead )?event chef/.test(k)).map((k) => plural(staff[k], cap(k.replace(/s$/, ""))));
+    if (lead + chef || otherChefs.length) team.push({ title: "Culinary Team", counts: [lead ? plural(lead, "Lead Event Chef") : "", chef ? plural(chef, "Event Chef") : "", ...otherChefs].filter(Boolean), text: "Preparing and presenting every dish fresh on site throughout your event.", photo: 1 });
     const serv = sum(/^server/);
     if (serv) team.push({ title: "Servers", counts: [plural(serv, "Server")], text: `${serv} professionally trained server${serv === 1 ? "" : "s"} attending your guests from first bite to last.`, photo: 2 });
     const bart = sum(/bartender/), barback = sum(/bar back/);
@@ -1895,6 +1910,9 @@ table.inv tr.tr td{border-top:1px solid var(--rule);padding-top:.08in}
     if (!M.venueLine) f.push({ lvl: "warn", t: "Venue line is blank." });
     if (!M.planner.email) f.push({ lvl: "warn", t: `No email on file for ${M.planner.name || "the planner"}. Type it in the Planner email box.` });
     if (!M.dateText) f.push({ lvl: "warn", t: "Couldn't read the event date." });
+    const known = /supervisor|captain|manager|chef|carv|cook|culinary|server|bartender|bar back|beverage attendant/;
+    const missed = Object.keys((PARSED && PARSED.staff) || {}).filter((k) => !known.test(k));
+    if (missed.length) f.push({ lvl: "note", t: `Staff on the SEO that aren't on the service page: ${missed.join(", ")}. Add them in the Team section if the client should see them.` });
     if ((M.details.venueNotes || []).length) f.push({ lvl: "note", t: `Facility rental: these SEO notes stay off the proposal: ${M.details.venueNotes.join(" • ")}. Add them under Venue rental on the Event details page if the client should see them.` });
     for (const s of M.sections) {
       if (s.hidden) continue;
