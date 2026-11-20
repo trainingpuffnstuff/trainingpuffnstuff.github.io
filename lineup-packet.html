@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Line-Up Packet | Puff 'n Stuff</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="menu-photos.js"></script>
+<style>
+/* Line-Up Packet: Production SEO in, supervisor box packet out (line-up sheet + one block per station).
+   Tool chrome follows the Proposal Builder; the printed pages follow the reception team's Line Up Sheet. */
+@font-face{font-family:"Cormorant";font-weight:600;src:url("proposal-builder/fonts/cormorant-garamond-latin-600-normal.woff2") format("woff2")}
+@font-face{font-family:"Cormorant";font-weight:500;src:url("proposal-builder/fonts/cormorant-garamond-latin-500-normal.woff2") format("woff2")}
+@font-face{font-family:"Lato";font-weight:400;src:url("proposal-builder/fonts/lato-latin-400-normal.woff2") format("woff2")}
+@font-face{font-family:"Lato";font-weight:400;font-style:italic;src:url("proposal-builder/fonts/lato-latin-400-italic.woff2") format("woff2")}
+@font-face{font-family:"Lato";font-weight:700;src:url("proposal-builder/fonts/lato-latin-700-normal.woff2") format("woff2")}
+:root{--mr:#202020;--vc:#FEFFF9;--ps:#E8E8E6;--sc:#424242;--mute:#76766f;--line:#cfcfca}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:#f4f4f1;color:var(--mr);font-family:"Lato",system-ui,sans-serif;font-size:14px}
+button,input,textarea,select{font:inherit;color:inherit}
+#app header{background:var(--mr);color:var(--vc);padding:12px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+#app header .logo{height:30px;filter:invert(1)}
+#app header h1{font-family:"Cormorant",serif;font-weight:500;font-size:25px;margin:0;padding-left:16px;border-left:1px solid rgba(254,255,249,.25)}
+#app header .hsub{color:#bdbdbb;font-size:12px}
+#app header .sp{flex:1}
+#app header button{background:transparent;color:var(--vc);border:1px solid rgba(254,255,249,.45);border-radius:2px;padding:9px 16px;cursor:pointer;font-size:12px;letter-spacing:.08em;text-transform:uppercase;min-height:40px}
+#app header button.solid{background:var(--vc);color:var(--mr)}
+#app header button:disabled{opacity:.6;cursor:wait}
+#start{max-width:720px;margin:48px auto;padding:0 20px}
+#drop{display:flex;flex-direction:column;align-items:center;gap:6px;padding:56px 24px;background:#fff;border:1.5px dashed #9a9a94;cursor:pointer;text-align:center}
+#drop.hot{border-color:var(--mr);background:#fafaf7}
+#drop b{font-family:"Cormorant",serif;font-size:28px;font-weight:600}
+#drop span{color:var(--mute)}
+#drop input{position:absolute;opacity:0;width:1px;height:1px}
+.help{color:var(--sc);line-height:1.6;font-size:15px}
+#err{color:#a12a1e;font-weight:700}
+#work{display:grid;grid-template-columns:minmax(330px,420px) minmax(0,1fr);min-height:calc(100vh - 56px)}
+#ed{background:#fff;border-right:1px solid var(--ps);padding:18px;overflow:auto;max-height:calc(100vh - 56px)}
+#pv{padding:20px;overflow:auto;max-height:calc(100vh - 56px)}
+@media(max-width:900px){#work{grid-template-columns:1fr}#ed,#pv{max-height:none}}
+.ed-h{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin:18px 0 8px;font-weight:700}
+.ed-h:first-child{margin-top:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fld{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mute)}
+.fld input{font-size:15px;color:var(--mr);padding:7px 9px;border:1px solid var(--line);border-radius:2px;min-height:38px}
+.fld.wide{grid-column:1/-1}
+.eb{border:1px solid var(--line);border-radius:3px;padding:10px;margin-bottom:10px;background:#fff}
+.eb.off{opacity:.55;background:#fafaf8}
+.eb-top{display:flex;gap:6px;align-items:center}
+.eb-top input[type=text]{border:1px solid var(--line);border-radius:2px;padding:6px 8px;min-height:36px;font-size:15px}
+.eb-title{flex:1;font-weight:700}
+.eb-time{width:118px}
+.eb input[type=checkbox]{width:18px;height:18px;accent-color:var(--mr)}
+.eb-btns{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0 4px}
+.eb-btns button,#addblock{background:#fff;border:1px solid var(--line);border-radius:2px;padding:5px 9px;font-size:12px;cursor:pointer;min-height:32px}
+.eb-btns button:hover,#addblock:hover{border-color:var(--mr)}
+.eb-sub{font-size:12px;color:var(--mute);margin:4px 0 0 26px}
+.eb-items{margin:6px 0;display:flex;flex-direction:column;gap:3px}
+.pi{display:flex;align-items:center;gap:8px;font-size:13px;padding:2px 0}
+.pi img,.pi .noimg{width:44px;height:30px;object-fit:cover;border-radius:2px;background:var(--ps);flex:none}
+.pi .noimg{display:inline-block}
+.pi small{color:#9a5a00}
+.pi.nop{color:var(--mute)}
+.eb details{font-size:13px;margin:6px 0}
+.eb summary{cursor:pointer;color:var(--sc)}
+.eb details label{display:flex;gap:6px;align-items:center;padding:2px 0}
+.eb textarea{width:100%;min-height:44px;border:1px solid var(--line);border-radius:2px;padding:6px 8px;font-size:14px;resize:vertical}
+#addblock{width:100%;min-height:40px}
+.tip{font-size:12px;color:var(--mute);line-height:1.5}
+#scale{transform-origin:top left}
+#app header a.hl{color:#d8d8d4;font-size:13px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:0 0 22px;padding:0;list-style:none;counter-reset:st}
+.steps li{counter-increment:st;background:#fff;border:1px solid var(--ps);padding:14px 14px 16px;font-size:14.5px;line-height:1.45;color:var(--sc)}
+.steps li::before{content:counter(st);display:block;font-family:"Cormorant",serif;font-weight:600;font-size:34px;line-height:1;color:var(--mr);margin-bottom:6px}
+.steps b{color:var(--mr)}
+@media(max-width:640px){.steps{grid-template-columns:1fr}}
+#go{display:block;width:100%;background:var(--mr);color:var(--vc);border:0;border-radius:3px;padding:18px 16px;font-size:21px;font-weight:700;cursor:pointer;min-height:72px}
+#go small{display:block;font-weight:400;font-size:13px;color:#cfcfca;margin-top:3px}
+#go:disabled{opacity:.75;cursor:wait}
+#after{margin:8px 0 0;font-size:13px;line-height:1.5;color:var(--sc)}
+#after a{color:var(--mr);font-weight:700}
+.pk{border:1px solid var(--line);border-radius:3px;padding:11px 12px;margin-top:10px;background:#fff}
+.pk-n{font-weight:700;font-size:15.5px;line-height:1.25}
+.pk-m{font-size:12.5px;color:var(--mute);margin-top:2px}
+.pk .ok{font-size:13px;color:#2f6b3a;margin-top:7px}
+.pk ul{margin:7px 0 0;padding:0;list-style:none}
+.pk li{font-size:13px;line-height:1.4;padding:5px 8px;margin-top:4px;background:#fff6e0;border-left:3px solid #c98a00;color:#3d2e00}
+.pk .inf{font-size:12px;color:var(--mute);margin-top:6px;line-height:1.4}
+.pk-b{display:flex;gap:6px;margin-top:9px}
+.pk-b button,#back,.more{background:#fff;border:1px solid var(--line);border-radius:2px;padding:6px 11px;font-size:13px;cursor:pointer;min-height:36px}
+.pk-b button:hover,#back:hover,.more:hover{border-color:var(--mr)}
+.bad{border:1px solid #d9a39c;background:#fdf1ef;border-radius:3px;padding:10px 12px;margin-top:10px;font-size:13px;line-height:1.45;color:#5c1b13}
+.bad b{display:block;word-break:break-word}
+.more{display:block;text-align:center;margin-top:12px;padding:10px;position:relative}
+.more input{position:absolute;opacity:0;width:1px;height:1px}
+#back{margin-bottom:14px;font-weight:700}
+#busy{color:var(--sc);font-size:15px;margin-top:14px}
+.pk-sep{width:816px;margin:6px auto 10px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);font-weight:700}
+/* ---------- printed pages (8.5 x 11 in at 96 px/in) ---------- */
+.page{width:816px;height:1056px;background:#fff;position:relative;overflow:hidden;margin:0 auto 22px;box-shadow:0 1px 6px rgba(0,0,0,.12);color:#1d1d1b}
+.pin{position:absolute;left:44px;right:44px;top:40px;bottom:58px}
+.pfoot{position:absolute;left:44px;right:44px;bottom:22px;display:flex;justify-content:space-between;font-size:10px;color:#8a8a84;letter-spacing:.04em}
+.quote{position:absolute;left:44px;right:44px;bottom:40px;text-align:center;font-size:11.5px;color:#55554f;font-style:italic}
+.ls-title{text-align:center;font-size:21px;letter-spacing:.22em;font-weight:400;margin-bottom:10px}
+.ls-head{display:flex;align-items:center;justify-content:center;gap:16px}
+.ls-logo{height:52px}
+.ls-box{border:1px solid #1d1d1b;padding:6px 10px;font-size:11.5px;line-height:1.45;min-width:330px;letter-spacing:.02em}
+.ls-box b{font-weight:700;letter-spacing:.04em}
+.blank{display:inline-block;min-width:150px;border-bottom:1px solid #1d1d1b;height:12px;vertical-align:baseline}
+.ls-meta{margin-top:10px;font-size:11.5px;line-height:1.5;text-align:center;color:#33332f}
+.ls-times{display:flex;justify-content:center;gap:0;margin-top:6px;font-size:11px}
+.ls-times span{padding:3px 10px;border-left:1px solid #c9c9c3}
+.ls-times span:first-child{border-left:0}
+.ls-times b{letter-spacing:.06em;font-size:9.5px;color:#66665f;margin-right:4px}
+.ls-alert{margin:8px auto 0;border:1.5px solid #1d1d1b;padding:5px 10px;font-size:12px;font-weight:700;text-align:center;max-width:620px}
+.ls-menuhead{text-align:center;font-family:"Cormorant",serif;font-weight:600;font-size:30px;letter-spacing:.1em;margin:8px 0 6px}
+.cols{display:flex;gap:18px;align-items:flex-start}
+.col{flex:1;min-width:0}
+.mbox{border:1px solid #1d1d1b;margin-bottom:12px;break-inside:avoid}
+.mb-h{font-family:"Cormorant",serif;font-weight:600;font-size:17px;line-height:1.15;padding:7px 10px 4px;text-align:center}
+.mb-h .t{display:block;font-size:13.5px}
+.mbox ul{margin:0;padding:2px 12px 8px 26px;font-size:11.5px;line-height:1.38}
+.mbox li{margin:0 0 3px}
+.mbox li b{font-weight:700}
+.mbox .tg{font-weight:700;font-size:10px;letter-spacing:.03em}
+.mbox .alt{list-style:none;margin-left:-14px;font-style:italic;color:#55554f}
+.mbox .inc{list-style:none;margin-left:-14px;color:#55554f;font-size:10.5px}
+.nbox{border:1px solid #9a9a94;padding:7px 10px;font-size:10.5px;line-height:1.4;color:#33332f}
+.nbox h4{margin:0 0 3px;font-size:10px;letter-spacing:.1em;font-weight:700}
+.nbox .nl{display:grid;grid-template-columns:1fr 1fr;column-gap:18px}
+.nbox .nl div{break-inside:avoid}
+.sp-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #1d1d1b;padding-bottom:5px;margin-bottom:12px}
+.sp-head .k{font-size:15px;letter-spacing:.2em}
+.sp-head .e{font-size:11px;color:#55554f}
+.card{border:1px solid #1d1d1b;padding:10px 12px 12px;margin-bottom:14px}
+.c-h{display:flex;justify-content:space-between;gap:12px}
+.c-time{font-size:10.5px;letter-spacing:.12em;font-weight:700;color:#55554f}
+.c-title{font-family:"Cormorant",serif;font-weight:600;font-size:23px;line-height:1.05}
+.c-sub{font-size:10.5px;color:#66665f;margin-top:1px}
+.c-qrs{display:flex;gap:10px;flex:none}
+.c-qr{width:96px;text-align:center;font-size:8.5px;line-height:1.2;color:#33332f}
+.c-qr svg{width:84px;height:84px;display:block;margin:0 auto 2px}
+.c-items{display:grid;grid-template-columns:1fr 1fr;column-gap:18px;font-size:11px;line-height:1.35;margin:7px 0 4px}
+.c-items div{break-inside:avoid;margin-bottom:2px}
+.c-items .hd{grid-column:1/-1;margin-top:3px}
+.c-items .q{color:#77776f;font-size:10px;margin-right:3px}
+.c-items .tg{font-weight:700;font-size:9.5px}
+.c-items .alt{font-style:italic;color:#55554f}
+.c-info{font-size:10.5px;line-height:1.38;margin-top:3px;color:#33332f}
+.c-info b{letter-spacing:.06em;font-size:9.5px;margin-right:4px;color:#1d1d1b}
+.c-photos{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.c-photos figure{margin:0}
+.c-photos img{width:100%;height:104px;object-fit:cover;display:block;background:#eee}
+.c-photos figcaption{font-size:9px;line-height:1.2;margin-top:2px;color:#33332f}
+.c-assign{display:grid;grid-template-columns:1fr 1fr;column-gap:18px;row-gap:2px;margin-top:10px}
+.a-row{display:flex;align-items:flex-end;gap:6px;height:28px;font-size:10px;font-weight:700;letter-spacing:.08em}
+.a-row i{flex:1;border-bottom:1px solid #1d1d1b;height:1px}
+.a-row.w{grid-column:1/-1}
+#sizer{position:absolute;left:-12000px;top:0;width:816px;visibility:hidden}
+#sizer .page{height:auto;min-height:0;overflow:visible}
+#sizer .pin{position:static;padding:0}
+@media print{
+  @page{size:letter;margin:0}
+  html,body{background:#fff}
+  #app header,#ed,#start,#sizer{display:none!important}
+  #work{display:block}
+  #pv{padding:0;overflow:visible;max-height:none}
+  #scale{transform:none!important;height:auto!important}
+  .page{margin:0;box-shadow:none;page-break-after:always;break-after:page}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <img class="logo" src="proposal-builder/logo.png" alt="Puff 'n Stuff">
+    <h1>Line-Up Packet</h1>
+    <span class="sp"></span>
+    <a class="hl" href="lineup-packet-help.html" target="_blank" rel="noopener">How it works</a>
+    <button id="restart" hidden>Start over</button>
+  </header>
+  <section id="start">
+    <ol class="steps">
+      <li><b>Save the SEOs.</b> Save each of tomorrow's Production SEOs from Caterease as a PDF.</li>
+      <li><b>Drop them all here.</b> Every event at once is fine. They stay on this computer.</li>
+      <li><b>Press Print.</b> One packet per event comes out, in order of event time.</li>
+    </ol>
+    <label id="drop">
+      <input type="file" id="file" accept="application/pdf,.pdf" multiple>
+      <b>Drop tomorrow's SEOs here</b>
+      <span>or click to choose them. You can pick several at once.</span>
+    </label>
+    <p id="busy" hidden></p>
+    <div id="startbad"></div>
+  </section>
+  <section id="work" hidden>
+    <aside id="ed"></aside>
+    <main id="pv"><div id="scale"><div id="out"></div></div></main>
+  </section>
+</div>
+<div id="sizer"></div>
+
+<script>
+window.LP_KEEP_INCLUDED = true;
+// SEO reading and Lookbook matching, copied from proposal-builder.html (SEO_LINES, SEO_PARSE, PHOTOS). Keep in step with it.
+// Shared by the browser tool and the Node test harness.
+// Turns a pdf.js document into visual rows that carry position and type style,
+// because Caterease styles each kind of line consistently:
+//   section header  semibold/bold face, >= 11.2pt (package titles are a script face, ~35pt)
+//   dish name       Lato Bold ~10.8pt at the item indent
+//   description     Lato regular ~10.8pt at the item indent
+//   diet tags       Lato Bold ~7.9pt
+//   qty item        Helvetica "(75) Name" at the left margin
+//   select note     Lato regular ~9.7pt, centered
+//   page header / footer: Helvetica at the far right / Futura at the bottom
+(function (root) {
+  // A family name from a TrueType font's name table (full name, else family)
+  function ttName(u) {
+    const v = new DataView(u.buffer, u.byteOffset, u.byteLength);
+    const n = v.getUint16(4);
+    let off = -1;
+    for (let i = 0; i < n; i++) { const r = 12 + i * 16; if (String.fromCharCode(u[r], u[r + 1], u[r + 2], u[r + 3]) === "name") { off = v.getUint32(r + 8); break; } }
+    if (off < 0) return "";
+    const cnt = v.getUint16(off + 2), so = off + v.getUint16(off + 4);
+    let fam = "";
+    for (let i = 0; i < cnt; i++) {
+      const r = off + 6 + i * 12, pid = v.getUint16(r), nid = v.getUint16(r + 6), len = v.getUint16(r + 8), o = so + v.getUint16(r + 10);
+      if (nid !== 4 && nid !== 1) continue;
+      let s = "";
+      if (pid === 3 || pid === 0) for (let k = 0; k + 1 < len; k += 2) s += String.fromCharCode(v.getUint16(o + k));
+      else for (let k = 0; k < len; k++) s += String.fromCharCode(u[o + k]);
+      if (nid === 4 && s) return s;
+      if (!fam) fam = s;
+    }
+    return fam;
+  }
+  async function inflate(bytes) {
+    const ds = new DecompressionStream("deflate");
+    const out = new Response(new Blob([bytes]).stream().pipeThrough(ds));
+    return new Uint8Array(await out.arrayBuffer());
+  }
+  // "Microsoft Print to PDF" renames every font CIDFont+F1, F2...; the real names (Lato Bold, Arial)
+  // are still inside the embedded font files, so read them from the raw PDF.
+  async function printedFontNames(pdf) {
+    const map = {};
+    try {
+      if (typeof DecompressionStream === "undefined") return map;
+      const raw = await pdf.getData();
+      let txt = "";
+      for (let i = 0; i < raw.length; i += 65536) txt += String.fromCharCode.apply(null, raw.subarray(i, i + 65536));
+      // pair each descriptor's FontName with its FontFile2, whichever order they're written in
+      const descs = txt.match(/\/FontDescriptor\s*<<[\s\S]*?>>/g) || [];
+      for (const d of descs) {
+        const fn = d.match(/\/FontName\s*\/(CIDFont\+F\d+)/), ff = d.match(/\/FontFile2\s+(\d+)\s+0\s+R/);
+        if (!fn || !ff || map[fn[1]]) continue;
+        const at = txt.search(new RegExp("(^|[^0-9])" + ff[1] + "\\s+0\\s+obj"));
+        if (at < 0) continue;
+        const s0 = txt.indexOf("stream", at), e0 = txt.indexOf("endstream", s0);
+        if (s0 < 0 || e0 < 0) continue;
+        let a = s0 + 6;
+        if (txt[a] === "\r") a++;
+        if (txt[a] === "\n") a++;
+        const head = txt.slice(at, s0);
+        const lm = head.match(/\/Length\s+(\d+)(?!\s+0\s+R)/);
+        let end = lm ? a + +lm[1] : e0;
+        while (!lm && end > a && (raw[end - 1] === 10 || raw[end - 1] === 13)) end--;
+        try {
+          let bytes = raw.subarray(a, end);
+          if (/FlateDecode/.test(head)) bytes = await inflate(bytes);
+          const nm = ttName(bytes);
+          if (nm) map[fn[1]] = nm;
+        } catch (e) { if (root.__fontDebug) console.log("FONTERR", fn[1], e.message); }
+      }
+    } catch (e) { if (root.__fontDebug) console.log('FONTERR', e); }
+    return map;
+  }
+  async function extractRows(pdf) {
+    const rows = [];
+    let printed = null;
+    for (let p = 1; p <= pdf.numPages; p++) {
+      const page = await pdf.getPage(p);
+      const tc = await page.getTextContent();
+      // loading the operator list makes pdf.js resolve the fonts so we can read their real names
+      try { await page.getOperatorList(); } catch (e) {}
+      const fontName = {};
+      const nameOf = (id) => {
+        if (id in fontName) return fontName[id];
+        let n = "";
+        try { const f = page.commonObjs.get(id); n = (f && (f.name || f.loadedName)) || ""; } catch (e) {}
+        if (!n && tc.styles && tc.styles[id]) n = tc.styles[id].fontFamily || "";
+        return (fontName[id] = n);
+      };
+      const buckets = [];
+      for (const it of tc.items) {
+        if (!it.str || !it.str.trim()) continue;
+        const t = it.transform;
+        const y = t[5], x = t[4];
+        const size = Math.round(Math.hypot(t[2], t[3]) * 10) / 10;
+        let fname = nameOf(it.fontName);
+        const cid = fname.match(/CIDFont\+F\d+/);
+        if (cid) {
+          if (!printed) printed = await printedFontNames(pdf);
+          // Arial stands in for Caterease's Helvetica when the SEO is printed instead of saved
+          if (printed[cid[0]]) fname = printed[cid[0]].replace(/^Arial/, "Helvetica").replace(/ Regular$/, "");
+        }
+        let b = buckets.find((r) => Math.abs(r.y - y) <= 3);
+        if (!b) { b = { y, segs: [] }; buckets.push(b); }
+        b.segs.push({ x, w: it.width || 0, s: it.str, size, font: fname });
+      }
+      buckets.sort((a, b) => b.y - a.y);
+      for (const b of buckets) {
+        b.segs.sort((a, c) => a.x - c.x);
+        // join segments; a gap smaller than a fraction of the type size is kerning, not a word break ("Raviol i")
+        let text = "";
+        b.segs.forEach((sg, k) => {
+          if (k === 0) { text = sg.s; return; }
+          const prev = b.segs[k - 1];
+          const gap = sg.x - (prev.x + prev.w);
+          const glue = prev.w && gap < sg.size * 0.12 && /[A-Za-z]$/.test(prev.s) && /^[a-z]/.test(sg.s) ? "" : " ";
+          text += glue + sg.s;
+        });
+        text = text.replace(/\s+/g, " ").trim();
+        if (!text) continue;
+        const first = b.segs[0];
+        const sizes = b.segs.map((s) => s.size);
+        // the first segment carries the line's role (a dish name is bold; "Flakes DF" is a regular line with bold tags)
+        const bold = /bold|semibold|black|heavy/i.test(first.font);
+        rows.push({ page: p, y: b.y, x: first.x, text, size: Math.max(...sizes), font: first.font, bold });
+      }
+    }
+    return rows;
+  }
+  root.SEO_LINES = { extractRows, printedFontNames };
+  if (typeof module !== "undefined") module.exports = root.SEO_LINES;
+})(typeof window !== "undefined" ? window : globalThis);
+
+
+;
+// Parse styled SEO rows (from seo-lines.js) into the proposal data model.
+// Runs in the browser and in Node (for tests).
+(function (root) {
+  const DIET_TOKEN = "(?:VEG|VE|VG|V|GF|DF|NF|N F)";
+  const DIET_ONLY = new RegExp("^" + DIET_TOKEN + "(?:\\s*,?\\s*" + DIET_TOKEN + ")*\\s*$");
+  const DIET_TAIL = new RegExp("\\s(" + DIET_TOKEN + "(?:\\s*,\\s*" + DIET_TOKEN + ")*)\\s*$");
+  const SELECTLIKE = /^\(?\s*(select|choose|choice)\b/i;
+  const PREP = /^(send hot|heat on site|heat lamp|assembled on site|plattered|black chafer|display under|deconstructed|two way|tasting note)/i;
+  const SEASON = /^(SPRING\/SUMMER|FALL\/WINTER|SPRING|SUMMER|FALL|WINTER)\s*[:\-]\s*/;
+  const LABELED = /^([A-Z][A-Z0-9 &'’\/\.\-]{2,40}?)\s*(?::|\s-)\s*(.*)$/;
+  const GENERIC = new Set(["bar", "station", "stations", "display", "displays", "the", "and", "with", "chef", "attended", "carved", "seasonal", "mini", "classic", "our", "build", "your", "own", "of", "a", "in", "on"]);
+  const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const CITIES = ["St. Petersburg", "St Petersburg", "Lakewood Ranch", "Winter Park", "Winter Garden", "Lake Mary", "Lake Nona", "Altamonte Springs", "Celebration", "Kissimmee", "Orlando", "Tampa", "Sarasota", "Clearwater", "Brandon", "Riverview", "Wesley Chapel", "Lutz", "Odessa", "Largo", "Dunedin", "Palm Harbor", "Tarpon Springs", "Bradenton", "Venice", "Lakeland", "Sanford", "Oviedo", "Windermere", "Ocoee", "Apopka", "Clermont", "Daytona Beach", "Jacksonville", "St Augustine", "St. Augustine", "Ponte Vedra Beach", "Miami", "Fort Lauderdale", "Naples", "Fort Myers", "Plant City", "Apollo Beach", "Ruskin", "Seminole", "Pinellas Park", "Safety Harbor", "Oldsmar", "Land O Lakes", "Ellenton", "Palmetto", "Anna Maria", "Siesta Key", "Longboat Key", "Osprey", "Nokomis", "Gainesville", "Ocala", "The Villages", "Davenport", "Haines City", "Winter Haven", "Melbourne", "Cocoa Beach", "Titusville"];
+
+  const clean = (s) => (s || "").replace(/\s+/g, " ").trim();
+  const titleTime = (t) => (t || "").replace(/\s*(am|pm)$/i, (m, p) => " " + p.toUpperCase()).trim();
+
+  function longDate(raw) {
+    const m = (raw || "").match(/(\d{1,2})\/(\d{1,2})\/(\d{4})\s*-\s*([A-Za-z]+day)/);
+    if (!m) return { text: raw || "", month: null };
+    return { text: `${m[4]}, ${MONTHS[+m[1] - 1]} ${+m[2]}, ${m[3]}`, month: +m[1], iso: `${m[3]}-${m[1].padStart(2, "0")}-${m[2].padStart(2, "0")}` };
+  }
+
+  function splitVenue(v) {
+    v = clean(v);
+    const i = v.indexOf(" - ");
+    const name = i >= 0 ? v.slice(0, i).trim() : v;
+    const addr = i >= 0 ? v.slice(i + 3).trim() : "";
+    let city = "";
+    const before = (addr.match(/^(.*?),\s*(?:FL|Florida)\b/i) || [, ""])[1];
+    if (before) {
+      const hit = CITIES.filter((c) => new RegExp("\\b" + c.replace(".", "\\.?") + "$", "i").test(before)).sort((a, b) => b.length - a.length)[0];
+      if (hit) city = hit.replace(/^St /, "St. ");
+      else {
+        const toks = before.split(/\s+/);
+        const SUF = /^(St|Street|Rd|Road|Ave|Avenue|Blvd|Dr|Drive|Way|Ln|Lane|Ct|Court|Pkwy|Parkway|Hwy|Highway|Trl|Trail|Cir|Circle|Path|Pl|Place|Ter|Loop|Run|Pass|Row|N|S|E|W|NE|NW|SE|SW)\.?$/i;
+        let k = toks.length - 1;
+        while (k > 0 && !SUF.test(toks[k - 1])) k--;
+        city = toks.slice(k).join(" ");
+      }
+    }
+    return { name, address: addr, city };
+  }
+
+  // ---------- rows -> structure ----------
+  function isFooter(r) { return /FuturaLt/i.test(r.font) || /Puff\s?['’]?n Stuff Catering, LLC/i.test(r.text) || /^Page \d+ of \d+/i.test(r.text); }
+  function isPageHeader(r) { return r.x > 380 && r.size < 10.6 && !/Lato/i.test(r.font); }
+  function rowKind(r) {
+    const t = r.text;
+    if (isFooter(r) || isPageHeader(r) || /^SPECIAL EVENT ORDER/i.test(t)) return "skip";
+    if (/^QTY\b.*MENU & INCLUSIONS/i.test(t)) return "skip";
+    if (r.size < 9.3 && r.bold && DIET_ONLY.test(t)) return "tags";
+    if (SELECTLIKE.test(t) && r.x > 200) return "section-select";
+    if (PREP.test(t)) return "prep";
+    if ((r.size >= 11.2 && r.bold && !/^\(\d+\)/.test(t)) || r.size > 20 || (r.bold && r.x > 200 && r.size >= 9.9 && !/^\(\d+\)/.test(t))) return "header";
+    const q = t.match(/^\((\d+)\)\s*(.+)$/);
+    if (q && r.x < 80) return "qty";
+    if (SELECTLIKE.test(t)) return "item-select";
+    if (r.bold && r.x > 80 && r.size >= 9.9 && !DIET_ONLY.test(t)) return "name";
+    return "text";
+  }
+
+  function words(name) { return clean(name).toLowerCase().replace(/[^a-z ]/g, " ").split(/\s+/).filter((w) => w.length > 2 && !GENERIC.has(w)); }
+
+  function stripTail(t) {
+    const m = t.match(DIET_TAIL);
+    if (m && m.index > 0) return { text: t.slice(0, m.index).trim(), tags: m[1].replace(/N F/g, "NF") };
+    return { text: t, tags: "" };
+  }
+
+  function parseMenu(rows, ctx) {
+    const sections = [];
+    let sec = null, item = null, group = null, inInclusion = null, uid = 0, orHead = null;
+    const newSection = (header) => { sec = { id: "s" + ++uid, header: clean(header), select: "", items: [], inclusions: [], notes: [] }; sections.push(sec); item = null; group = null; inInclusion = null; orHead = null; return sec; };
+    const newItem = (name, qty) => {
+      if (!sec) newSection("Menu");
+      const tail = stripTail(clean(name));
+      item = { id: "i" + ++uid, name: tail.text, qty: qty, desc: [], tags: tail.tags, groups: [] };
+      // "OR" on the SEO: the dishes after it are alternates to the last counted dish, until the next counted dish
+      if (qty != null) orHead = null; else if (orHead) item.altOf = orHead.id;
+      sec.items.push(item); group = null; inInclusion = null; return item;
+    };
+    const addText = (t) => {
+      if (inInclusion) { inInclusion.text = clean(inInclusion.text + " " + t); return; }
+      if (!item) { if (sec && t.length > 2) sec.notes.push(t); return; }
+      const st = stripTail(t);
+      if (group) {
+        const last = group.options[group.options.length - 1];
+        const lab = st.text.match(LABELED);
+        // a row continues the previous option when it wraps mid-phrase; an option that already ended in its diet tags is complete
+        const contWord = last && !last.tags && (/^[a-z]/.test(st.text) || /[,\-&]$/.test(last.text) || (last.label && !lab && last.text) || (st.text.split(/\s+/).length <= 1 && !/^[A-Z][a-z]+ [A-Z]/.test(st.text)));
+        if (last && contWord && !(lab && /[A-Z]{3}/.test(lab[1]))) { last.text = clean(last.text + " " + st.text); if (st.tags) last.tags = st.tags; return; }
+        if (lab && /[A-Z]{3}/.test(lab[1]) && lab[1] === lab[1].toUpperCase()) group.options.push({ label: titleCase(lab[1]), text: lab[2], tags: st.tags, fromName: false });
+        else group.options.push({ label: "", text: st.text, tags: st.tags, fromName: false });
+        return;
+      }
+      // plain description; a season prefix means Caterease printed the chosen season only
+      let txt = st.text;
+      const lab = txt.match(LABELED);
+      if (item.desc.length && (/^[a-z]/.test(txt) || /[,\-&]$/.test(item.desc[item.desc.length - 1].text) || (!lab && !/[A-Z]{3,}:/.test(txt)))) {
+        const d = item.desc[item.desc.length - 1]; d.text = clean(d.text + " " + txt); if (st.tags) item.tags = item.tags || st.tags; return;
+      }
+      if (lab && /[A-Z]{3}/.test(lab[1]) && lab[1] === lab[1].toUpperCase()) item.desc.push({ label: titleCase(lab[1]), text: lab[2] });
+      else item.desc.push({ label: "", text: txt });
+      if (st.tags && !item.tags) item.tags = st.tags;
+    };
+    for (const r of rows) {
+      const k = rowKind(r);
+      const t = clean(r.text);
+      if (k === "skip" || k === "prep") continue;
+      if (/^or$/i.test(t)) { if (item) { orHead = item.altOf ? sec.items.find((x) => x.id === item.altOf) : item; orHead.slot = true; } group = null; inInclusion = null; continue; }
+      if (k === "header") {
+        if (/inclusions?$/i.test(t) && sec) { inInclusion = { label: t, text: "" }; sec.inclusions.push(inInclusion); item = null; group = null; continue; }
+        newSection(t); continue;
+      }
+      if (k === "section-select") { if (sec) sec.select = t.replace(/^\(|\)$/g, ""); continue; }
+      if (k === "tags") {
+        const tg = t.replace(/N F/g, "NF");
+        if (group && group.options.length && group.options[group.options.length - 1].fromName && !group.options[group.options.length - 1].tags) group.options[group.options.length - 1].tags = tg;
+        else if (item && !item.tags) item.tags = tg;
+        else if (group && group.options.length) group.options[group.options.length - 1].tags = tg;
+        continue;
+      }
+      if (k === "qty") {
+        const q = t.match(/^\((\d+)\)\s*(.+)$/);
+        if (/inclusions?\b/i.test(q[2])) { if (!sec) newSection("Menu"); inInclusion = { label: clean(q[2]), text: "" }; sec.inclusions.push(inInclusion); item = null; group = null; continue; }
+        newItem(q[2], +q[1]); continue;
+      }
+      if (k === "item-select") {
+        if (!item) { if (sec) sec.select = sec.select || t; continue; }
+        const st = stripTail(t.replace(/^\(|\)\s*:?\s*$|\)\s*$/g, "").replace(/:\s*$/, ""));
+        let label = st.text.replace(/^\(/, "").replace(/\)\s*:?$/, "").replace(/:\s*$/, "");
+        // "Select Two Pastas: VEG, NF"
+        const inline = label.match(/^(.*?):\s*(.*)$/);
+        if (inline) label = inline[1];
+        group = { label: sentenceCase(label), tags: st.tags, options: [] };
+        item.groups.push(group); inInclusion = null; continue;
+      }
+      if (k === "name" && /^\*/.test(t)) { if (sec) sec.notes.push(t.replace(/^\*+|\*+$/g, "").trim()); continue; }
+      // size / headcount lines on drop-off orders ("15 Guests", "Serves up to 20", "Feeds 10-12") are not dishes
+      if ((k === "name" || k === "text" || k === "header") && /^(\(?\s*)?((serves|feeds)\s+(up\s+to\s+)?)?\d+(\s*[-\u2013]\s*\d+)?\s*(guests?|people|persons?|pax|ppl)?\s*\)?$/i.test(t) && /\d/.test(t) && /guest|people|person|pax|ppl|serves|feeds/i.test(t)) {
+        // it belongs to the platter above it: print it as that dish's serving size
+        if (item && !group) {
+          const serves = /serves|feeds/i.test(t) ? t.replace(/^\(|\)$/g, "").trim() : "Serves " + t.replace(/^\(|\)$/g, "").trim().toLowerCase();
+          item.desc.push({ label: "", text: serves.charAt(0).toUpperCase() + serves.slice(1) });
+        } else { if (!sec) newSection("Menu"); sec.notes.push(t); }
+        continue;
+      }
+      if (k === "name") {
+        if (inInclusion) { inInclusion.text = clean(inInclusion.text + " " + t); continue; }
+        // a bold name inside an open choice group: a sub-option if it shares a word with the parent
+        if (group && item) {
+          const pw = words(item.name), nw = words(t);
+          if (pw.some((w) => nw.includes(w) || nw.includes(w.replace(/s$/, "")))) {
+            const st = stripTail(t);
+            group.options.push({ label: st.text, text: "", tags: st.tags, fromName: true }); continue;
+          }
+        }
+        // a bold line that is really a wrapped description: lowercase start or the previous line ended mid-phrase
+        if (item && !group && item.desc.length && /[,\-&]$/.test(item.desc[item.desc.length - 1].text)) { addText(t); continue; }
+        newItem(t, null); continue;
+      }
+      // text
+      if (/^\*/.test(t)) { if (sec) sec.notes.push(t.replace(/^\*+|\*+$/g, "").trim()); continue; }
+      if (group && group.options.length && group.options[group.options.length - 1].fromName && !group.options[group.options.length - 1].text) {
+        const st = stripTail(t); group.options[group.options.length - 1].text = st.text; if (st.tags) group.options[group.options.length - 1].tags = st.tags; continue;
+      }
+      if (group && group.options.length && group.options[group.options.length - 1].fromName) {
+        const last = group.options[group.options.length - 1];
+        if (/^[a-z]/.test(t) || /[,\-&]$/.test(last.text) || t.split(/\s+/).length <= 3) { const st = stripTail(t); last.text = clean(last.text + " " + st.text); if (st.tags) last.tags = st.tags; continue; }
+      }
+      addText(t);
+    }
+    // seasons: Caterease prints both variants inside a choice; keep the one for the event month
+    const fallWinter = !ctx.month || ctx.month >= 9 || ctx.month <= 2;
+    for (const s of sections) for (const it of s.items) {
+      for (const g of it.groups) {
+        for (const o of g.options) {
+          const m = (o.label + " " + o.text).match(/^(.*?)\s*(SPRING\/SUMMER|FALL\/WINTER)\s*[:\-]\s*/i);
+          if (o.text && /SPRING\/SUMMER|FALL\/WINTER/i.test(o.text)) {
+            const parts = o.text.split(/(SPRING\/SUMMER|FALL\/WINTER)\s*[:\-]\s*/i).map(clean);
+            // parts: [lead, "SPRING/SUMMER", text, "FALL/WINTER", text]
+            let keep = "";
+            for (let p = 1; p < parts.length; p += 2) if (/FALL/i.test(parts[p]) === fallWinter) keep = parts[p + 1];
+            if (keep) o.text = keep;
+          }
+          if (/^(Spring\/summer|Fall\/winter)$/i.test(o.label)) o.season = /fall/i.test(o.label) ? "fw" : "ss";
+        }
+        g.options = g.options.filter((o) => !o.season || (o.season === "fw") === fallWinter);
+        // "Seasonal Ravioli:" followed by its season's variant -> one option
+        for (let k = g.options.length - 2; k >= 0; k--) {
+          if (!g.options[k].text && g.options[k + 1].season) { g.options[k].text = g.options[k + 1].text; g.options[k].tags = g.options[k].tags || g.options[k + 1].tags; g.options.splice(k + 1, 1); }
+        }
+      }
+      for (const d of it.desc) {
+        const sm = d.text.match(SEASON);
+        if (sm) d.text = d.text.slice(sm[0].length);
+        if (/^(Spring\/summer|Fall\/winter|Spring|Summer|Fall|Winter)$/i.test(d.label)) d.label = "";
+      }
+      // unmarked options in a section with no select note and no qty marks anywhere are still items
+    }
+    // not client menu copy
+    const DROP = /^(passionately perfecting|pns staff meals?|staff meals?|vendor meals?|cheese wheel|chocolate discs?)/i;
+    const INCLUDED = /\b(artisan breads?|focaccia|zucchini loaf|dinner rolls|bread basket|preset (spa )?water|spa water|preset water)\b/i;
+    for (const s of sections) {
+      s.items = s.items.filter((it) => !DROP.test(it.name));
+      for (const it of s.items) {
+        if (INCLUDED.test(it.name)) it.included = true;
+        for (const d of it.desc) d.text = d.text.replace(/[,;]\s*$/, "").replace(/\s+(assembled|skewered|plattered)$/i, "");
+        // a description chunk with a label ("Key Lime: Classic Pie Crust") on a repeated generic name is a flavor
+        if (it.desc[0] && it.desc[0].label && s.items.filter((x) => x.name === it.name).length > 1) it.variant = it.desc[0].label;
+      }
+    }
+    // drop sections that are only headings (package titles with nothing under them merge into the next)
+    const out = [];
+    for (let i = 0; i < sections.length; i++) {
+      const s = sections[i];
+      if (!s.items.length && !s.inclusions.length) {
+        const nx = sections[i + 1];
+        if (nx && !/^send hot/i.test(s.header)) nx.package = nx.package || s.header;
+        continue;
+      }
+      out.push(s);
+    }
+    // a heading that is really a setup note ("set up on client's countertop") yields to the package title
+    const SETUP = /\b(set ?up|setup|tables?|linen|countertop|shelves|8ft|built in|use large)\b/i;
+    for (const s of out) if (s.package && (/^[a-z]/.test(s.header) || SETUP.test(s.header)) && !SETUP.test(s.package)) { s.setupNote = s.header; s.header = s.package; s.package = ""; }
+    for (let i = 0; i < out.length - 1; i++) {
+      const s = out[i];
+      if (!root.LP_KEEP_INCLUDED && s.items.length && s.items.every((it) => it.included) && !s.select) {
+        const nx = out[i + 1];
+        nx.items = s.items.concat(nx.items); nx.inclusions = s.inclusions.concat(nx.inclusions);
+        out.splice(i, 1); i--;
+      }
+    }
+    // skip crew meals
+    return out.filter((s) => !/vendor meal|staff meal/i.test(s.header) && (s.items.length || s.inclusions.length));
+  }
+
+  function titleCase(s) { return clean(s).toLowerCase().replace(/(^|[\s\/\-(])([a-z])/g, (m, a, b) => a + b.toUpperCase()).replace(/\b(And|Or|Of|With|A|The|In|On|To)\b/g, (w) => w.toLowerCase()).replace(/^./, (c) => c.toUpperCase()); }
+  function sentenceCase(s) { s = clean(s); return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase(); }
+
+  // ---------- whole document ----------
+  function parse(rows) {
+    const lines = rows.map((r) => r.text);
+    const joined = lines.join("\n");
+    const g = (re) => { const m = joined.match(re); return m ? clean(m[1]) : ""; };
+    const meta = {};
+    meta.event_no = g(/Event #:\s*([O0-9]+)/);
+    meta.party = g(/Party Name:\s*(.+?)\s*Event Type:/) || g(/Party Name:\s*([^\n]+)/);
+    if (/^Event Type:/i.test(meta.party)) meta.party = "";
+    meta.client = g(/Client:\s*(.+?)(?:\n|Event Type)/);
+    meta.event_type = g(/Event Type:\s*([^\n]+)/);
+    meta.event_info = g(/Event Info:\s*(.+?)\s*Guests:/);
+    meta.date_raw = g(/Date:\s*(\d{1,2}\/\d{1,2}\/\d{4}\s*-\s*[A-Za-z]+day)/) || ((lines.find((l) => /\d{1,2}\/\d{1,2}\/\d{4}\s*-\s*[A-Za-z]+day/.test(l) && !/Revised/i.test(l)) || "").match(/(\d{1,2}\/\d{1,2}\/\d{4}\s*-\s*[A-Za-z]+day)/) || [, ""])[1];
+    const d = longDate(meta.date_raw);
+    meta.date = d.text; meta.month = d.month; meta.iso = d.iso;
+    meta.guests = g(/Guests:\s*(\d+)/);
+    meta.venue_raw = g(/Event Site Location:\s*([^\n]+)/);
+    Object.assign(meta, { venue: splitVenue(meta.venue_raw) });
+    meta.on_site_contact = g(/On Site Contact:\s*(.+?)\s*\(E\)/);
+    meta.market = /Columbus Drive/.test(joined) ? "Tampa" : /Rio Drive/.test(joined) ? "Orlando" : /King Street/.test(joined) ? "Jacksonville" : "";
+    // rep: the name row right of the page header, under SPECIAL EVENT ORDER
+    // Miami SEOs print "MIAMI - Lauren Balden ( ) -": market prefix, then the rep
+    const repRow = rows.find((r) => r.x > 380 && /^(?:[A-Z]{3,}(?:\s[A-Z]{3,})?\s*-\s*)?[A-Z][A-Za-z.'-]+\s+[A-Z][A-Za-z.'-]+/.test(r.text) && !/SPECIAL|Event|Revised|@|^(January|February|March|April|May|June|July|August|September|October|November|December)\b/.test(r.text));
+    const mp = repRow ? repRow.text.match(/^([A-Z]{3,}(?:\s[A-Z]{3,})?)\s*-\s*(?=[A-Z][a-z])/) : null;
+    if (mp) { const mk = mp[1].charAt(0) + mp[1].slice(1).toLowerCase(); if (/^(Miami|Tampa|Orlando|Jacksonville)$/.test(mk)) meta.market = mk; }
+    const repText = repRow ? repRow.text.slice(mp ? mp[0].length : 0) : "";
+    const rm = repRow ? repText.match(/^(.*?)(?:\s*(\(\d{3}\)\s*\d{3}-\d{4}))?\s*(?:\(\s*\)\s*-?)?\s*$/) : null;
+    meta.rep_name = rm ? clean(rm[1]) : "";
+    meta.rep_phone = rm && rm[2] ? rm[2] : "";
+    // timeline
+    let times = [];
+    const t = lines.findIndex((l) => /Departure\s+Arrival on Site\s+Event Start/i.test(l));
+    if (t >= 0) times = (lines[t + 1] || "").match(/\d{1,2}:\d{2}\s*[ap]m/gi) || [];
+    const keys = ["departure", "arrival", "event_start", "event_concludes", "breakdown_complete"];
+    meta.timeline = {}; keys.forEach((k, i) => { if (times[i]) meta.timeline[k] = titleTime(times[i]); });
+
+    // menu region
+    const i0 = rows.findIndex((r) => /MENU & INCLUSIONS/.test(r.text));
+    let i1 = rows.findIndex((r, i) => i > i0 && /^Menu & Inclusions\s*:/i.test(r.text));
+    if (i1 < 0) i1 = rows.findIndex((r, i) => i > i0 && /^QTY\s*BEVERAGES|^BEVERAGES$|SERVICE PERSONNEL/.test(r.text));
+    const menuRows = i0 >= 0 ? rows.slice(i0 + 1, i1 > 0 ? i1 : rows.length) : [];
+    const sections = parseMenu(menuRows, { month: meta.month });
+
+    // bar
+    const bar = { extras: [], cocktails: [], type: "", hours: "", hours_text: "", spirits: [], beer: [], wine: [], inclusions: "", open: "", close: "" };
+    const bl = lines.findIndex((l) => /Hour .*Full Bar|Premium Full Bar|^\(\d+\)\s*Full Bar\b|Hour .*(?:Beer\s*(?:&|and)\s*Wine|Wine\s*(?:&|and)\s*Beer)|(?:Beer\s*(?:&|and)\s*Wine|Wine\s*(?:&|and)\s*Beer) Bar/i.test(l));
+    if (bl >= 0) {
+      bar.type = /Full Bar/i.test(lines[bl]) ? (/Premium/i.test(lines[bl]) ? "Premium Full Bar" : "Full Bar") : "Beer & Wine Bar";
+      const hm = lines[bl].match(/\((\d+)\)\s*Hour.*?From\s*([\d:]+)\s*(?:[ap]\.?m\.?)?\s*-\s*([\d:]+)/i);
+      if (hm) { bar.hours = +hm[1]; bar.open = hm[2]; bar.close = hm[3]; }
+      else {
+        // "(85) (4) Hour Full Bar" with the times on a setup line above it ("5:45PM-10:00PM")
+        const h2 = lines[bl].match(/\((\d+)\)\s*Hour/i);
+        if (h2) bar.hours = +h2[1];
+        for (let j = bl - 1; j >= Math.max(0, bl - 6); j--) {
+          const tm = lines[j].match(/^\s*(\d{1,2}(?::\d{2})?)\s*([ap])\.?m\.?\s*[-–]\s*(\d{1,2}(?::\d{2})?)\s*([ap])\.?m\.?\s*$/i);
+          if (tm) { bar.open = tm[1]; bar.close = tm[3]; break; }
+          if (/^QTY\b/.test(lines[j])) break;
+        }
+      }
+      const block = [];
+      for (let j = bl + 1; j < lines.length; j++) {
+        const nx = lines[j];
+        if (/Inclusions|Beverages\s*:|SERVICE PERSONNEL|^\(\d+\)\s/i.test(nx)) break;
+        if (/Listed brands|may (?:be )?substitut|equal or/i.test(nx)) continue;
+        block.push(nx);
+        if (/[.]\s*$/.test(nx)) break;
+      }
+      const jb = clean(block.join(" ")).replace(/[.]\s*$/, "");
+      const SP = /vodka|rum|gin\b|bourbon|tequila|scotch|whiske?y|cognac/i;
+      const BE = /michelob|corona|jai alai|stella|budweiser|bud light|miller|heineken|modelo|ipa|lager|pilsner|\bale\b|ultra|\bbeer\b|yuengling|blue moon|coors/i;
+      const WI = /sauvignon|cabernet|pinot|chardonnay|prosecco|merlot|ros[eé]|blanc|noir|riesling|moscato|\bwine\b|brut|champagne|malbec|cava/i;
+      const split = (s) => s.split(/,(?![^(]*\))/).map(clean).filter(Boolean);
+      for (const grp of jb.split(";").map(clean).filter(Boolean)) {
+        if (SP.test(grp) && !bar.spirits.length) bar.spirits = split(grp);
+        else if (WI.test(grp) && !bar.wine.length) bar.wine = split(grp).flatMap((w) => w.split(/\s+&\s+/)).map(clean).filter(Boolean);
+        else if (BE.test(grp) && !bar.beer.length) bar.beer = split(grp);
+      }
+      const inc = lines.findIndex((l) => /(Full Bar|(?:Beer\s*(?:&|and)\s*Wine|Wine\s*(?:&|and)\s*Beer)( Bar)?) Inclusions/i.test(l));
+      if (inc >= 0) {
+        const tx = [];
+        // skip the page footer and header when the inclusions run onto the next page, and stop at the closing period
+        for (let j = inc + 1, n = 0; j < lines.length && n < 8; j++) {
+          const r = rows[j];
+          if (isFooter(r) || isPageHeader(r) || /^SPECIAL EVENT ORDER|^QTY\b|Catering, LLC|Page \d+ of \d+/i.test(lines[j])) continue;
+          if (/Beverages\s*:|SERVICE PERSONNEL|Station set up|Listed brands/i.test(lines[j])) break;
+          if (lines[j] === lines[j].toUpperCase() && lines[j].split(/\s+/).length > 3) break; // a setup note, not inclusions
+          tx.push(lines[j]); n++;
+          if (/\.\s*$/.test(lines[j])) break;
+        }
+        bar.inclusions = clean(tx.join(" "));
+      }
+      // other beverage lines the bar page doesn't carry (specialty cocktails, add-ons)
+      for (let j = bl + 1; j < lines.length; j++) {
+        const l = lines[j];
+        if (/Beverages\s*:|SERVICE PERSONNEL/i.test(l)) break;
+        const q = l.match(/^\(\d+\)\s*(.+)$/);
+        if (q && !/Inclusions/i.test(q[1])) {
+          // a specialty cocktail is a named item with an ingredient line under it (mixed case, commas)
+          const nx = lines[j + 1] || "";
+          if (!/^\(\d+\)/.test(nx) && /,/.test(nx) && nx !== nx.toUpperCase() && !/Beverages\s*:/i.test(nx)) {
+            let nm = clean(q[1].split(/\s+-\s+/)[0]);
+            if (/[A-Z]{3}/.test(nm)) nm = titleCase(nm);
+            bar.cocktails.push(nm + ": " + clean(nx).replace(/[.]\s*$/, ""));
+          } else bar.extras.push(clean(q[1]));
+        }
+        else if (/^ADD\s+[A-Z]/.test(l) && l === l.toUpperCase()) bar.extras.push(clean(l));
+      }
+    }
+    // beverages without a bar (coffee, iced coffee, a signature mocktail): read them as their own menu section
+    if (bl < 0) {
+      const b0 = rows.findIndex((r) => /^QTY\s*BEVERAGES/.test(r.text));
+      const b1 = rows.findIndex((r, i) => i > b0 && /^Beverages\s*:/i.test(r.text));
+      if (b0 >= 0) {
+        const br = [], notes = [];
+        let recipe = false;
+        for (const r of rows.slice(b0 + 1, b1 > 0 ? b1 : rows.length)) {
+          if (/^\(\d+\)/.test(r.text) && r.x < 80) recipe = false;
+          // the bartender's recipe (ingredients, steps) stays on the SEO
+          if (/Italic/i.test(r.font || "") && /^(Ingredients|Instructions|Recipe|Directions)\s*:?$/i.test(clean(r.text))) { recipe = true; continue; }
+          if (recipe) continue;
+          // a bold italic line under a drink is a serving note ("Serve in Mojito Glass"); keep it as its own line
+          if (r.bold && /Italic/i.test(r.font || "") && r.x > 80) { notes.push(clean(r.text)); br.push(Object.assign({}, r, { bold: false })); continue; }
+          br.push(r);
+        }
+        const bs = parseMenu(br, { month: meta.month });
+        for (const sct of bs) for (const it of sct.items) for (let k = 0; k < it.desc.length; k++) {
+          for (const n of notes) {
+            const d = it.desc[k], at = d.text.indexOf(n);
+            if (at < 0) continue;
+            const before = clean(d.text.slice(0, at)), after = clean(d.text.slice(at + n.length));
+            const parts = [before ? { label: d.label, text: before } : null, { label: "", text: n, em: true }, after ? { label: "", text: after } : null].filter(Boolean);
+            it.desc.splice(k, 1, ...parts); k += parts.length - 1; break;
+          }
+        }
+        for (const sct of bs) { sct.beverage = true; if (sct.header === "Menu") sct.header = "Beverages"; }
+        sections.push(...bs);
+      }
+    }
+    // facility rental (venue fee billed through us): "Window of Wonder : $5,000", a plain note line under each
+    const facility = [];
+    const f0 = rows.findIndex((r) => clean(r.text) === "FACILITY RENTAL");
+    if (f0 >= 0) for (const r of rows.slice(f0 + 1)) {
+      const t = clean(r.text);
+      if (/^Facility Total\s*:/i.test(t) || /^(TIMELINE|QTY\b)/.test(t)) break;
+      if (isFooter(r) || isPageHeader(r)) continue;
+      const fm = t.match(/^(.+?)\s*:\s*(\$.+)$/);
+      if (fm && r.bold) facility.push({ name: clean(fm[1]), price: clean(fm[2]), notes: [] });
+      else if (facility.length) facility[facility.length - 1].notes.push(t);
+    }
+    // staff
+    const staff = {};
+    for (const l of lines) {
+      const mm = l.match(/(?:[TO]-SVC)\s+(.+?)\s*(?:Prem\s*)?(\d+)\s*$/i);
+      if (mm) { const role = mm[1].toLowerCase().replace(/prem/g, "").trim(); staff[role] = (staff[role] || 0) + +mm[2]; }
+    }
+    // rentals / equipment
+    const rentals = [], rentalItems = [], addServices = [];
+    const e0 = rows.findIndex((r) => clean(r.text) === "EQUIPMENT");
+    const a0 = rows.findIndex((r) => clean(r.text) === "ADDITIONAL SERVICES");
+    const e1 = rows.findIndex((r) => clean(r.text) === "INVESTMENT BREAKDOWN");
+    const scan = (from, to, inAdd) => {
+      let cur = null;
+      for (const r of rows.slice(from + 1, to > from ? to : rows.length)) {
+        if (isFooter(r) || isPageHeader(r) || /Total\s*:|^ADDITIONAL SERVICES$|^SPECIAL EVENT|^QTY/i.test(r.text)) continue;
+        const t = clean(r.text);
+        rentals.push(t);
+        // a bold line is the rental itself ("Natural Wood Folded Chair 40 $4.00 $160.00"); the plain lines under it say where it goes
+        const pm = t.match(/^(.+?)\s+(\d+)\s+\$[\d,]+\.\d{2}\s+\$[\d,]+\.\d{2}$/);
+        if (r.bold && pm) {
+          cur = { name: clean(pm[1]), qty: +pm[2], parts: [] };
+          (inAdd ? addServices : rentalItems).push(cur);
+        } else if (cur && inAdd) cur.parts.push(t);
+      }
+    };
+    if (e0 >= 0) scan(e0, a0 > e0 ? a0 : e1, false);
+    if (a0 >= 0) scan(a0, e1, true);
+    // investment
+    const investment = [];
+    const v0 = lines.findIndex((l) => l.trim() === "INVESTMENT BREAKDOWN"), v1 = lines.findIndex((l, i) => i > v0 && /PAYMENT TERMS/.test(l));
+    for (let li = 0; li < lines.length; li++) {
+      const l = lines[li];
+      // any other line shown in parentheses inside the breakdown is a credit ("Summer Wedding Savvy ($681.25)")
+      if (v0 >= 0 && li > v0 && (v1 < 0 || li < v1)) {
+        const cr = l.match(/^([A-Z][A-Za-z0-9 '&\-]{2,40}?)\s+\(\$([\d,]+\.\d{2})\)$/);
+        if (cr && !/^(Subtotal|Production Fee|Sales Tax|Grand Total|Minus Deposit|Balance Due)$/.test(cr[1]) && !investment.some((r) => r.label === cr[1])) { investment.push({ label: cr[1].trim(), amount: cr[2], credit: true }); continue; }
+      }
+      const mm = l.match(/^(Facility Rental|Menu & Inclusions|Beverages|Service Personnel|Equipment|Additional Services|Booking Incentive|Discount|[A-Z][A-Za-z ]{2,30}(?:Incentive|Discount|Credit))\s+(\(?)\$([\d,]+\.\d{2})\)?$/);
+      if (mm) investment.push({ label: mm[1], amount: mm[3], credit: mm[2] === "(" });
+      const tt = l.match(/^(Subtotal|Production Fee|Sales Tax|Grand Total|Minus Deposit|Balance Due)\s+\(?\$([\d,]+\.\d{2})\)?$/);
+      if (tt) investment.push({ label: tt[1], amount: tt[2], credit: false, total: true });
+    }
+    return { meta, sections, bar, staff, rentals, rentalItems, addServices, facility, investment };
+  }
+
+  root.SEO_PARSE = { parse, splitVenue, longDate };
+  if (typeof module !== "undefined") module.exports = root.SEO_PARSE;
+})(typeof window !== "undefined" ? window : globalThis);
+
+
+;
+// Dish-photo matching against the Menu Photo Lookbook, and focal points for crops.
+// Same rules as the proposal skill's match_dishes.py, plus a course check.
+(function (root) {
+  const norm = (s) => " " + String(s || "").toLowerCase().replace(/&/g, " and ").replace(/[°º]/g, "").replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim() + " ";
+
+  // course of an SEO section or a lookbook section, for catching an entrée photo on an hors d'oeuvre
+  function course(s) {
+    s = String(s || "").toLowerCase();
+    if (/hors|passed|bites|appetizer|merry bites/.test(s)) return "hors";
+    if (/dessert|sweet|cake|cookie/.test(s)) return "dessert";
+    if (/salad|starter|soup/.test(s)) return "starter";
+    if (/side|accompaniment|starch|veggie|vegetable/.test(s)) return "side";
+    if (/entr[eé]e|plated|dinner|protein|carv|executive/.test(s)) return "entree";
+    return "";
+  }
+
+  // Build the catalog from the lookbook DATA array and the MENU_PHOTOS list
+  function buildCatalog(DATA, MENU_PHOTOS, MENU_NO_PHOTO) {
+    const items = DATA.map((d) => ({ name: d.n, section: d.s || "", photo: d.p || "", alts: d.a || [], status: d.st || "none" }));
+    const photos = (MENU_PHOTOS || []).map((p) => ({ slug: p.slug, name: p.name, aliases: p.aliases || [], generic: !!p.fallback }));
+    const byName = {};
+    items.forEach((it) => { byName[norm(it.name)] = it; });
+    const sectionOfSlug = {};
+    items.forEach((it) => { if (it.photo && it.status === "own" && !sectionOfSlug[it.photo]) sectionOfSlug[it.photo] = it.section; });
+    return { items, photos, byName, sectionOfSlug, noPhoto: (MENU_NO_PHOTO || []).map((x) => norm(x).trim()) };
+  }
+
+  function match(dish, seoSection, cat) {
+    const n = norm(dish);
+    const out = { status: "none", slug: "", catalog_name: "", reason: "" };
+    if (cat.noPhoto.includes(n.trim())) { out.reason = "on the Lookbook's no-photo list"; return out; }
+    const toks = new Set(n.trim().split(" "));
+    // every word of a 2+ word alias appears in the dish name, in any order ("Mushroom & Taleggio Cheese Arancini" has all of "Mushroom & Taleggio Arancini")
+    const covers = (a) => { const t = norm(a).trim().split(" ").filter((w) => w !== "and"); return t.length >= 2 && t.every((w) => toks.has(w)); };
+    const strongAlias = (entry) => [entry.name].concat(entry.aliases).some((a) => covers(a));
+    const it = cat.byName[n];
+    let res = null;
+    if (it && it.photo) {
+      if (it.status === "standin") { out.reason = "Lookbook only has a stand-in photo"; return out; }
+      const entry = cat.photos.find((p) => p.slug === it.photo);
+      const strong = !entry || strongAlias(entry) || n.includes(norm(entry.name));
+      res = { status: strong ? "own" : "review", slug: it.photo, catalog_name: entry ? entry.name : it.name };
+    } else {
+      let best = null, bestLen = 0, strong = false;
+      for (const p of cat.photos) {
+        if (p.generic) continue;
+        for (const a of [p.name].concat(p.aliases)) {
+          const an = norm(a);
+          const hit = (an.trim().length > 3 && n.includes(an)) || covers(a);
+          if (hit && an.length > bestLen) { best = p; bestLen = an.length; strong = an.trim().split(" ").length >= 2; }
+        }
+      }
+      if (best) res = { status: strong ? "own" : "review", slug: best.slug, catalog_name: best.name };
+    }
+    if (!res) return out;
+    Object.assign(out, res);
+    if (out.status === "review") out.reason = "matched on one word (" + out.catalog_name + ")";
+    // a plated entrée photo on an hors d'oeuvre (or the reverse) is a different dish
+    const a = course(seoSection), b = course(cat.sectionOfSlug[out.slug]);
+    if (out.status === "own" && a && b && ((a === "hors" && b === "entree") || (a === "entree" && b === "hors"))) {
+      out.status = "review"; out.reason = "the Lookbook photo is the " + (b === "hors" ? "hors d'oeuvre" : b) + " version";
+    }
+    return out;
+  }
+
+  // Focal point of a dish photo: centroid of the largest saturated (food) region.
+  // Library shots are food on white china over marble, so saturation finds the dish.
+  function focus(img) {
+    const W = 120, H = Math.max(1, Math.round(img.naturalHeight * W / img.naturalWidth));
+    const c = (typeof OffscreenCanvas !== "undefined") ? new OffscreenCanvas(W, H) : Object.assign(document.createElement("canvas"), { width: W, height: H });
+    const x = c.getContext("2d");
+    x.drawImage(img, 0, 0, W, H);
+    let data;
+    try { data = x.getImageData(0, 0, W, H).data; } catch (e) { return [50, 50]; }
+    const wgt = new Float32Array(W * H), mask = new Uint8Array(W * H);
+    for (let i = 0; i < W * H; i++) {
+      const r = data[i * 4] / 255, g = data[i * 4 + 1] / 255, b = data[i * 4 + 2] / 255;
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+      const s = mx ? (mx - mn) / mx : 0;
+      wgt[i] = s * s * mx;
+      mask[i] = wgt[i] > 0.04 ? 1 : 0;
+    }
+    // close small gaps so one dish is one region
+    const dil = new Uint8Array(W * H), R = 2;
+    for (let y = 0; y < H; y++) for (let xx = 0; xx < W; xx++) {
+      if (!mask[y * W + xx]) continue;
+      for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) {
+        const yy = y + dy, xq = xx + dx;
+        if (yy >= 0 && yy < H && xq >= 0 && xq < W) dil[yy * W + xq] = 1;
+      }
+    }
+    const lab = new Int32Array(W * H); let cur = 0, best = 0, bestSum = 0;
+    const sums = [0];
+    for (let i = 0; i < W * H; i++) {
+      if (!dil[i] || lab[i]) continue;
+      cur++; let sum = 0; const st = [i]; lab[i] = cur;
+      while (st.length) {
+        const p = st.pop(); sum += wgt[p];
+        const py = (p / W) | 0, px = p % W;
+        const nb = [p - 1, p + 1, p - W, p + W];
+        for (let k = 0; k < 4; k++) {
+          const q = nb[k];
+          if (q < 0 || q >= W * H) continue;
+          if ((k === 0 && px === 0) || (k === 1 && px === W - 1)) continue;
+          if (dil[q] && !lab[q]) { lab[q] = cur; st.push(q); }
+        }
+      }
+      sums.push(sum);
+      if (sum > bestSum) { bestSum = sum; best = cur; }
+    }
+    if (!best) return [50, 50];
+    let sx = 0, sy = 0, sw = 0;
+    for (let i = 0; i < W * H; i++) if (lab[i] === best) { const w = wgt[i]; sx += (i % W) * w; sy += ((i / W) | 0) * w; sw += w; }
+    if (!sw) return [50, 50];
+    const fx = Math.min(80, Math.max(20, Math.round(sx / sw / W * 100)));
+    const fy = Math.min(85, Math.max(20, Math.round(sy / sw / H * 100)));
+    return [fx, fy];
+  }
+
+  root.PHOTOS = { buildCatalog, match, focus, course, norm };
+  if (typeof module !== "undefined") module.exports = root.PHOTOS;
+})(typeof window !== "undefined" ? window : globalThis);
+
+
+</script>
+<script>
+{
+const CFG = window.LP_CONFIG || {};
+const BASE = CFG.base || "";
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const clean = (s) => String(s || "").replace(/\s+/g, " ").trim();
+const STD_URL = "https://training.puffnstuff.com/#station/";
+const QUOTE = "“Your customer doesn’t care how much you know until they know how much you care.” –Damon Richards";
+
+// Station standards on the training site. Same ids as station-qr-codes.html, so these QR codes open the same pages as the printed ones.
+// The test runs on the station name plus its dish names.
+const STDS = [
+  ["blazing-donuts-coffee", "Blazing Donuts – Coffee", (t) => /blazing donut/.test(t) && /coffee|espresso|mocha/.test(t)],
+  ["blazing-donuts-berries", "Blazing Donuts – Berries & Cream", (t) => /blazing donut/.test(t) && /berr/.test(t)],
+  ["blazing-donuts-latin", "Blazing Donuts – Latin Inspired", (t) => /blazing donut/.test(t) && /latin|dulce|guava|churro|tres leches/.test(t)],
+  ["carved-turkey", "Chef Carved Turkey Breast", (t) => /carv/.test(t) && /turkey/.test(t)],
+  ["carved-ham", "Chef Carved Ham", (t) => /carv/.test(t) && /\bham\b/.test(t)],
+  ["carved-flank", "Chef Carved Flank Steak", (t) => /carv/.test(t) && /flank/.test(t)],
+  ["carved-chicken", "Chef Carved Brick Chicken", (t) => /carv/.test(t) && /brick chicken/.test(t)],
+  ["hot-dog-bar", "Hot Dog Bar", (t) => /hot ?dog/.test(t)],
+  ["omelet", "Omelet Station", (t) => /omelet/.test(t)],
+  ["eggs-benedict", "Eggs Benedict", (t) => /benedict/.test(t)],
+  ["sundae-bar", "Sundae Bar", (t) => /sundae/.test(t)],
+  ["walking-cannoli", "Walking Cannoli", (t) => /cannoli/.test(t)],
+  ["byo-bowl", "Build Your Own Bowl", (t) => /build[\s-]*your[\s-]*own[\s-]*bowl|byo bowl/.test(t)],
+  ["pasta-bowl", "Pasta Bowl", (t) => /pasta bowl/.test(t)],
+  ["rice-krispy", "Rice Krispy Bar", (t) => /rice (krisp|crisp)/.test(t)],
+  ["sweet-savory", "Sweet & Savory", (t) => /sweet (&|and) savory/.test(t)],
+  ["hot-mess-bar", "Hot Mess Bar", (t) => /hot mess/.test(t)],
+  ["coffee-station", "Coffee Station", (t) => /\bcoffee\b(?! cake)/.test(t) && !/blazing donut/.test(t)],
+  ["place-setting", "Standard Place Setting", null],
+];
+const stdName = (id) => (STDS.find((s) => s[0] === id) || [, id])[1];
+
+const TIME_RE = /^~?\s*\d{1,2}(:\d{2})?\s*[ap]\.?m\.?(\s*[-–]\s*~?\s*\d{1,2}(:\d{2})?\s*[ap]\.?m\.?)?$/i;
+const fmtTime = (t) => {
+  const s = clean(t).replace(/\s*([ap])\.?m\.?/gi, (m, p) => " " + p.toUpperCase() + "M").replace(/\s*[-–]\s*/g, " - ");
+  const m = s.match(/^(~?[\d:]+) (AM|PM) - (~?[\d:]+) (AM|PM)$/);
+  return m && m[2] === m[4] ? m[1] + " - " + m[3] + " " + m[4] : s;
+};
+const junkRow = (r) => /Catering, LLC|^Page \d+ of \d+|^SPECIAL EVENT ORDER|^QTY\b/i.test(clean(r.text)) || /FuturaLt/i.test(r.font || "") || (r.x > 380 && r.size < 10.6 && !/Lato/i.test(r.font || ""));
+const STAFF_ORDER = ["supervisor", "lead event chef", "super-culinary", "event chef", "floor chef", "server", "bartender", "bar back", "beverage attendant"];
+const titleCase = (s) => String(s || "").toLowerCase().replace(/(^|[\s\/\-(&])([a-z])/g, (m, a, b) => a + b.toUpperCase()).replace(/\b(And|Or|Of|With|A|The|In|On|To|For)\b/g, (w) => w.toLowerCase()).replace(/^./, (c) => c.toUpperCase());
+const fixCaps = (s) => (/[a-z]/.test(s) ? s : titleCase(s));
+const firstLast = (s) => { const m = String(s || "").match(/^([^,]+),\s*(.+)$/); return m ? m[2].trim() + " " + m[1].trim() : String(s || ""); };
+
+// ---------- Lookbook ----------
+let CAT = null;
+async function loadCatalog() {
+  if (CAT) return CAT;
+  try {
+    const h = await (await fetch(BASE + "menu-lookbook.html", { cache: "no-cache" })).text();
+    const i = h.indexOf("const DATA="), j = h.indexOf("];", i) + 1;
+    const DATA = JSON.parse(h.slice(i + 11, j));
+    CAT = PHOTOS.buildCatalog(DATA, typeof MENU_PHOTOS !== "undefined" ? MENU_PHOTOS : [], typeof MENU_NO_PHOTO !== "undefined" ? MENU_NO_PHOTO : []);
+  } catch (e) {
+    console.warn("Lookbook not reachable", e);
+    CAT = PHOTOS.buildCatalog([], [], []);
+    CAT.offline = true;
+  }
+  return CAT;
+}
+const photoSrc = (slug) => BASE + "img/menu/" + slug + ".jpg";
+
+// ---------- reading the SEO ----------
+// A station's time is the line printed under its heading ("Displayed Station" / "6:00pm").
+function headingTimes(rows) {
+  const map = {};
+  let prev = null;
+  for (const r of rows) {
+    if (junkRow(r)) continue;
+    const t = clean(r.text);
+    if (TIME_RE.test(t) && prev && !TIME_RE.test(prev) && !map[prev]) map[prev] = t;
+    prev = t;
+  }
+  return map;
+}
+// Bars and beverage stations: read the BEVERAGES part of the SEO as its own menu.
+function beverageSections(rows) {
+  const b0 = rows.findIndex((r) => /^QTY\s*BEVERAGES/.test(clean(r.text)));
+  if (b0 < 0) return [];
+  let b1 = rows.findIndex((r, i) => i > b0 && (/^Beverages\s*:/i.test(clean(r.text)) || /SERVICE PERSONNEL|^EQUIPMENT$|INVESTMENT BREAKDOWN/.test(clean(r.text))));
+  if (b1 < 0) b1 = rows.length;
+  const fake = [Object.assign({}, rows[b0], { text: "MENU & INCLUSIONS" })].concat(rows.slice(b0 + 1, b1), [Object.assign({}, rows[b0], { text: "SERVICE PERSONNEL" })]);
+  try {
+    return SEO_PARSE.parse(fake).sections.map((s) => { if (s.header === "Menu") s.header = "Beverages"; s.beverage = true; return s; });
+  } catch (e) { return []; }
+}
+// Notes under the timeline (the event's run of show, set-up notes) and site details (delivery window, unit #)
+function eventNotes(rows) {
+  const out = [];
+  const S = rows.findIndex((r) => clean(r.text) === "EVENT SITE DETAILS");
+  const TL = rows.findIndex((r) => clean(r.text) === "TIMELINE");
+  const T = rows.findIndex((r) => /Departure\s+Arrival on Site/i.test(r.text));
+  const M = rows.findIndex((r) => /MENU & INCLUSIONS/.test(r.text));
+  if (S >= 0 && TL > S) for (const r of rows.slice(S + 1, TL)) {
+    const t = clean(r.text);
+    if (t && !/^Event Site Location:/i.test(t) && !junkRow(r)) out.push(t.replace(/\s*-$/, ""));
+  }
+  if (T >= 0) for (const r of rows.slice(T + 2, M > T ? M : T + 60)) {
+    const t = clean(r.text).replace(/^Notes:\s*/i, "");
+    if (t && !junkRow(r) && !/^TIMELINE$/i.test(t)) out.push(t);
+  }
+  return out.filter((t) => t.length > 1);
+}
+function allergyLines(rows) {
+  const M = rows.findIndex((r) => /MENU & INCLUSIONS/.test(r.text));
+  const E = rows.findIndex((r, i) => i > M && /SERVICE PERSONNEL|INVESTMENT BREAKDOWN|PAYMENT TERMS/.test(r.text));
+  const out = [];
+  if (M < 0) return out;
+  rows.slice(M, E > M ? E : rows.length).forEach((r, k, arr) => {
+    const t = clean(r.text);
+    if (/allerg/i.test(t) && !junkRow(r)) {
+      let line = t;
+      const nx = arr[k + 1] && clean(arr[k + 1].text);
+      if (nx && /^please|^note|^no /i.test(nx)) line += " " + nx;
+      if (!out.includes(line)) out.push(line);
+    }
+  });
+  return out;
+}
+// EQUIPMENT: "6 Foot Table 2 $10.00 $20.00" then where it goes, "(2) Displayed Station"
+function equipment(rows) {
+  const e0 = rows.findIndex((r) => clean(r.text) === "EQUIPMENT");
+  if (e0 < 0) return [];
+  const out = [];
+  let cur = null;
+  for (const r of rows.slice(e0 + 1)) {
+    const t = clean(r.text);
+    if (/^(Equipment Total|ADDITIONAL SERVICES|INVESTMENT BREAKDOWN|FACILITY RENTAL|PAYMENT TERMS)/i.test(t)) break;
+    if (junkRow(r)) continue;
+    const m = t.match(/^(.+?)\s+(\d+)\s+\$[\d,]+\.\d{2}\s+\$[\d,]+\.\d{2}$/);
+    if (m) { cur = { name: clean(m[1]), qty: +m[2], where: [] }; out.push(cur); continue; }
+    if (cur) cur.where.push(t);
+  }
+  return out;
+}
+const GEN = new Set(["station", "stations", "table", "tables", "front", "back", "top", "box", "the", "and", "area", "set"]);
+const stems = (s) => clean(s).toLowerCase().replace(/\(\d+\)/g, " ").replace(/[^a-z ]/g, " ").split(/\s+/).filter((w) => w.length > 2 && !GEN.has(w)).map((w) => w.slice(0, 4));
+
+function descText(it) {
+  const parts = (it.desc || []).map((d) => (d.label ? d.label + ": " : "") + d.text);
+  for (const g of it.groups || []) {
+    const opts = g.options.map((o) => (o.label && o.text ? o.label + " (" + o.text + ")" : o.label || o.text)).filter(Boolean);
+    parts.push((g.label ? g.label + ": " : "") + opts.join(", "));
+  }
+  return clean(parts.filter(Boolean).join("; "));
+}
+
+function buildEvent(P, rows) {
+  const m = P.meta;
+  const staff = Object.entries(P.staff || {}).sort((a, b) => {
+    const ia = STAFF_ORDER.indexOf(a[0]), ib = STAFF_ORDER.indexOf(b[0]);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+  });
+  const tl = m.timeline || {};
+  return {
+    seo: m.event_no || "",
+    event: fixCaps(m.party || m.client || ""),
+    client: firstLast(m.client || ""),
+    date: m.date || "",
+    venue: m.venue ? m.venue.name : "",
+    address: m.venue ? clean(m.venue.address).replace(/\s*-$/, "").replace(/^,\s*-?$/, "") : "",
+    guests: m.guests || "",
+    service: clean(m.event_info).replace(/\s*-$/, ""),
+    contact: firstLast(m.on_site_contact || ""),
+    rep: m.rep_name || "",
+    supervisor: "", chef: "",
+    depart: tl.departure || "", arrive: tl.arrival || "", start: tl.event_start || "", end: tl.event_concludes || "", breakdown: tl.breakdown_complete || "",
+    staff: staff.map(([k, v]) => v + " " + titleCase(k) + (v > 1 && !/s$/.test(k) ? "s" : "")),
+    notes: eventNotes(rows),
+    alerts: allergyLines(rows),
+    plated: /plated/i.test((m.event_type || "") + " " + (m.event_info || "")),
+  };
+}
+
+let UID = 0;
+// "Vegetarian / Chicken / Beef" printed as separate SEO headings are one course on the floor: one block, each choice kept as a heading in the list.
+const CHOICE = /^(vegetarian|vegan|chicken|poultry|beef|pork|lamb|fish|seafood|salmon|duet|duo)( (entr[e\u00e9]e|option|choice|meal|plate))?s?$/i;
+function mergeChoices(blocks, ev) {
+  const out = [];
+  for (let i = 0; i < blocks.length; i++) {
+    const run = [];
+    let j = i;
+    while (j < blocks.length && blocks[j].include && CHOICE.test(blocks[j].title) && (j === i || (!blocks[j].sub && !blocks[j].time))) run.push(blocks[j++]);
+    if (run.length < 2) { out.push(blocks[i]); continue; }
+    const m = Object.assign({}, run[0], { title: run[0].sub || "Entr\u00e9es", sub: "", items: [], inclusions: [], notes: [], equipment: [], stds: [] });
+    for (const b of run) {
+      m.items.push({ name: b.title, head: true, qty: null, tags: "", desc: "", photo: null });
+      m.items.push(...b.items);
+      for (const k of ["inclusions", "notes", "equipment", "stds"]) for (const x of b[k]) if (!m[k].includes(x)) m[k].push(x);
+    }
+    ev.info.push("Combined " + run.map((b) => b.title).join(", ").replace(/, ([^,]*)$/, " and $1") + " into one block, " + m.title + ".");
+    out.push(m);
+    i = j - 1;
+  }
+  return out;
+}
+function buildBlocks(P, rows, ev) {
+  const times = headingTimes(rows);
+  const all = P.sections.slice();
+  for (const b of beverageSections(rows)) {
+    const dup = all.some((s) => s.header === b.header && ((s.items[0] || {}).name || "") === ((b.items[0] || {}).name || ""));
+    if (!dup) all.push(b);
+  }
+  let blocks = all.map((s) => {
+    let time = "";
+    const notes = [];
+    for (const n of s.notes || []) { if (!time && TIME_RE.test(clean(n))) time = clean(n); else notes.push(clean(n)); }
+    if (!time) time = times[s.header] || (s.package && times[s.package]) || "";
+    if (s.setupNote) notes.unshift(s.setupNote);
+    const items = [];
+    for (const it of s.items) {
+      const nm = clean(it.name);
+      // "SHELL:" / "FILLINGS:" lines are parts of the dish above them
+      if (/:$/.test(nm) && items.length) { const prev = items[items.length - 1]; prev.desc = clean(prev.desc + "; " + nm.replace(/:$/, "") + ": " + descText(it)).replace(/^; /, ""); continue; }
+      const mt = CAT ? PHOTOS.match(nm, s.header, CAT) : { status: "none" };
+      items.push({
+        name: fixCaps(nm), qty: it.qty, tags: it.tags || "", alt: !!it.altOf, desc: descText(it),
+        photo: mt.status !== "none" ? { slug: mt.slug, status: mt.status, why: mt.reason || "", on: mt.status === "own" } : null,
+      });
+    }
+    for (const it of items) it.desc = clean(it.desc.replace(/Listed brands are typically[^.]*\.?/i, "").replace(/\s*(ADDITIONAL SERVICES|SERVICE PERSONNEL)\b.*$/, ""));
+    const inclusions = [];
+    for (const inc of s.inclusions || []) {
+      // delivery SEOs have no menu total line, so the text can run on into ADDITIONAL SERVICES and prices
+      let t = (clean(inc.text) || clean(inc.label)).replace(/\s*(ADDITIONAL SERVICES|SERVICE PERSONNEL|EQUIPMENT\b|INVESTMENT BREAKDOWN|Notes:).*$/, "").replace(/\s*\$[\d,]+\.\d{2}.*$/, "");
+      // "... Liability Insurance. Holiday Signature Cocktail Select 1: Mistletoe Merry Mule ..." -> the cocktail choice is its own line
+      const cm = t.match(/^(.*?)\s*\b((?:[A-Z][a-z]+\s){0,2}(?:Signature|Specialty) Cocktails?)\b\s*:?\s*(.*)$/);
+      if (cm && cm[3]) { t = cm[1]; items.push({ name: cm[2], qty: null, tags: "", alt: false, desc: cm[3], photo: null }); }
+      if (t) inclusions.push(t);
+    }
+    const sub = s.package && !/^menu$|passionately/i.test(s.package) ? fixCaps(s.package) : "";
+    const b = {
+      id: "b" + ++UID, include: !/^option\b/i.test(s.header), title: fixCaps(s.header), sub, time: time ? fmtTime(time) : "",
+      items, inclusions,
+      notes, equipment: [], stds: [], extra: "",
+    };
+    const names = (b.title + " " + b.sub + " " + items.map((i) => i.name).join(" ")).toLowerCase();
+    for (const [id, , test] of STDS) if (test && test(names)) b.stds.push(id);
+    return b;
+  }).filter((b) => b.items.length || b.inclusions.length);
+  ev.info = [];
+  const left = blocks.filter((b) => !b.include).map((b) => b.title);
+  if (left.length) ev.info.push("Left out (an option the client hasn't taken): " + left.join(", ") + ".");
+  blocks = mergeChoices(blocks, ev);
+  // place setting standard goes with the plated course
+  if (ev.plated && blocks.length) {
+    const tgt = [/course|plated/i, /preset/i, /entr|dinner/i].map((re) => blocks.find((b) => b.include && re.test(b.title + " " + b.sub))).find(Boolean) || blocks.find((b) => b.include);
+    if (tgt && !tgt.stds.includes("place-setting")) tgt.stds.push("place-setting");
+  }
+  // equipment to the station it's listed for
+  const unplaced = [];
+  for (const e of equipment(rows)) {
+    const parts = e.where.join(", ").split(/[,;]/).map(clean).filter(Boolean);
+    let placed = false;
+    for (const p of parts) {
+      const ps = stems(p);
+      if (!ps.length) continue;
+      const qm = p.match(/^\((\d+)\)/);
+      for (const b of blocks) {
+        const bs = stems(b.title + " " + b.sub);
+        if (ps.every((w) => bs.includes(w))) {
+          const line = "(" + (qm ? qm[1] : e.qty) + ") " + e.name;
+          if (!b.equipment.includes(line)) b.equipment.push(line);
+          placed = true;
+        }
+      }
+    }
+    if (!placed) unplaced.push("(" + e.qty + ") " + e.name + (e.where.length ? " for " + e.where.join(", ").replace(/\(\d+\)\s*/g, "") : ""));
+  }
+  ev.equipment = unplaced;
+  return blocks;
+}
+
+// ---------- state ----------
+// PK: one packet per SEO. EV / BL point at the packet being drawn or edited.
+let EV = null, BL = [];
+const PK = [], BAD = [];
+let EDIT = -1, PDF_URL = "", DIRTY = true;
+
+const MSG = {
+  notpdf: "This isn't a PDF. In Caterease, save the SEO as a PDF and drop that file here.",
+  open: "This PDF couldn't be opened. Save the SEO from Caterease again and retry.",
+  packet: "This is a finished line-up packet, not an SEO. Drop the SEO it was made from.",
+  image: "This PDF is a picture of a page (a scan, a photo, or a proposal or packet from one of our tools), so the menu can't be read. Save the SEO straight from Caterease as a PDF.",
+  notseo: "This doesn't look like a Caterease SEO. Use the Production SEO or the Special Event Order.",
+};
+async function readOne(file) {
+  if (!/\.pdf$/i.test(file.name || "") && file.type !== "application/pdf") throw new Error(MSG.notpdf);
+  let pdf;
+  const buf = new Uint8Array(await file.arrayBuffer());
+  try {
+    try { pdf = await pdfjsLib.getDocument({ data: buf.slice() }).promise; }
+    catch (werr) { pdfjsLib.GlobalWorkerOptions.workerSrc = ""; pdf = await pdfjsLib.getDocument({ data: buf.slice(), disableWorker: true }).promise; }
+  } catch (e) { throw new Error(MSG.open); }
+  let meta = {};
+  try { meta = (await pdf.getMetadata()).info || {}; } catch (e) {}
+  if (/Line-Up Packet/i.test(meta.Creator || "") || /^Line Ups? - /i.test(meta.Title || "")) throw new Error(MSG.packet);
+  const rows = await SEO_LINES.extractRows(pdf);
+  if (rows.length < 5) throw new Error(MSG.image);
+  if (!rows.some((r) => /MENU & INCLUSIONS|SPECIAL EVENT ORDER/.test(r.text))) throw new Error(MSG.notseo);
+  const P = SEO_PARSE.parse(rows);
+  const ev = buildEvent(P, rows);
+  const bl = buildBlocks(P, rows, ev);
+  return { ev, bl, file: file.name || "", pages: 0 };
+}
+const when = (p) => {
+  const d = Date.parse(String(p.ev.date).replace(/^[A-Za-z]+,\s*/, "")) || 0;
+  const m = String(p.ev.depart || p.ev.arrive || p.ev.start || "").match(/(\d{1,2})(?::(\d{2}))?\s*([AP])M/i);
+  const t = m ? ((+m[1] % 12) + (/p/i.test(m[3]) ? 12 : 0)) * 60 + +(m[2] || 0) : 0;
+  return d + t * 60000;
+};
+async function addFiles(files) {
+  files = [...files];
+  if (!files.length) return;
+  const busy = $("#busy");
+  busy.hidden = false;
+  if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  await loadCatalog();
+  for (let i = 0; i < files.length; i++) {
+    busy.textContent = "Reading " + (i + 1) + " of " + files.length + "…";
+    try { PK.push(await readOne(files[i])); }
+    catch (e) { console.error(e); BAD.push({ file: files[i].name || "File", msg: e && MSG_VALUES.includes(e.message) ? e.message : MSG.notseo }); }
+  }
+  busy.hidden = true;
+  PK.sort((a, b) => when(a) - when(b));
+  window.__LP = { PK, BAD };
+  if (!PK.length) { $("#startbad").innerHTML = badHTML(); return; }
+  $("#start").hidden = true; $("#work").hidden = false; $("#restart").hidden = false;
+  EDIT = -1;
+  renderPages(); renderSide();
+}
+const MSG_VALUES = Object.values(MSG);
+const badHTML = () => BAD.map((b) => `<div class="bad"><b>${esc(b.file)}</b>${esc(b.msg)}</div>`).join("");
+
+// ---------- the list: what reception sees ----------
+function checks(p, i) {
+  const out = [], e = p.ev;
+  if (!p.bl.some((b) => b.include)) out.push("No menu was found in this SEO, so the packet has no stations.");
+  if (!clean(e.guests)) out.push("No guest count on the SEO.");
+  const d = Date.parse(String(e.date).replace(/^[A-Za-z]+,\s*/, ""));
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  if (d && d < today.getTime()) out.push("This event is dated " + e.date + ", which has already passed. Is it the right SEO?");
+  if (e.seo && PK.some((q, k) => k !== i && q.ev.seo === e.seo)) out.push("Another file has the same SEO number, " + e.seo + ". If one is an older copy, remove it.");
+  return out;
+}
+function renderSide() {
+  if (EDIT >= 0) return renderEditor();
+  const n = PK.length, pages = PK.reduce((a, p) => a + p.pages, 0);
+  let h = `<button id="go">Print ${n === 1 ? "the packet" : n + " packets"}<small>${pages} page${pages === 1 ? "" : "s"}, in order of event time</small></button><p id="after"></p>`;
+  if (CAT && CAT.offline) h += `<div class="bad"><b>No photos</b>The Lookbook couldn't be reached, so these packets have no dish photos. Check the internet connection and start over.</div>`;
+  h += badHTML();
+  h += PK.map((p, i) => {
+    const c = checks(p, i), e = p.ev;
+    return `<div class="pk" data-p="${i}"><div class="pk-n">${esc(e.event || p.file)}</div>
+     <div class="pk-m">${esc([e.client && e.client !== e.event ? e.client : "", e.venue].filter(clean).join(" \u00b7 "))}</div>
+     <div class="pk-m">${esc([e.date, e.start, e.guests ? e.guests + " guests" : "", p.pages + " page" + (p.pages === 1 ? "" : "s")].filter(clean).join(" · "))}</div>
+     ${c.length ? `<ul>${c.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : `<div class="ok">Nothing to check</div>`}
+     ${(e.info || []).map((t) => `<div class="inf">${esc(t)}</div>`).join("")}
+     <div class="pk-b"><button data-a="edit">Make changes</button><button data-a="rm">Remove</button></div></div>`;
+  }).join("");
+  h += `<label class="more">Add more SEOs<input type="file" id="morefile" accept="application/pdf,.pdf" multiple></label>`;
+  $("#ed").innerHTML = h;
+  $("#ed").scrollTop = 0;
+}
+
+// ---------- editor ----------
+const EVF = [["event", "Event"], ["client", "Client"], ["date", "Date"], ["guests", "Guest count"], ["supervisor", "Supervisor"], ["chef", "Lead chef"], ["venue", "Venue", 1], ["address", "Address", 1], ["arrive", "Arrive on site"], ["start", "Event start"], ["end", "Event ends"], ["breakdown", "Breakdown done"]];
+function renderEditor() {
+  const ed = $("#ed");
+  EV = PK[EDIT].ev; BL = PK[EDIT].bl;
+  let h = `<div class="ed-h">Event</div><div class="grid2">` + EVF.map(([k, l, w]) => `<label class="fld${w ? " wide" : ""}">${l}<input type="text" data-ev="${k}" value="${esc(EV[k])}"${k === "supervisor" || k === "chef" ? ' placeholder="Leave blank to write in"' : ""}></label>`).join("") + `</div>`;
+  h += `<div class="ed-h">Stations (${BL.filter((b) => b.include).length} printing)</div><p class="tip">Uncheck a station to leave it out. Merge up joins a station into the one above it. Photos with a checkmark print on the block.</p>`;
+  h += BL.map((b, i) => `<div class="eb${b.include ? "" : " off"}" data-i="${i}">
+    <div class="eb-top"><input type="checkbox" data-f="include" ${b.include ? "checked" : ""} aria-label="Print this station"><input type="text" class="eb-title" data-f="title" value="${esc(b.title)}" aria-label="Station name"><input type="text" class="eb-time" data-f="time" value="${esc(b.time)}" placeholder="Time" aria-label="Time"></div>
+    ${b.sub ? `<div class="eb-sub">${esc(b.sub)}</div>` : ""}
+    <div class="eb-items">${b.items.map((it, j) => it.photo
+      ? `<label class="pi"><input type="checkbox" data-f="photo" data-j="${j}" ${it.photo.on ? "checked" : ""}><img src="${esc(photoSrc(it.photo.slug))}" alt="">${esc(it.name)}${it.photo.status === "review" ? ` <small>not a sure match</small>` : ""}</label>`
+      : `<div class="pi nop"><span class="noimg"></span>${esc(it.name)}</div>`).join("")}</div>
+    <details><summary>QR code: ${b.stds.length ? esc(b.stds.map(stdName).join(", ")) : "none"}</summary>${STDS.map(([id, nm]) => `<label><input type="checkbox" data-f="std" data-id="${id}" ${b.stds.includes(id) ? "checked" : ""}>${esc(nm)}</label>`).join("")}</details>
+    <textarea data-f="extra" placeholder="Notes for this station (prints on the block)">${esc(b.extra)}</textarea>
+    <div class="eb-btns"><button data-a="up">Move up</button><button data-a="down">Move down</button>${i ? `<button data-a="merge">Merge up</button>` : ""}<button data-a="del">Remove</button></div>
+  </div>`).join("");
+  h += `<button id="addblock">Add a station</button><p class="tip">Supervisors fill in the assignment lines by hand on site.</p>`;
+  ed.innerHTML = `<button id="back">\u2190 Done, back to all packets</button>` + h;
+}
+let tmr = 0;
+const later = () => { clearTimeout(tmr); tmr = setTimeout(renderPages, 250); };
+$("#ed").addEventListener("input", (e) => {
+  const t = e.target;
+  if (t.dataset.ev) { EV[t.dataset.ev] = t.value; return later(); }
+  const card = t.closest(".eb"); if (!card) return;
+  const b = BL[+card.dataset.i], f = t.dataset.f;
+  if (f === "title" || f === "time" || f === "extra") { b[f] = t.value; later(); }
+});
+$("#ed").addEventListener("change", (e) => {
+  if (e.target.id === "morefile") { $("#start").hidden = false; $("#drop").hidden = true; document.querySelector(".steps").hidden = true; addFiles(e.target.files).then(() => { $("#start").hidden = PK.length > 0; }); return; }
+  const t = e.target, card = t.closest(".eb"); if (!card) return;
+  const b = BL[+card.dataset.i], f = t.dataset.f;
+  if (f === "include") { b.include = t.checked; card.classList.toggle("off", !t.checked); }
+  else if (f === "photo") b.items[+t.dataset.j].photo.on = t.checked;
+  else if (f === "std") { b.stds = b.stds.filter((x) => x !== t.dataset.id); if (t.checked) b.stds.push(t.dataset.id); renderEditor(); }
+  renderPages();
+});
+$("#ed").addEventListener("click", (e) => {
+  const t = e.target.closest("button") || e.target;
+  if (t.id === "go") return printAll();
+  if (t.id === "back") { EDIT = -1; renderPages(); renderSide(); return; }
+  const pk = t.closest(".pk");
+  if (pk && t.dataset.a) {
+    const i = +pk.dataset.p;
+    if (t.dataset.a === "edit") { EDIT = i; renderSide(); $("#ed").scrollTop = 0; const el = document.querySelector(`#out [data-pk="${i}"]`); if (el) el.scrollIntoView({ block: "start" }); }
+    else if (t.dataset.a === "rm") { PK.splice(i, 1); if (!PK.length) return location.reload(); renderPages(); renderSide(); }
+    return;
+  }
+  if (t.id === "addblock") { BL.push({ id: "b" + ++UID, include: true, title: "New station", sub: "", time: "", items: [], inclusions: [], notes: [], equipment: [], stds: [], extra: "" }); renderEditor(); renderPages(); return; }
+  const a = t.dataset.a, card = t.closest(".eb"); if (!a || !card) return;
+  const i = +card.dataset.i;
+  if (a === "up" && i > 0) [BL[i - 1], BL[i]] = [BL[i], BL[i - 1]];
+  else if (a === "down" && i < BL.length - 1) [BL[i + 1], BL[i]] = [BL[i], BL[i + 1]];
+  else if (a === "del") BL.splice(i, 1);
+  else if (a === "merge" && i > 0) {
+    const up = BL[i - 1], b = BL[i];
+    // a merged sub-course keeps its own heading as a line in the list ("Chicken")
+    if (b.items.length) up.items.push({ name: b.title, head: true, qty: null, tags: "", desc: "", photo: null });
+    up.items.push(...b.items); up.inclusions.push(...b.inclusions); up.notes.push(...b.notes);
+    for (const x of b.equipment) if (!up.equipment.includes(x)) up.equipment.push(x);
+    for (const x of b.stds) if (!up.stds.includes(x)) up.stds.push(x);
+    up.extra = clean(up.extra + " " + b.extra); if (!up.time) up.time = b.time;
+    BL.splice(i, 1);
+  }
+  renderEditor(); renderPages();
+});
+
+// ---------- printed pages ----------
+const val = (v) => (clean(v) ? esc(v) : `<span class="blank"></span>`);
+const tg = (t) => (t ? ` <span class="tg">${esc(t)}</span>` : "");
+function headHTML() {
+  const e = EV;
+  const times = [["DEPART", e.depart], ["ARRIVE", e.arrive], ["START", e.start], ["ENDS", e.end], ["BREAKDOWN DONE", e.breakdown]].filter((x) => clean(x[1]));
+  return `<div class="ls-title">LINE UP SHEET</div>
+  <div class="ls-head"><img class="ls-logo" src="${BASE}proposal-builder/logo.png" alt="Puff 'n Stuff">
+   <div class="ls-box"><div><b>DATE:</b> ${val(e.date)}</div><div><b>EVENT:</b> ${val(e.event)}${e.client && e.client !== e.event ? " (" + esc(e.client) + ")" : ""}</div><div><b>SUPERVISOR:</b> ${val(e.supervisor)}</div><div><b>LEAD CHEF:</b> ${val(e.chef)}</div><div><b>GUEST COUNT:</b> ${val(e.guests)}${e.seo ? ` &nbsp; <b>SEO:</b> ${esc(e.seo)}` : ""}</div></div></div>
+  <div class="ls-meta">${[e.venue, e.address].filter(clean).map(esc).join(" · ")}${e.contact ? `<br>On-site contact: ${esc(e.contact)}` : ""}${e.service ? ` · ${esc(e.service)}` : ""}</div>
+  ${times.length ? `<div class="ls-times">${times.map(([k, v]) => `<span><b>${k}</b>${esc(v)}</span>`).join("")}</div>` : ""}
+  ${e.staff.length ? `<div class="ls-meta"><b>Team:</b> ${esc(e.staff.join(", "))}</div>` : ""}
+  ${e.alerts.map((a) => `<div class="ls-alert">${esc(a)}</div>`).join("")}
+  <div class="ls-menuhead">MENU</div>`;
+}
+function menuBox(b) {
+  return `<div class="mbox"><div class="mb-h">${b.time ? esc(b.time) + " - " : ""}${esc(b.title)}${b.sub ? `<span class="t">${esc(b.sub)}</span>` : ""}</div><ul>${b.items.map((it) =>
+    it.head ? `<li class="alt"><b>${esc(it.name)}</b></li>`
+    : it.alt ? `<li class="alt">or <b>${esc(it.name)}</b>${it.desc ? ": " + esc(it.desc) : ""}${tg(it.tags)}</li>`
+    : `<li><b>${esc(it.name)}${it.desc ? ":" : ""}</b> ${esc(it.desc)}${tg(it.tags)}</li>`).join("")}${b.items.length ? "" : b.inclusions.map((x) => `<li class="inc">${esc(x)}</li>`).join("")}</ul></div>`;
+}
+function notesBox() {
+  const n = EV.notes;
+  const eq = EV.equipment || [];
+  if (!n.length && !eq.length) return "";
+  return `<div class="nbox">${n.length ? `<h4>EVENT NOTES</h4><div class="nl">${n.map((t) => `<div>${esc(t)}</div>`).join("")}</div>` : ""}${eq.length ? `<h4 style="margin-top:${n.length ? 6 : 0}px">EQUIPMENT</h4><div class="nl">${eq.map((t) => `<div>${esc(t)}</div>`).join("")}</div>` : ""}</div>`;
+}
+function qrSVG(id) {
+  const q = qrcode(0, "M"); q.addData(STD_URL + id); q.make();
+  return q.createSvgTag({ cellSize: 3, margin: 0, scalable: true });
+}
+function cardHTML(b, maxPhotos) {
+  const photos = [];
+  for (const it of b.items) if (it.photo && it.photo.on && !photos.some((p) => p.slug === it.photo.slug)) photos.push({ slug: it.photo.slug, name: it.name });
+  const shown = photos.slice(0, maxPhotos);
+  const info = [];
+  if (b.inclusions.length) info.push(["SETUP", b.inclusions.join(" ")]);
+  if (b.equipment.length) info.push(["EQUIPMENT", b.equipment.join(", ")]);
+  const notes = b.notes.concat(clean(b.extra) ? [b.extra] : []);
+  if (notes.length) info.push(["NOTES", notes.join(" ")]);
+  return `<div class="card">
+   <div class="c-h"><div>${b.time ? `<div class="c-time">${esc(b.time)}</div>` : ""}<div class="c-title">${esc(b.title)}</div>${b.sub ? `<div class="c-sub">${esc(b.sub)}</div>` : ""}</div>
+    ${b.stds.length ? `<div class="c-qrs">${b.stds.map((id) => `<div class="c-qr">${qrSVG(id)}Station standard:<br><b>${esc(stdName(id))}</b></div>`).join("")}</div>` : ""}</div>
+   ${b.items.length ? `<div class="c-items">${b.items.map((it) => it.head ? `<div class="hd"><b>${esc(it.name)}</b></div>` : `<div class="${it.alt ? "alt" : ""}">${it.qty != null ? `<span class="q">(${it.qty})</span>` : ""}${it.alt ? "or " : ""}${esc(it.name)}${tg(it.tags)}</div>`).join("")}</div>` : ""}
+   ${info.map(([k, v]) => `<div class="c-info"><b>${k}</b>${esc(v)}</div>`).join("")}
+   ${shown.length ? `<div class="c-photos">${shown.map((p) => `<figure><img src="${esc(photoSrc(p.slug))}" alt="" crossorigin="anonymous"><figcaption>${esc(p.name)}</figcaption></figure>`).join("")}</div>` : ""}
+   <div class="c-assign"><div class="a-row">SET UP<i></i></div><div class="a-row">GUEST ARRIVAL<i></i></div><div class="a-row">SERVICE<i></i></div><div class="a-row">BREAKDOWN<i></i></div><div class="a-row w">NOTES<i></i></div></div>
+  </div>`;
+}
+
+const PAGE_H = 1056 - 40 - 58; // content height inside .pin
+function measure(html, width) {
+  const s = $("#sizer");
+  s.innerHTML = `<div class="page"><div class="pin" style="width:${width || 728}px">${html}</div></div>`;
+  return s.querySelector(".pin").firstElementChild ? s.querySelector(".pin").getBoundingClientRect().height : 0;
+}
+// the pages of the packet EV / BL point at
+function pagesFor() {
+  const blocks = BL.filter((b) => b.include);
+  const pages = [];
+  const headH = measure(headHTML());
+  const quoteRoom = 26;
+  const colW = (728 - 18) / 2;
+  const boxes = blocks.map((b) => ({ html: menuBox(b), h: measure(menuBox(b), colW) + 12 }));
+  let pg = { head: true, cols: [[], []], ch: [0, 0], avail: PAGE_H - headH - quoteRoom, tail: "" };
+  pages.push(pg);
+  for (const bx of boxes) {
+    const k = pg.ch[0] <= pg.ch[1] ? 0 : 1;
+    let put = pg.ch[k] + bx.h <= pg.avail ? k : pg.ch[1 - k] + bx.h <= pg.avail ? 1 - k : -1;
+    if (put < 0 && (pg.cols[0].length || pg.cols[1].length)) {
+      pg = { head: false, cols: [[], []], ch: [0, 0], avail: PAGE_H - quoteRoom, tail: "" };
+      pages.push(pg); put = 0;
+    } else if (put < 0) put = k;
+    pg.cols[put].push(bx.html); pg.ch[put] += bx.h;
+  }
+  const nb = notesBox();
+  if (nb) {
+    const nh = measure(nb);
+    if (Math.max(pg.ch[0], pg.ch[1]) + nh > pg.avail) { pg = { head: false, cols: [[], []], ch: [0, 0], avail: PAGE_H - quoteRoom, tail: "" }; pages.push(pg); }
+    pg.tail = nb;
+  }
+  const menuPages = pages.map((p) => `${p.head ? headHTML() : `<div class="sp-head"><span class="k">MENU (CONTINUED)</span><span class="e">${esc(EV.event)}</span></div>`}<div class="cols"><div class="col">${p.cols[0].join("")}</div><div class="col">${p.cols[1].join("")}</div></div>${p.tail}`);
+  const spHead = `<div class="sp-head"><span class="k">STATION ASSIGNMENTS</span><span class="e">${esc([EV.event, EV.date].filter(clean).join(" · "))}</span></div>`;
+  const spH = measure(spHead) + 0;
+  const stationPages = [];
+  let cur = [], used = spH;
+  for (const b of blocks) {
+    let max = 8, html = cardHTML(b, max), h = measure(html) + 14;
+    while (h > PAGE_H - spH && max > 0) { max -= 4; html = cardHTML(b, Math.max(max, 0)); h = measure(html) + 14; }
+    if (used + h > PAGE_H && cur.length) { stationPages.push(cur); cur = []; used = spH; }
+    cur.push(html); used += h;
+  }
+  if (cur.length) stationPages.push(cur);
+  const all = menuPages.map((c) => ({ c, quote: true })).concat(stationPages.map((cards) => ({ c: spHead + cards.join(""), quote: false })));
+  const n = all.length;
+  const foot = (i) => `<div class="pfoot"><span>${esc([EV.seo, EV.event].filter(clean).join(" · "))}</span><span>Page ${i + 1} of ${n}</span></div>`;
+  return all.map((p, i) => `<div class="page"><div class="pin">${p.c}</div>${p.quote ? `<div class="quote">${esc(QUOTE)}</div>` : ""}${foot(i)}</div>`);
+}
+function renderPages() {
+  if (!PK.length) return;
+  DIRTY = true;
+  let html = "";
+  PK.forEach((p, i) => {
+    EV = p.ev; BL = p.bl;
+    const pages = pagesFor();
+    p.pages = pages.length;
+    html += `<div data-pk="${i}">${PK.length > 1 ? `<div class="pk-sep">${i + 1} of ${PK.length} · ${esc(p.ev.event)}</div>` : ""}${pages.join("")}</div>`;
+  });
+  if (EDIT >= 0) { EV = PK[EDIT].ev; BL = PK[EDIT].bl; }
+  $("#out").innerHTML = html;
+  $("#sizer").innerHTML = "";
+  fit();
+}
+function fit() {
+  const pv = $("#pv"), sc = $("#scale");
+  const k = Math.min(1, (pv.clientWidth - 40) / 816);
+  sc.style.transform = `scale(${k})`;
+  sc.style.width = "816px";
+  sc.style.height = $("#out").scrollHeight * k + "px";
+}
+window.addEventListener("resize", () => { if (PK.length) fit(); });
+
+// ---------- input ----------
+const drop = $("#drop");
+$("#file").addEventListener("change", (e) => addFiles(e.target.files));
+["dragenter", "dragover"].forEach((t) => document.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add("hot"); }));
+["dragleave", "drop"].forEach((t) => document.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove("hot"); }));
+// a drop anywhere on the page counts, before or after the first batch
+document.addEventListener("drop", (e) => { if (e.dataTransfer && e.dataTransfer.files.length) addFiles(e.dataTransfer.files); });
+$("#restart").addEventListener("click", () => location.reload());
+
+// ---------- print ----------
+// One button: build the PDF, then hand it to the printer. The PDF is built in the page, so an unreachable default printer can't hang the preview.
+const safe = (t) => t.replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim();
+const fileName = () => {
+  if (PK.length === 1) return safe("Line Up - " + [PK[0].ev.event, PK[0].ev.date].filter(clean).join(" - "));
+  const dates = [...new Set(PK.map((p) => p.ev.date).filter(clean))];
+  return safe("Line Ups - " + (dates.length === 1 ? dates[0] : dates[0] + " to " + dates[dates.length - 1]) + " (" + PK.length + " events)");
+};
+const LIBS = [["htmlToImage", "https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"], ["jspdf", "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"]];
+const loadScript = (src) => new Promise((ok, bad) => { const t = document.createElement("script"); t.src = src; t.onload = ok; t.onerror = () => bad(new Error("Couldn't load " + src)); document.head.appendChild(t); });
+async function buildPDF(say) {
+  for (const [g, src] of LIBS) if (!window[g]) await loadScript(src);
+  await document.fonts.ready;
+  const pages = [...document.querySelectorAll("#out .page")];
+  await Promise.all([...document.querySelectorAll("#out img")].map((im) => im.complete ? 0 : new Promise((r) => { im.onload = im.onerror = r; })));
+  const fontEmbedCSS = await htmlToImage.getFontEmbedCSS(pages[0]);
+  const pdf = new jspdf.jsPDF({ unit: "in", format: "letter", orientation: "portrait", compress: true });
+  for (let i = 0; i < pages.length; i++) {
+    say(`Getting page ${i + 1} of ${pages.length} ready…`);
+    const url = await htmlToImage.toJpeg(pages[i], { quality: 0.92, pixelRatio: 2, backgroundColor: "#ffffff", fontEmbedCSS, style: { margin: "0", boxShadow: "none", transform: "none" } });
+    if (i) pdf.addPage("letter", "portrait");
+    pdf.addImage(url, "JPEG", 0, 0, 8.5, 11, undefined, "FAST");
+  }
+  pdf.setProperties({ title: fileName(), creator: "Puff 'n Stuff Line-Up Packet" });
+  return pdf.output("blob");
+}
+async function printAll() {
+  const btn = $("#go"), label = btn.innerHTML, after = $("#after");
+  const chromium = /Chrome\//.test(navigator.userAgent);
+  // other browsers can't print a PDF from inside the page, so the packet opens in its own tab (opened now, while the click still allows it)
+  const tab = chromium ? null : window.open("", "_blank");
+  if (tab) tab.document.write("<p style='font:16px sans-serif;padding:24px'>Getting the packets ready…</p>");
+  btn.disabled = true; after.textContent = "";
+  try {
+    if (DIRTY || !PDF_URL) {
+      const blob = await buildPDF((t) => { btn.innerHTML = t; });
+      if (PDF_URL) URL.revokeObjectURL(PDF_URL);
+      PDF_URL = URL.createObjectURL(blob); DIRTY = false;
+    }
+    const name = fileName() + ".pdf";
+    if (chromium) {
+      const old = document.getElementById("printframe"); if (old) old.remove();
+      const f = document.createElement("iframe");
+      f.id = "printframe"; f.style.cssText = "position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;visibility:hidden";
+      f.onload = () => setTimeout(() => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { console.warn(e); } }, 500);
+      f.src = PDF_URL; document.body.appendChild(f);
+    } else if (tab) tab.location = PDF_URL;
+    after.innerHTML = `${tab ? "The packets opened in a new tab. Print from there." : "The print window is opening."} If it doesn't, <a href="${PDF_URL}" target="_blank" rel="noopener">open the packets</a> or <a href="${PDF_URL}" download="${esc(name)}" id="savepdf">save them as a file</a>.`;
+  } catch (err) {
+    console.error(err);
+    if (tab) tab.close();
+    after.textContent = "The packets couldn't be made (" + (err && err.message ? err.message : err) + "). Check the internet connection and press Print again.";
+  } finally { btn.innerHTML = label; btn.disabled = false; }
+}
+}
+</script>
+</body>
+</html>
