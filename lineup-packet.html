@@ -115,7 +115,7 @@ button,input,textarea,select{font:inherit;color:inherit}
 .ls-times span:first-child{border-left:0}
 .ls-times b{letter-spacing:.06em;font-size:9.5px;color:#66665f;margin-right:4px}
 .ls-alert{margin:8px auto 0;border:1.5px solid #1d1d1b;padding:5px 10px;font-size:12px;font-weight:700;text-align:center;max-width:620px}
-.ls-menuhead{text-align:center;font-family:"Cormorant",serif;font-weight:600;font-size:30px;letter-spacing:.1em;margin:8px 0 6px}
+.ls-menuhead{text-align:center;font-family:"Cormorant",serif;font-weight:600;font-size:24px;letter-spacing:.1em;margin:6px 0 5px}
 .cols{display:flex;gap:18px;align-items:flex-start}
 .col{flex:1;min-width:0}
 .mbox{border:1px solid #1d1d1b;margin-bottom:12px;break-inside:avoid}
@@ -158,6 +158,26 @@ button,input,textarea,select{font:inherit;color:inherit}
 .a-row{display:flex;align-items:flex-end;gap:6px;height:28px;font-size:10px;font-weight:700;letter-spacing:.08em}
 .a-row i{flex:1;border-bottom:1px solid #1d1d1b;height:1px}
 .a-row.w{grid-column:1/-1}
+.ls-qr{width:92px;text-align:center;font-size:8.5px;line-height:1.2;color:#33332f;flex:none}
+.ls-qr svg{width:74px;height:74px;display:block;margin:0 auto 3px}
+.ls-warn{text-align:center;font-size:11px;font-weight:700;margin-top:5px}
+.mine{border:1.5px solid #1d1d1b;padding:7px 12px 9px;margin:0 0 10px}
+.mine .a-row{height:24px}
+.nbox.one{margin-bottom:12px}
+.nbox.one .nl{display:block}
+.mine h4{margin:0;font-size:11px;letter-spacing:.14em;font-weight:700}
+.mine .c-assign{margin-top:2px}
+.ph-sec{margin-bottom:12px}
+.ph-h{font-family:"Cormorant",serif;font-weight:600;font-size:17px;border-bottom:1px solid #c9c9c3;padding-bottom:2px;margin-bottom:6px}
+.ph-h span{font-family:"Lato",sans-serif;font-size:10px;letter-spacing:.1em;font-weight:700;color:#55554f;margin-right:8px}
+.ph-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.ph-grid figure{margin:0}
+.ph-grid img{width:100%;height:92px;object-fit:cover;display:block;background:#eee}
+.ph-grid figcaption{font-size:9.5px;line-height:1.2;margin-top:2px;color:#1d1d1b}
+.pk-c{display:flex;align-items:center;gap:8px;font-size:13px;margin-top:8px;color:var(--sc)}
+.pk-c input{width:64px;font-size:15px;padding:5px 7px;border:1px solid var(--line);border-radius:2px;min-height:34px}
+.dup{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.4;color:var(--sc);margin:10px 0 0}
+.dup input{width:18px;height:18px;accent-color:var(--mr);flex:none;margin-top:1px}
 #sizer{position:absolute;left:-12000px;top:0;width:816px;visibility:hidden}
 #sizer .page{height:auto;min-height:0;overflow:visible}
 #sizer .pin{position:static;padding:0}
@@ -185,7 +205,7 @@ button,input,textarea,select{font:inherit;color:inherit}
     <ol class="steps">
       <li><b>Save the SEOs.</b> Save each of tomorrow's Production SEOs from Caterease as a PDF.</li>
       <li><b>Drop them all here.</b> Every event at once is fine. They stay on this computer.</li>
-      <li><b>Press Print.</b> One packet per event comes out, in order of event time.</li>
+      <li><b>Press Print.</b> Set the copies for each event, one per team member, and print double-sided.</li>
     </ol>
     <label id="drop">
       <input type="file" id="file" accept="application/pdf,.pdf" multiple>
@@ -914,7 +934,18 @@ const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const clean = (s) => String(s || "").replace(/\s+/g, " ").trim();
 const STD_URL = "https://training.puffnstuff.com/#station/";
-const QUOTE = "“Your customer doesn’t care how much you know until they know how much you care.” –Damon Richards";
+// Hospitality quote at the foot of the line-up sheet. One per week, in order; the week comes from the event date, so every packet for the same week matches.
+// Add a quote by adding a line.
+const QUOTES = [
+  "\u201cYour customer doesn\u2019t care how much you know until they know how much you care.\u201d \u2013Damon Richards",
+];
+const quoteFor = (ev) => {
+  const d = Date.parse(String(ev.date).replace(/^[A-Za-z]+,\s*/, "")) || Date.now();
+  // weeks counted from a Monday (Jan 5, 1970), so the quote changes each Monday
+  const wk = Math.floor((d - 4 * 864e5) / (7 * 864e5));
+  return QUOTES[((wk % QUOTES.length) + QUOTES.length) % QUOTES.length];
+};
+const ALL_STATIONS_URL = "https://training.puffnstuff.com/#stations";
 
 // Station standards on the training site. Same ids as station-qr-codes.html, so these QR codes open the same pages as the printed ones.
 // The test runs on the station name plus its dish names.
@@ -998,19 +1029,36 @@ function beverageSections(rows) {
 // Notes under the timeline (the event's run of show, set-up notes) and site details (delivery window, unit #)
 function eventNotes(rows) {
   const out = [];
+  const add = (t) => { t = clean(t); if (t.length > 1 && !out.includes(t)) out.push(t); };
   const S = rows.findIndex((r) => clean(r.text) === "EVENT SITE DETAILS");
   const TL = rows.findIndex((r) => clean(r.text) === "TIMELINE");
   const T = rows.findIndex((r) => /Departure\s+Arrival on Site/i.test(r.text));
   const M = rows.findIndex((r) => /MENU & INCLUSIONS/.test(r.text));
   if (S >= 0 && TL > S) for (const r of rows.slice(S + 1, TL)) {
     const t = clean(r.text);
-    if (t && !/^Event Site Location:/i.test(t) && !junkRow(r)) out.push(t.replace(/\s*-$/, ""));
+    if (t && !/^Event Site Location:/i.test(t) && !junkRow(r)) add(t.replace(/\s*-$/, ""));
   }
-  if (T >= 0) for (const r of rows.slice(T + 2, M > T ? M : T + 60)) {
+  const end = M > T ? M : T + 60;
+  if (T >= 0) for (const r of rows.slice(T + 2, end)) {
     const t = clean(r.text).replace(/^Notes:\s*/i, "");
-    if (t && !junkRow(r) && !/^TIMELINE$/i.test(t)) out.push(t);
+    if (t && !junkRow(r) && !/^TIMELINE$/i.test(t)) add(t);
   }
-  return out.filter((t) => t.length > 1);
+  // Notes and Comments printed anywhere else on the SEO (the comments box, a note under the last section)
+  const STOP = /^(QTY\b|SERVICE PERSONNEL|EQUIPMENT$|ADDITIONAL SERVICES|INVESTMENT BREAKDOWN|FACILITY RENTAL|PAYMENT TERMS|MENU & INCLUSIONS|[A-Za-z &]+ Total\b)|\$[\d,]+\.\d{2}\s*$/;
+  for (let i = 0; i < rows.length; i++) {
+    if (T >= 0 && i >= T && i < end) continue;
+    const m = clean(rows[i].text).match(/^((?:Event |Email |Internal |Production |Kitchen )?(?:Notes|Comments))\s*:\s*(.*)$/i);
+    if (!m || junkRow(rows[i])) continue;
+    if (m[2]) add(m[2]);
+    for (let k = i + 1; k < rows.length && k < i + 40; k++) {
+      const t = clean(rows[k].text);
+      if (junkRow(rows[k])) continue;
+      if (!t || STOP.test(t) || (rows[k].bold && rows[k].size >= 11.5) || rows[k].x < rows[i].x - 2) break;
+      if (rows[k].x <= rows[i].x + 2 && rows[k].bold) break; // the next label at the same indent
+      add(t);
+    }
+  }
+  return out;
 }
 function allergyLines(rows) {
   const M = rows.findIndex((r) => /MENU & INCLUSIONS/.test(r.text));
@@ -1186,7 +1234,8 @@ function buildBlocks(P, rows, ev) {
 // PK: one packet per SEO. EV / BL point at the packet being drawn or edited.
 let EV = null, BL = [];
 const PK = [], BAD = [];
-let EDIT = -1, PDF_URL = "", DIRTY = true;
+let EDIT = -1, PDF_URL = "", DIRTY = true, DUPLEX = true;
+const sides = (p) => p.pages + (DUPLEX && p.pages % 2 ? 1 : 0);
 
 const MSG = {
   notpdf: "This isn't a PDF. In Caterease, save the SEO as a PDF and drop that file here.",
@@ -1212,7 +1261,7 @@ async function readOne(file) {
   const P = SEO_PARSE.parse(rows);
   const ev = buildEvent(P, rows);
   const bl = buildBlocks(P, rows, ev);
-  return { ev, bl, file: file.name || "", pages: 0 };
+  return { ev, bl, file: file.name || "", pages: 0, copies: 1 };
 }
 const when = (p) => {
   const d = Date.parse(String(p.ev.date).replace(/^[A-Za-z]+,\s*/, "")) || 0;
@@ -1256,8 +1305,9 @@ function checks(p, i) {
 }
 function renderSide() {
   if (EDIT >= 0) return renderEditor();
-  const n = PK.length, pages = PK.reduce((a, p) => a + p.pages, 0);
-  let h = `<button id="go">Print ${n === 1 ? "the packet" : n + " packets"}<small>${pages} page${pages === 1 ? "" : "s"}, in order of event time</small></button><p id="after"></p>`;
+  const n = PK.length, pages = PK.reduce((a, p) => a + sides(p) * p.copies, 0), copies = PK.reduce((a, p) => a + p.copies, 0);
+  let h = `<button id="go">Print<small>${n} event${n === 1 ? "" : "s"}, ${copies} cop${copies === 1 ? "y" : "ies"}, ${pages} printed side${pages === 1 ? "" : "s"}</small></button><p id="after"></p>
+  <label class="dup"><input type="checkbox" id="duplex" ${DUPLEX ? "checked" : ""}>Printing double-sided. Each copy starts on a new sheet of paper.</label>`;
   if (CAT && CAT.offline) h += `<div class="bad"><b>No photos</b>The Lookbook couldn't be reached, so these packets have no dish photos. Check the internet connection and start over.</div>`;
   h += badHTML();
   h += PK.map((p, i) => {
@@ -1267,6 +1317,7 @@ function renderSide() {
      <div class="pk-m">${esc([e.date, e.start, e.guests ? e.guests + " guests" : "", p.pages + " page" + (p.pages === 1 ? "" : "s")].filter(clean).join(" · "))}</div>
      ${c.length ? `<ul>${c.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : `<div class="ok">Nothing to check</div>`}
      ${(e.info || []).map((t) => `<div class="inf">${esc(t)}</div>`).join("")}
+     <label class="pk-c">Copies<input type="number" min="1" max="99" value="${p.copies}" data-f="copies" inputmode="numeric"> one per team member</label>
      <div class="pk-b"><button data-a="edit">Make changes</button><button data-a="rm">Remove</button></div></div>`;
   }).join("");
   h += `<label class="more">Add more SEOs<input type="file" id="morefile" accept="application/pdf,.pdf" multiple></label>`;
@@ -1287,11 +1338,10 @@ function renderEditor() {
     <div class="eb-items">${b.items.map((it, j) => it.photo
       ? `<label class="pi"><input type="checkbox" data-f="photo" data-j="${j}" ${it.photo.on ? "checked" : ""}><img src="${esc(photoSrc(it.photo.slug))}" alt="">${esc(it.name)}${it.photo.status === "review" ? ` <small>not a sure match</small>` : ""}</label>`
       : `<div class="pi nop"><span class="noimg"></span>${esc(it.name)}</div>`).join("")}</div>
-    <details><summary>QR code: ${b.stds.length ? esc(b.stds.map(stdName).join(", ")) : "none"}</summary>${STDS.map(([id, nm]) => `<label><input type="checkbox" data-f="std" data-id="${id}" ${b.stds.includes(id) ? "checked" : ""}>${esc(nm)}</label>`).join("")}</details>
     <textarea data-f="extra" placeholder="Notes for this station (prints on the block)">${esc(b.extra)}</textarea>
     <div class="eb-btns"><button data-a="up">Move up</button><button data-a="down">Move down</button>${i ? `<button data-a="merge">Merge up</button>` : ""}<button data-a="del">Remove</button></div>
   </div>`).join("");
-  h += `<button id="addblock">Add a station</button><p class="tip">Supervisors fill in the assignment lines by hand on site.</p>`;
+  h += `<button id="addblock">Add a station</button><p class="tip">Each team member writes their own assignment on the sheet.</p>`;
   ed.innerHTML = `<button id="back">\u2190 Done, back to all packets</button>` + h;
 }
 let tmr = 0;
@@ -1305,6 +1355,8 @@ $("#ed").addEventListener("input", (e) => {
 });
 $("#ed").addEventListener("change", (e) => {
   if (e.target.id === "morefile") { $("#start").hidden = false; $("#drop").hidden = true; document.querySelector(".steps").hidden = true; addFiles(e.target.files).then(() => { $("#start").hidden = PK.length > 0; }); return; }
+  if (e.target.id === "duplex") { DUPLEX = e.target.checked; DIRTY = true; renderSide(); return; }
+  if (e.target.dataset.f === "copies") { const pk = e.target.closest(".pk"); PK[+pk.dataset.p].copies = Math.min(99, Math.max(1, parseInt(e.target.value, 10) || 1)); DIRTY = true; renderSide(); return; }
   const t = e.target, card = t.closest(".eb"); if (!card) return;
   const b = BL[+card.dataset.i], f = t.dataset.f;
   if (f === "include") { b.include = t.checked; card.classList.toggle("off", !t.checked); }
@@ -1345,15 +1397,19 @@ $("#ed").addEventListener("click", (e) => {
 // ---------- printed pages ----------
 const val = (v) => (clean(v) ? esc(v) : `<span class="blank"></span>`);
 const tg = (t) => (t ? ` <span class="tg">${esc(t)}</span>` : "");
+function qrAll() {
+  const q = qrcode(0, "M"); q.addData(ALL_STATIONS_URL); q.make();
+  return q.createSvgTag({ cellSize: 3, margin: 0, scalable: true });
+}
 function headHTML() {
   const e = EV;
   const times = [["DEPART", e.depart], ["ARRIVE", e.arrive], ["START", e.start], ["ENDS", e.end], ["BREAKDOWN DONE", e.breakdown]].filter((x) => clean(x[1]));
   return `<div class="ls-title">LINE UP SHEET</div>
   <div class="ls-head"><img class="ls-logo" src="${BASE}proposal-builder/logo.png" alt="Puff 'n Stuff">
-   <div class="ls-box"><div><b>DATE:</b> ${val(e.date)}</div><div><b>EVENT:</b> ${val(e.event)}${e.client && e.client !== e.event ? " (" + esc(e.client) + ")" : ""}</div><div><b>SUPERVISOR:</b> ${val(e.supervisor)}</div><div><b>LEAD CHEF:</b> ${val(e.chef)}</div><div><b>GUEST COUNT:</b> ${val(e.guests)}${e.seo ? ` &nbsp; <b>SEO:</b> ${esc(e.seo)}` : ""}</div></div></div>
-  <div class="ls-meta">${[e.venue, e.address].filter(clean).map(esc).join(" · ")}${e.contact ? `<br>On-site contact: ${esc(e.contact)}` : ""}${e.service ? ` · ${esc(e.service)}` : ""}</div>
-  ${times.length ? `<div class="ls-times">${times.map(([k, v]) => `<span><b>${k}</b>${esc(v)}</span>`).join("")}</div>` : ""}
-  ${e.staff.length ? `<div class="ls-meta"><b>Team:</b> ${esc(e.staff.join(", "))}</div>` : ""}
+   <div class="ls-box"><div><b>DATE:</b> ${val(e.date)}</div><div><b>EVENT:</b> ${val(e.event)}${e.client && e.client !== e.event ? " (" + esc(e.client) + ")" : ""}</div><div><b>SUPERVISOR:</b> ${val(e.supervisor)}</div><div><b>LEAD CHEF:</b> ${val(e.chef)}</div><div><b>GUEST COUNT:</b> ${val(e.guests)}${e.seo ? ` &nbsp; <b>SEO:</b> ${esc(e.seo)}` : ""}</div></div>
+   <div class="ls-qr">${qrAll()}Station set-up guides</div></div>
+  ${clean(e.venue) || clean(e.service) ? `<div class="ls-meta">${[e.venue, e.service].filter(clean).map(esc).join(" · ")}</div>` : ""}
+  ${times.length ? `<div class="ls-times">${times.map(([k, v]) => `<span><b>${k}</b>${esc(v)}</span>`).join("")}</div><div class="ls-warn">Times can change. Do not start breaking down until your supervisor tells you to.</div>` : ""}
   ${e.alerts.map((a) => `<div class="ls-alert">${esc(a)}</div>`).join("")}
   <div class="ls-menuhead">MENU</div>`;
 }
@@ -1363,33 +1419,22 @@ function menuBox(b) {
     : it.alt ? `<li class="alt">or <b>${esc(it.name)}</b>${it.desc ? ": " + esc(it.desc) : ""}${tg(it.tags)}</li>`
     : `<li><b>${esc(it.name)}${it.desc ? ":" : ""}</b> ${esc(it.desc)}${tg(it.tags)}</li>`).join("")}${b.items.length ? "" : b.inclusions.map((x) => `<li class="inc">${esc(x)}</li>`).join("")}</ul></div>`;
 }
-function notesBox() {
+function notesBox(narrow) {
   const n = EV.notes;
-  const eq = EV.equipment || [];
-  if (!n.length && !eq.length) return "";
-  return `<div class="nbox">${n.length ? `<h4>EVENT NOTES</h4><div class="nl">${n.map((t) => `<div>${esc(t)}</div>`).join("")}</div>` : ""}${eq.length ? `<h4 style="margin-top:${n.length ? 6 : 0}px">EQUIPMENT</h4><div class="nl">${eq.map((t) => `<div>${esc(t)}</div>`).join("")}</div>` : ""}</div>`;
+  if (!n.length) return "";
+  return `<div class="nbox${narrow ? " one" : ""}"><h4>EVENT NOTES</h4><div class="nl">${n.map((t) => `<div>${esc(t)}</div>`).join("")}</div></div>`;
 }
-function qrSVG(id) {
-  const q = qrcode(0, "M"); q.addData(STD_URL + id); q.make();
-  return q.createSvgTag({ cellSize: 3, margin: 0, scalable: true });
-}
-function cardHTML(b, maxPhotos) {
-  const photos = [];
-  for (const it of b.items) if (it.photo && it.photo.on && !photos.some((p) => p.slug === it.photo.slug)) photos.push({ slug: it.photo.slug, name: it.name });
-  const shown = photos.slice(0, maxPhotos);
-  const info = [];
-  if (b.inclusions.length) info.push(["SETUP", b.inclusions.join(" ")]);
-  if (b.equipment.length) info.push(["EQUIPMENT", b.equipment.join(", ")]);
-  const notes = b.notes.concat(clean(b.extra) ? [b.extra] : []);
-  if (notes.length) info.push(["NOTES", notes.join(" ")]);
-  return `<div class="card">
-   <div class="c-h"><div>${b.time ? `<div class="c-time">${esc(b.time)}</div>` : ""}<div class="c-title">${esc(b.title)}</div>${b.sub ? `<div class="c-sub">${esc(b.sub)}</div>` : ""}</div>
-    ${b.stds.length ? `<div class="c-qrs">${b.stds.map((id) => `<div class="c-qr">${qrSVG(id)}Station standard:<br><b>${esc(stdName(id))}</b></div>`).join("")}</div>` : ""}</div>
-   ${b.items.length ? `<div class="c-items">${b.items.map((it) => it.head ? `<div class="hd"><b>${esc(it.name)}</b></div>` : `<div class="${it.alt ? "alt" : ""}">${it.qty != null ? `<span class="q">(${it.qty})</span>` : ""}${it.alt ? "or " : ""}${esc(it.name)}${tg(it.tags)}</div>`).join("")}</div>` : ""}
-   ${info.map(([k, v]) => `<div class="c-info"><b>${k}</b>${esc(v)}</div>`).join("")}
-   ${shown.length ? `<div class="c-photos">${shown.map((p) => `<figure><img src="${esc(photoSrc(p.slug))}" alt="" crossorigin="anonymous"><figcaption>${esc(p.name)}</figcaption></figure>`).join("")}</div>` : ""}
-   <div class="c-assign"><div class="a-row">SET UP<i></i></div><div class="a-row">GUEST ARRIVAL<i></i></div><div class="a-row">SERVICE<i></i></div><div class="a-row">BREAKDOWN<i></i></div><div class="a-row w">NOTES<i></i></div></div>
-  </div>`;
+// once per sheet: the person holding it writes in what they were given
+const mineHTML = () => `<div class="mine"><h4>MY ASSIGNMENT</h4><div class="c-assign"><div class="a-row">SET UP<i></i></div><div class="a-row">GUEST ARRIVAL<i></i></div><div class="a-row">SERVICE<i></i></div><div class="a-row">BREAKDOWN<i></i></div><div class="a-row w">NOTES<i></i></div></div></div>`;
+// photos by station, each photo once in the packet
+function photoSections(blocks) {
+  const seen = new Set(), out = [];
+  for (const b of blocks) {
+    const ph = [];
+    for (const it of b.items) if (it.photo && it.photo.on && !seen.has(it.photo.slug)) { seen.add(it.photo.slug); ph.push({ slug: it.photo.slug, name: it.name }); }
+    if (ph.length) out.push(`<div class="ph-sec"><div class="ph-h">${b.time ? `<span>${esc(b.time)}</span>` : ""}${esc(b.title)}</div><div class="ph-grid">${ph.map((p) => `<figure><img src="${esc(photoSrc(p.slug))}" alt="" crossorigin="anonymous"><figcaption>${esc(p.name)}</figcaption></figure>`).join("")}</div></div>`);
+  }
+  return out;
 }
 
 const PAGE_H = 1056 - 40 - 58; // content height inside .pin
@@ -1398,7 +1443,7 @@ function measure(html, width) {
   s.innerHTML = `<div class="page"><div class="pin" style="width:${width || 728}px">${html}</div></div>`;
   return s.querySelector(".pin").firstElementChild ? s.querySelector(".pin").getBoundingClientRect().height : 0;
 }
-// the pages of the packet EV / BL point at
+// the pages of the packet EV / BL point at: the line-up sheet (front), then the photos (back)
 function pagesFor() {
   const blocks = BL.filter((b) => b.include);
   const pages = [];
@@ -1406,39 +1451,43 @@ function pagesFor() {
   const quoteRoom = 26;
   const colW = (728 - 18) / 2;
   const boxes = blocks.map((b) => ({ html: menuBox(b), h: measure(menuBox(b), colW) + 12 }));
-  let pg = { head: true, cols: [[], []], ch: [0, 0], avail: PAGE_H - headH - quoteRoom, tail: "" };
+  const fresh = () => ({ head: false, cols: [[], []], ch: [0, 0], avail: PAGE_H - quoteRoom, tail: "" });
+  let pg = Object.assign(fresh(), { head: true, avail: PAGE_H - headH - quoteRoom });
   pages.push(pg);
   for (const bx of boxes) {
     const k = pg.ch[0] <= pg.ch[1] ? 0 : 1;
     let put = pg.ch[k] + bx.h <= pg.avail ? k : pg.ch[1 - k] + bx.h <= pg.avail ? 1 - k : -1;
-    if (put < 0 && (pg.cols[0].length || pg.cols[1].length)) {
-      pg = { head: false, cols: [[], []], ch: [0, 0], avail: PAGE_H - quoteRoom, tail: "" };
-      pages.push(pg); put = 0;
-    } else if (put < 0) put = k;
+    if (put < 0 && (pg.cols[0].length || pg.cols[1].length)) { pg = fresh(); pages.push(pg); put = 0; }
+    else if (put < 0) put = k;
     pg.cols[put].push(bx.html); pg.ch[put] += bx.h;
   }
-  const nb = notesBox();
-  if (nb) {
-    const nh = measure(nb);
-    if (Math.max(pg.ch[0], pg.ch[1]) + nh > pg.avail) { pg = { head: false, cols: [[], []], ch: [0, 0], avail: PAGE_H - quoteRoom, tail: "" }; pages.push(pg); }
-    pg.tail = nb;
+  // event notes go in the shorter column when they fit there; the assignment box runs full width under the menu
+  let notes = notesBox(true);
+  if (notes) {
+    const k = pg.ch[0] <= pg.ch[1] ? 0 : 1, h = measure(notes, colW) + 12;
+    if (pg.ch[k] + h <= pg.avail) { pg.cols[k].push(notes); pg.ch[k] += h; notes = ""; }
+    else notes = notesBox(false);
   }
-  const menuPages = pages.map((p) => `${p.head ? headHTML() : `<div class="sp-head"><span class="k">MENU (CONTINUED)</span><span class="e">${esc(EV.event)}</span></div>`}<div class="cols"><div class="col">${p.cols[0].join("")}</div><div class="col">${p.cols[1].join("")}</div></div>${p.tail}`);
-  const spHead = `<div class="sp-head"><span class="k">STATION ASSIGNMENTS</span><span class="e">${esc([EV.event, EV.date].filter(clean).join(" · "))}</span></div>`;
-  const spH = measure(spHead) + 0;
-  const stationPages = [];
-  let cur = [], used = spH;
-  for (const b of blocks) {
-    let max = 8, html = cardHTML(b, max), h = measure(html) + 14;
-    while (h > PAGE_H - spH && max > 0) { max -= 4; html = cardHTML(b, Math.max(max, 0)); h = measure(html) + 14; }
-    if (used + h > PAGE_H && cur.length) { stationPages.push(cur); cur = []; used = spH; }
-    cur.push(html); used += h;
+  let usedH = Math.max(pg.ch[0], pg.ch[1]);
+  for (const part of [mineHTML(), notes]) {
+    if (!part) continue;
+    const h = measure(part) + 10;
+    if (usedH + h > pg.avail && usedH > 0) { pg = fresh(); pages.push(pg); usedH = 0; }
+    pg.tail += part; usedH += h;
   }
-  if (cur.length) stationPages.push(cur);
-  const all = menuPages.map((c) => ({ c, quote: true })).concat(stationPages.map((cards) => ({ c: spHead + cards.join(""), quote: false })));
-  const n = all.length;
+  const out = pages.map((p) => ({ quote: true, c: `${p.head ? headHTML() : `<div class="sp-head"><span class="k">LINE UP SHEET (CONTINUED)</span><span class="e">${esc(EV.event)}</span></div>`}<div class="cols"><div class="col">${p.cols[0].join("")}</div><div class="col">${p.cols[1].join("")}</div></div>${p.tail}` }));
+  const phHead = `<div class="sp-head"><span class="k">HOW IT SHOULD LOOK</span><span class="e">${esc([EV.event, EV.date].filter(clean).join(" · "))}</span></div>`;
+  const phH = measure(phHead);
+  let cur = [], used = phH;
+  for (const sec of photoSections(blocks)) {
+    const h = measure(sec);
+    if (used + h > PAGE_H && cur.length) { out.push({ quote: false, c: phHead + cur.join("") }); cur = []; used = phH; }
+    cur.push(sec); used += h;
+  }
+  if (cur.length) out.push({ quote: false, c: phHead + cur.join("") });
+  const n = out.length;
   const foot = (i) => `<div class="pfoot"><span>${esc([EV.seo, EV.event].filter(clean).join(" · "))}</span><span>Page ${i + 1} of ${n}</span></div>`;
-  return all.map((p, i) => `<div class="page"><div class="pin">${p.c}</div>${p.quote ? `<div class="quote">${esc(QUOTE)}</div>` : ""}${foot(i)}</div>`);
+  return out.map((p, i) => `<div class="page"><div class="pin">${p.c}</div>${p.quote ? `<div class="quote">${esc(quoteFor(EV))}</div>` : ""}${foot(i)}</div>`);
 }
 function renderPages() {
   if (!PK.length) return;
@@ -1486,15 +1535,23 @@ const loadScript = (src) => new Promise((ok, bad) => { const t = document.create
 async function buildPDF(say) {
   for (const [g, src] of LIBS) if (!window[g]) await loadScript(src);
   await document.fonts.ready;
-  const pages = [...document.querySelectorAll("#out .page")];
+  const all = [...document.querySelectorAll("#out .page")];
   await Promise.all([...document.querySelectorAll("#out img")].map((im) => im.complete ? 0 : new Promise((r) => { im.onload = im.onerror = r; })));
-  const fontEmbedCSS = await htmlToImage.getFontEmbedCSS(pages[0]);
+  const fontEmbedCSS = await htmlToImage.getFontEmbedCSS(all[0]);
   const pdf = new jspdf.jsPDF({ unit: "in", format: "letter", orientation: "portrait", compress: true });
-  for (let i = 0; i < pages.length; i++) {
-    say(`Getting page ${i + 1} of ${pages.length} ready…`);
-    const url = await htmlToImage.toJpeg(pages[i], { quality: 0.92, pixelRatio: 2, backgroundColor: "#ffffff", fontEmbedCSS, style: { margin: "0", boxShadow: "none", transform: "none" } });
-    if (i) pdf.addPage("letter", "portrait");
-    pdf.addImage(url, "JPEG", 0, 0, 8.5, 11, undefined, "FAST");
+  let first = true, done = 0;
+  const next = () => { if (!first) pdf.addPage("letter", "portrait"); first = false; };
+  for (let i = 0; i < PK.length; i++) {
+    // draw each page once, then lay it down for every copy
+    const shots = [];
+    for (const el of document.querySelectorAll(`#out [data-pk="${i}"] .page`)) {
+      say(`Getting page ${++done} of ${all.length} ready…`);
+      shots.push(await htmlToImage.toJpeg(el, { quality: 0.92, pixelRatio: 2, backgroundColor: "#ffffff", fontEmbedCSS, style: { margin: "0", boxShadow: "none", transform: "none" } }));
+    }
+    for (let c = 0; c < PK[i].copies; c++) {
+      shots.forEach((url, k) => { next(); pdf.addImage(url, "JPEG", 0, 0, 8.5, 11, "p" + i + "_" + k, "FAST"); });
+      if (DUPLEX && shots.length % 2) next(); // blank back, so the next copy starts on its own sheet
+    }
   }
   pdf.setProperties({ title: fileName(), creator: "Puff 'n Stuff Line-Up Packet" });
   return pdf.output("blob");
